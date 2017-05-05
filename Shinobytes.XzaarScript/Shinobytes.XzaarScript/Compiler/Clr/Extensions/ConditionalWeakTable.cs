@@ -63,16 +63,14 @@
 **    may be delayed until appdomain shutdown.
 ===========================================================*/
 
-using System.Collections;
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
-namespace System.Runtime.CompilerServices
+namespace Shinobytes.XzaarScript.Compiler.Extensions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Versioning;
-    using System.Runtime.InteropServices;
-
-
     public static class HashtableHelpers
     {
         internal const Int32 HashPrime = 101;
@@ -787,13 +785,7 @@ namespace System.Runtime.CompilerServices
         #endregion
 
         #region Public Members
-        public bool IsAllocated
-        {
-            get
-            {
-                return _handle != (IntPtr)0;
-            }
-        }
+        public bool IsAllocated => _handle != (IntPtr)0;
 
         // Getting the secondary object is more expensive than getting the first so
         // we provide a separate primary-only accessor for those times we only want the
@@ -839,22 +831,22 @@ namespace System.Runtime.CompilerServices
         #region Private Members
         [System.Security.SecurityCritical]
         [ResourceExposure(ResourceScope.AppDomain)]
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void nInitialize(Object primary, Object secondary, out IntPtr dependentHandle);
 
         [System.Security.SecurityCritical]
         [ResourceExposure(ResourceScope.None)]
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void nGetPrimary(IntPtr dependentHandle, out Object primary);
 
         [System.Security.SecurityCritical]
         [ResourceExposure(ResourceScope.None)]
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void nGetPrimaryAndSecondary(IntPtr dependentHandle, out Object primary, out Object secondary);
 
         [System.Security.SecurityCritical]
         [ResourceExposure(ResourceScope.None)]
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void nFree(IntPtr dependentHandle);
         #endregion
 

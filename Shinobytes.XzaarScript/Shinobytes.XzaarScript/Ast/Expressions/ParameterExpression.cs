@@ -10,18 +10,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         {
             _name = name;
         }
-        public override XzaarType Type
-        {
-            get { return XzaarBaseTypes.Any; }
-        }
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Parameter; }
-        }
-        public string Name
-        {
-            get { return _name; }
-        }
+        public override XzaarType Type => XzaarBaseTypes.Any;
+
+        public override ExpressionType NodeType => ExpressionType.Parameter;
+
+        public string Name => _name;
 
         public XzaarExpression ArrayIndex { get; set; }
 
@@ -37,17 +30,17 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 {
                     switch (XzaarType.GetTypeCode(type))
                     {
-                        case XzaarTypeCode.Boolean: return new PrimitiveParameterExpression<Boolean>(name);
-                        case XzaarTypeCode.Byte: return new PrimitiveParameterExpression<Byte>(name);
-                        case XzaarTypeCode.Char: return new PrimitiveParameterExpression<Char>(name);
-                        case XzaarTypeCode.DateTime: return new PrimitiveParameterExpression<DateTime>(name);                        
-                        case XzaarTypeCode.Decimal: return new PrimitiveParameterExpression<Decimal>(name);
-                        case XzaarTypeCode.Double: return new PrimitiveParameterExpression<Double>(name);
-                        case XzaarTypeCode.Int16: return new PrimitiveParameterExpression<Int16>(name);
-                        case XzaarTypeCode.Int32: return new PrimitiveParameterExpression<Int32>(name);
-                        case XzaarTypeCode.Int64: return new PrimitiveParameterExpression<Int64>(name);
+                        case TypeCode.Boolean: return new PrimitiveParameterExpression<Boolean>(name);
+                        case TypeCode.Byte: return new PrimitiveParameterExpression<Byte>(name);
+                        case TypeCode.Char: return new PrimitiveParameterExpression<Char>(name);
+                        case TypeCode.DateTime: return new PrimitiveParameterExpression<DateTime>(name);                        
+                        case TypeCode.Decimal: return new PrimitiveParameterExpression<Decimal>(name);
+                        case TypeCode.Double: return new PrimitiveParameterExpression<Double>(name);
+                        case TypeCode.Int16: return new PrimitiveParameterExpression<Int16>(name);
+                        case TypeCode.Int32: return new PrimitiveParameterExpression<Int32>(name);
+                        case TypeCode.Int64: return new PrimitiveParameterExpression<Int64>(name);
                         
-                        case XzaarTypeCode.Any:
+                        case TypeCode.Any:
                             // common reference types which we optimize go here.  Of course object is in
                             // the list, the others are driven by profiling of various workloads.  This list
                             // should be kept short.
@@ -64,12 +57,12 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                             //    return new PrimitiveParameterExpression<object[]>(name);
                             //}
                             break;
-                        case XzaarTypeCode.SByte: return new PrimitiveParameterExpression<SByte>(name);
-                        case XzaarTypeCode.Single: return new PrimitiveParameterExpression<Single>(name);
-                        case XzaarTypeCode.String: return new PrimitiveParameterExpression<String>(name);
-                        case XzaarTypeCode.UInt16: return new PrimitiveParameterExpression<UInt16>(name);
-                        case XzaarTypeCode.UInt32: return new PrimitiveParameterExpression<UInt32>(name);
-                        case XzaarTypeCode.UInt64: return new PrimitiveParameterExpression<UInt64>(name);
+                        case TypeCode.SByte: return new PrimitiveParameterExpression<SByte>(name);
+                        case TypeCode.Single: return new PrimitiveParameterExpression<Single>(name);
+                        case TypeCode.String: return new PrimitiveParameterExpression<String>(name);
+                        case TypeCode.UInt16: return new PrimitiveParameterExpression<UInt16>(name);
+                        case TypeCode.UInt32: return new PrimitiveParameterExpression<UInt32>(name);
+                        case TypeCode.UInt64: return new PrimitiveParameterExpression<UInt64>(name);
                     }
                 }
             }
@@ -88,10 +81,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _paramType = type;
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return _paramType; }
-        }
+        public sealed override XzaarType Type => _paramType;
     }
 
     internal sealed class ByRefParameterExpression : TypedParameterExpression
@@ -114,10 +104,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         {
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return XzaarBaseTypes.Typeof(typeof(T)); }
-        }
+        public sealed override XzaarType Type => XzaarBaseTypes.Typeof(typeof(T));
     }
 
     public partial class XzaarExpression

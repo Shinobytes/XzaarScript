@@ -1,8 +1,9 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shinobytes.XzaarScript.Ast;
-using Shinobytes.XzaarScript.Ast.Compilers;
-using Shinobytes.XzaarScript.Ast.Nodes;
+using Shinobytes.XzaarScript.Compiler.Compilers;
+using Shinobytes.XzaarScript.Parser;
+using Shinobytes.XzaarScript.Parser.Nodes;
 using Shinobytes.XzaarScript.UtilityVisitors;
 
 namespace Shinobytes.XzaarScript.Interpreter.Tests
@@ -13,18 +14,18 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
         [TestMethod]
         public void while_Expression()
         {
-            XzaarNodeTransformer transformer;
-            var tree = Reduce("while(true && false != true) { a.test() }", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var tree = Reduce("while(true && false != true) { a.test() }", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("while (true && false != true) { a.test() }", tree.ToString());
         }
 
         [TestMethod]
         public void Switch_invoke_function_on_item_4()
         {
-            XzaarNodeTransformer transformer;
-            var tree = Reduce("switch(a+b) { case 99+apa: a.j() return case aa+apa: a.c() break }", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var tree = Reduce("switch(a+b) { case 99+apa: a.j() return case aa+apa: a.c() break }", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("switch (a + b) { case 99 + apa: a.j() return  case aa + apa: a.c() break }", tree.ToString());
         }
 
@@ -32,31 +33,31 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
         [TestMethod]
         public void Simple_if_expr_5()
         {
-            XzaarNodeTransformer transformer;
-            var tree = Reduce("if ((true || (helloWorld || true)) && (fal2se || j > 0)) { }", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var tree = Reduce("if ((true || (helloWorld || true)) && (fal2se || j > 0)) { }", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("if (true || helloWorld || true && fal2se || j > 0) {} else {}", tree.ToString());
         }
 
         [TestMethod]
         public void Simple_if_expr_6()
         {
-            XzaarNodeTransformer transformer;
-            var tree = Reduce("if (a || ((b && x) || c)) { }", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var tree = Reduce("if (a || ((b && x) || c)) { }", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("if (a || b && x || c) {} else {}", tree.ToString());
         }
 
 
-        private XzaarNodeTransformer Transformer(string code)
+        private NodeParser Transformer(string code)
         {
-            return new XzaarNodeTransformer(new XzaarSyntaxParser(new XzaarScriptLexer(code).Tokenize()).Parse());
+            return new NodeParser(new SyntaxParser(new Lexer(code).Tokenize()).Parse());
         }
 
-        private XzaarAstNode Reduce(string code, out XzaarNodeTransformer transformer)
+        private AstNode Reduce(string code, out NodeParser parser)
         {
-            transformer = Transformer(code);
-            return new XzaarNodeReducer().Process(transformer.Transform());
+            parser = Transformer(code);
+            return new NodeReducer().Process(parser.Transform());
         }
     }
 
@@ -69,9 +70,9 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
         [TestMethod]
         public void variable_assigned_struct()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct hello { test : number } let j = hello", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct hello { test : number } let j = hello", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct hello {
   number test
 }
@@ -82,9 +83,9 @@ var j = hello", code);
         [TestMethod]
         public void Invoke_simple_mathematical_expression()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let result = 5 + (1 * 1) - 992", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let result = 5 + (1 * 1) - 992", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"var result = 5 + 1 * 1 - 992", code);
         }
 
@@ -92,9 +93,9 @@ var j = hello", code);
         [TestMethod]
         public void variable_assigned_struct_2()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct hello { test : number } let j j = hello", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct hello { test : number } let j j = hello", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct hello {
   number test
 }
@@ -105,18 +106,18 @@ j = hello", code);
         [TestMethod]
         public void variable_assigned_array_empty()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = []", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = []", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"var j = []", code);
         }
 
         [TestMethod]
         public void variable_assigned_array_initializer()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = ['hello', 'wha']", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = ['hello', 'wha']", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j = [\"hello\", \"wha\"]", code);
         }
 
@@ -124,9 +125,9 @@ j = hello", code);
         [TestMethod]
         public void variable_assigned_array_empty_2()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = []", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = []", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"var j
 j = []", code);
         }
@@ -134,9 +135,9 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_array_initializer_2()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = ['hello', 'wha']", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = ['hello', 'wha']", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = [\"hello\", \"wha\"]", code);
         }
@@ -144,9 +145,9 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_array_initializer_3()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = ['hello', 'wha'].Length", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = ['hello', 'wha'].Length", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = [\"hello\", \"wha\"].Length", code);
         }
@@ -155,9 +156,9 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_array_initializer_4()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = ['hello', 'wha'][0]", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = ['hello', 'wha'][0]", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = [\"hello\", \"wha\"][0]", code);
         }
@@ -166,9 +167,9 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_array_initializer_5()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = ['hello', 'wha'][0].Length", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = ['hello', 'wha'][0].Length", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = [\"hello\", \"wha\"][0].Length", code);
         }
@@ -176,9 +177,9 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_constant_element_access_1()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = 'test'[0]", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = 'test'[0]", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = \"test\"[0]", code);
         }
@@ -186,18 +187,18 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_constant_element_access_2()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = 'test'[0]", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = 'test'[0]", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j = \"test\"[0]", code);
         }
 
         [TestMethod]
         public void variable_assigned_constant_element_access_3()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = 1[0]", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = 1[0]", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = 1[0]", code);
         }
@@ -205,18 +206,18 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_constant_element_access_4()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = 1[0]", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = 1[0]", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j = 1[0]", code);
         }
 
         [TestMethod]
         public void variable_assigned_constant_property_1()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = 'test'.Length", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = 'test'.Length", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = \"test\".Length", code);
         }
@@ -225,18 +226,18 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_constant_property_2()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = 'test'.Length", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = 'test'.Length", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j = \"test\".Length", code);
         }
 
         [TestMethod]
         public void variable_assigned_constant_property_3()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j j = 0.Length", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j j = 0.Length", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j" + Environment.NewLine +
                             "j = 0.Length", code);
         }
@@ -244,18 +245,18 @@ j = []", code);
         [TestMethod]
         public void variable_assigned_constant_property_4()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = 0.Length", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = 0.Length", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j = 0.Length", code);
         }
 
         [TestMethod]
         public void for_loop()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { s.hello[i] = i } return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { s.hello[i] = i } return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -271,9 +272,9 @@ fn do_stuff() -> any {
         [TestMethod]
         public void for_break_loop()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { break } return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { break } return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -290,16 +291,16 @@ fn do_stuff() -> any {
         public void Declare_struct_and_create_new_instance_with_initializer()
         {
             // Assert.Inconclusive("Array initializers has not been implemented yet");
-            XzaarNodeTransformer transformer;
+            NodeParser parser;
             var code = TypeLookup(@"let console = $console
 struct test_struct {
   number my_number
 }
 
 let a = test_struct { my_number = 1000 }
-console.log(a.my_number)", out transformer);
+console.log(a.my_number)", out parser);
 
-            Assert.AreEqual(false, transformer.HasErrors);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"var console = $console
 struct test_struct {
   number my_number
@@ -312,7 +313,7 @@ console.log(a.my_number)", code);
         public void Declare_struct_and_create_new_instance_with_initializer_2()
         {
             // Assert.Inconclusive("Array initializers has not been implemented yet");
-            XzaarNodeTransformer transformer;
+            NodeParser parser;
             var code = TypeLookup(@"let console = $console
 struct test_struct {
   my_number : number;
@@ -321,9 +322,9 @@ struct test_struct {
 
 let a = test_struct { my_number = 1000, my_string = ""hehe"" }
 console.log(a.my_number)
-console.log(a.my_string)", out transformer);
+console.log(a.my_string)", out parser);
 
-            Assert.AreEqual(false, transformer.HasErrors);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"var console = $console
 struct test_struct {
   number my_number
@@ -338,9 +339,9 @@ console.log(a.my_string)", code);
         [TestMethod]
         public void for_while_loop()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { while (true) { s.hello[i] = i } } return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { while (true) { s.hello[i] = i } } return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -360,9 +361,9 @@ fn do_stuff() -> any {
         [TestMethod]
         public void for_while_break_loop()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { while (true) { s.hello[i] = i break } } return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { while (true) { s.hello[i] = i break } } return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -382,9 +383,9 @@ fn do_stuff() -> any {
         [TestMethod]
         public void for_loop_with_if_statement_1()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { s.hello[i].apa = i } return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff() { let s = structA for(let i = 0; i < 5; i++) { s.hello[i].apa = i } return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -401,9 +402,9 @@ fn do_stuff() -> any {
         [TestMethod]
         public void for_loop_with_if_statement_2()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA for(let i = 0; i < 5; i++) { if(s.hello[i] == i + 25) { console.log(s.hello[i+2]) } } return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA for(let i = 0; i < 5; i++) { if(s.hello[i] == i + 25) { console.log(s.hello[i+2]) } } return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -421,9 +422,9 @@ fn do_stuff(console:any) -> any {
         [TestMethod]
         public void for_loop_with_if_statement__3()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA for(let i = 0; i < 5; i++) { if(s.hello[i] == i + 25 * 2 / 4) { console.log(s.hello[i+2] + \" hello world\") } } return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA for(let i = 0; i < 5; i++) { if(s.hello[i] == i + 25 * 2 / 4) { console.log(s.hello[i+2] + \" hello world\") } } return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -443,9 +444,9 @@ fn do_stuff(console:any) -> any {
         [TestMethod]
         public void switch_normal_case()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA switch (99-25*1) { case 9: break } console.log(s.hello[i+2] + \" hello world\") return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA switch (99-25*1) { case 9: break } console.log(s.hello[i+2] + \" hello world\") return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -464,9 +465,9 @@ fn do_stuff(console:any) -> any {
         [TestMethod]
         public void switch_default_case()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA switch (99-25*1) { default: break } console.log(s.hello[i+2] + \" hello world\") return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA switch (99-25*1) { default: break } console.log(s.hello[i+2] + \" hello world\") return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -485,9 +486,9 @@ fn do_stuff(console:any) -> any {
         [TestMethod]
         public void switch_normal_and_default_case()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA switch (99-25*1) { case 9: break default: break } console.log(s.hello[i+2] + \" hello world\") return s.hello } ", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("struct structA { number[] hello } fn do_stuff(any console) { let s = structA switch (99-25*1) { case 9: break default: break } console.log(s.hello[i+2] + \" hello world\") return s.hello } ", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"struct structA {
   number[] hello
 }
@@ -509,15 +510,15 @@ fn do_stuff(console:any) -> any {
         public void Pre_Post_Increment_Variable_2()
         {
             // Assert.Inconclusive("Array initializers has not been implemented yet");
-            XzaarNodeTransformer transformer;
+            NodeParser parser;
             var code = TypeLookup(@"let console = $console
 
 let y = 0
 let x = y++
 let z = ++y
 
-console.log(x + ' ' + y + ' ' + z)", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+console.log(x + ' ' + y + ' ' + z)", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"var console = $console
 var y = 0
 var x = y++
@@ -528,27 +529,27 @@ console.log(x + "" "" + y + "" "" + z)", code);
         [TestMethod]
         public void simple_variable_number()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = 0", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = 0", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual("var j = 0", code);
         }
 
         [TestMethod]
         public void simple_variable_string()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("let j = \"0\"", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("let j = \"0\"", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"var j = ""0""", code);
         }
 
         [TestMethod]
         public void simple_fn_string()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("fn test() { return \"0\" }", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("fn test() { return \"0\" }", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"fn test() -> string {
   return ""0""
 }", code);
@@ -557,30 +558,30 @@ console.log(x + "" "" + y + "" "" + z)", code);
         [TestMethod]
         public void simple_fn_number()
         {
-            XzaarNodeTransformer transformer;
-            var code = TypeLookup("fn test() { return 0 }", out transformer);
-            Assert.AreEqual(false, transformer.HasErrors);
+            NodeParser parser;
+            var code = TypeLookup("fn test() { return 0 }", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
             Assert.AreEqual(@"fn test() -> number {
   return 0
 }", code);
         }
 
 
-        private XzaarNodeTransformer Transformer(string code)
+        private NodeParser Transformer(string code)
         {
-            return new XzaarNodeTransformer(new XzaarSyntaxParser(new XzaarScriptLexer(code).Tokenize()).Parse());
+            return new NodeParser(new SyntaxParser(new Lexer(code).Tokenize()).Parse());
         }
 
-        private XzaarAstNode Reduce(string code, out XzaarNodeTransformer transformer)
+        private AstNode Reduce(string code, out NodeParser parser)
         {
-            transformer = Transformer(code);
-            return new XzaarNodeReducer().Process(transformer.Transform());
+            parser = Transformer(code);
+            return new NodeReducer().Process(parser.Transform());
         }
 
-        private string TypeLookup(string code, out XzaarNodeTransformer transformer)
+        private string TypeLookup(string code, out NodeParser parser)
         {
-            var ast = new XzaarNodeTypeBinder().Process(Reduce(code, out transformer));
-            var analyzer = new XzaarExpressionAnalyzer();
+            var ast = new NodeTypeBinder().Process(Reduce(code, out parser));
+            var analyzer = new ExpressionAnalyzer();
             var analyzed = analyzer.AnalyzeExpression(ast as EntryNode);
             var codeGenerator = new CodeGeneratorVisitor();
             return codeGenerator.Visit(analyzed.GetExpression()).TrimEnd('\r', '\n');
@@ -1267,9 +1268,9 @@ console.log(x + "" "" + y + "" "" + z)", code);
 
 
 
-        private XzaarNodeTransformer Transformer(string code)
+        private NodeParser Transformer(string code)
         {
-            return new XzaarNodeTransformer(new XzaarSyntaxParser(new XzaarScriptLexer(code).Tokenize()).Parse());
+            return new NodeParser(new SyntaxParser(new Lexer(code).Tokenize()).Parse());
         }
     }
 }

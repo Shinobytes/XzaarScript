@@ -2,7 +2,7 @@
 {
     public class ForEachExpression : LoopExpression
     {
-        internal ForEachExpression(XzaarExpression variable, XzaarExpression collection, XzaarExpression body) : base(body, null, null, XzaarLoopTypes.Foreach)
+        internal ForEachExpression(XzaarExpression variable, XzaarExpression collection, XzaarExpression body) : base(body, null, null, LoopTypes.Foreach)
         {
             Variable = variable;
             Collection = collection;

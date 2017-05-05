@@ -2,31 +2,22 @@
 {
     public sealed class LabelExpression : XzaarExpression
     {
-        private readonly XzaarLabelTarget target;
+        private readonly LabelTarget target;
         private readonly XzaarExpression defaultValue;        
 
-        internal LabelExpression(XzaarLabelTarget label, XzaarExpression defaultValue)
+        internal LabelExpression(LabelTarget label, XzaarExpression defaultValue)
         {
             this.target = label;
             this.defaultValue = defaultValue;
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return this.target.Type; }
-        }
+        public sealed override XzaarType Type => this.target.Type;
 
-        public XzaarLabelTarget Target
-        {
-            get { return target; }
-        }
+        public LabelTarget Target => target;
 
-        public XzaarExpression DefaultValue
-        {
-            get { return defaultValue; }
-        }
+        public XzaarExpression DefaultValue => defaultValue;
 
-        public LabelExpression Update(XzaarLabelTarget target, XzaarExpression defaultValue)
+        public LabelExpression Update(LabelTarget target, XzaarExpression defaultValue)
         {
             if (target == Target && defaultValue == DefaultValue)
             {
@@ -36,20 +27,17 @@
         }
 
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Label; }
-        }
+        public override ExpressionType NodeType => ExpressionType.Label;
     }
 
     public partial class XzaarExpression
     {
-        public static LabelExpression Label(XzaarLabelTarget target)
+        public static LabelExpression Label(LabelTarget target)
         {
             return Label(target, null);
         }
 
-        public static LabelExpression Label(XzaarLabelTarget target, XzaarExpression defaultValue)
+        public static LabelExpression Label(LabelTarget target, XzaarExpression defaultValue)
         {
             return new LabelExpression(target, defaultValue);
         }

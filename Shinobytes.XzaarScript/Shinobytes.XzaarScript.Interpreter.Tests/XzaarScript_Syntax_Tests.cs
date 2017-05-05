@@ -1,7 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shinobytes.XzaarScript.Ast;
-using Shinobytes.XzaarScript.Ast.Compilers;
-using Shinobytes.XzaarScript.Ast.Nodes;
+using Shinobytes.XzaarScript.Compiler.Compilers;
+using Shinobytes.XzaarScript.Parser;
+using Shinobytes.XzaarScript.Parser.Nodes;
 using Shinobytes.XzaarScript.UtilityVisitors;
 
 namespace Shinobytes.XzaarScript.Interpreter.Tests
@@ -553,7 +554,7 @@ fn main(a:f64) {
 }", code);
         }
 
-        [TestMethod, ExpectedException(typeof(XzaarExpressionTransformerException))]
+        [TestMethod, ExpectedException(typeof(ExpressionException))]
         public void Transform_Main_with_foreach_loop_throws_on_parameter_mismatch()
         {
             var code = FormatCode("fn main(int a) { let collection = [] foreach(let i in collection) { main(i) } }");
@@ -2112,22 +2113,22 @@ var result = looper()", code);
 }", code);
         }
         
-        private XzaarNodeTransformer Transformer(string code)
+        private NodeParser Transformer(string code)
         {
-            return new XzaarNodeTransformer(new XzaarSyntaxParser(new XzaarScriptLexer(code).Tokenize()).Parse());
+            return new NodeParser(new SyntaxParser(new Lexer(code).Tokenize()).Parse());
         }
 
-        private XzaarAstNode Reduce(string code, out XzaarNodeTransformer transformer)
+        private AstNode Reduce(string code, out NodeParser parser)
         {
-            transformer = Transformer(code);
-            return new XzaarNodeReducer().Process(transformer.Transform());
+            parser = Transformer(code);
+            return new NodeReducer().Process(parser.Transform());
         }
 
         private string FormatCode(string code)
         {
-            XzaarNodeTransformer transformer;
-            var ast = new XzaarNodeTypeBinder().Process(Reduce(code, out transformer));
-            var analyzer = new XzaarExpressionAnalyzer();
+            NodeParser parser;
+            var ast = new NodeTypeBinder().Process(Reduce(code, out parser));
+            var analyzer = new ExpressionAnalyzer();
             var analyzed = analyzer.AnalyzeExpression(ast as EntryNode);
             var codeGenerator = new CodeGeneratorVisitor();
             return codeGenerator.Visit(analyzed.GetExpression()).TrimEnd('\r', '\n');

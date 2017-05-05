@@ -31,17 +31,17 @@
 
             switch (XzaarType.GetTypeCode(type))
             {
-                case XzaarTypeCode.Char:
-                case XzaarTypeCode.SByte:
-                case XzaarTypeCode.Byte:
-                case XzaarTypeCode.Int16:
-                case XzaarTypeCode.Int32:
-                case XzaarTypeCode.Int64:
-                case XzaarTypeCode.Double:
-                case XzaarTypeCode.Single:
-                case XzaarTypeCode.UInt16:
-                case XzaarTypeCode.UInt32:
-                case XzaarTypeCode.UInt64:
+                case TypeCode.Char:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
                     return true;
             }
 
@@ -53,14 +53,14 @@
             type = GetNonNullableType(type);
             switch (XzaarType.GetTypeCode(type))
             {
-                case XzaarTypeCode.Byte:
-                case XzaarTypeCode.SByte:
-                case XzaarTypeCode.Int16:
-                case XzaarTypeCode.Int32:
-                case XzaarTypeCode.Int64:
-                case XzaarTypeCode.UInt16:
-                case XzaarTypeCode.UInt32:
-                case XzaarTypeCode.UInt64:
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
                     return true;
                 default:
                     return false;
@@ -75,14 +75,14 @@
             //{
             switch (XzaarType.GetTypeCode(type))
             {
-                case XzaarTypeCode.Int16:
-                case XzaarTypeCode.Int32:
-                case XzaarTypeCode.Int64:
-                case XzaarTypeCode.Double:
-                case XzaarTypeCode.Single:
-                case XzaarTypeCode.UInt16:
-                case XzaarTypeCode.UInt32:
-                case XzaarTypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
                     return true;
             }
             //}
@@ -96,9 +96,9 @@
             //{
             switch (XzaarType.GetTypeCode(type))
             {
-                case XzaarTypeCode.UInt16:
-                case XzaarTypeCode.UInt32:
-                case XzaarTypeCode.UInt64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
                     return true;
             }
             //}
@@ -113,15 +113,15 @@
             var xzaarTypeCode = XzaarType.GetTypeCode(type);
             switch (xzaarTypeCode)
             {
-                case XzaarTypeCode.Int64:
-                case XzaarTypeCode.Int32:
-                case XzaarTypeCode.Int16:
-                case XzaarTypeCode.UInt64:
-                case XzaarTypeCode.UInt32:
-                case XzaarTypeCode.UInt16:
-                case XzaarTypeCode.Boolean:
-                case XzaarTypeCode.SByte:
-                case XzaarTypeCode.Byte:
+                case TypeCode.Int64:
+                case TypeCode.Int32:
+                case TypeCode.Int16:
+                case TypeCode.UInt64:
+                case TypeCode.UInt32:
+                case TypeCode.UInt16:
+                case TypeCode.Boolean:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
                     return true;
             }
             //}

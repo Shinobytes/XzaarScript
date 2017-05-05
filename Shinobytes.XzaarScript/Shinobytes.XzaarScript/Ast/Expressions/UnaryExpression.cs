@@ -6,56 +6,47 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
     public class UnaryExpression : XzaarExpression
     {
         private readonly XzaarExpression item;
-        private XzaarExpressionType nodeType;
+        private ExpressionType nodeType;
         private XzaarType type;
 
-        internal UnaryExpression(XzaarExpression item, XzaarExpressionType nodeType)
+        internal UnaryExpression(XzaarExpression item, ExpressionType nodeType)
         {
             this.item = item;
             this.nodeType = nodeType;
         }
 
-        public XzaarExpression Item
-        {
-            get { return item; }
-        }
+        public XzaarExpression Item => item;
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return nodeType; }
-        }
+        public override ExpressionType NodeType => nodeType;
 
-        public override XzaarType Type
-        {
-            get { return XzaarBaseTypes.Number; }
-        }
+        public override XzaarType Type => XzaarBaseTypes.Number;
     }
 
     public partial class XzaarExpression
     {
-        public static UnaryExpression UnaryOperation(XzaarExpression item, XzaarExpressionType type)
+        public static UnaryExpression UnaryOperation(XzaarExpression item, ExpressionType type)
         {
             return new UnaryExpression(item, type);
         }
 
         public static UnaryExpression PostIncrementor(XzaarExpression item)
         {
-            return UnaryOperation(item, XzaarExpressionType.PostIncrementAssign);
+            return UnaryOperation(item, ExpressionType.PostIncrementAssign);
         }
 
         public static UnaryExpression Incrementor(XzaarExpression item)
         {
-            return UnaryOperation(item, XzaarExpressionType.Increment);
+            return UnaryOperation(item, ExpressionType.Increment);
         }
 
         public static UnaryExpression PostDecrementor(XzaarExpression item)
         {
-            return UnaryOperation(item, XzaarExpressionType.PostDecrementAssign);
+            return UnaryOperation(item, ExpressionType.PostDecrementAssign);
         }
 
         public static UnaryExpression Decrementor(XzaarExpression item)
         {
-            return UnaryOperation(item, XzaarExpressionType.Decrement);
+            return UnaryOperation(item, ExpressionType.Decrement);
         }
     }
 }

@@ -1,10 +1,10 @@
-﻿using Shinobytes.XzaarScript.Ast.Nodes;
+﻿using Shinobytes.XzaarScript.Parser.Nodes;
 
 namespace Shinobytes.XzaarScript.Ast
 {
-    public class NodeProcessorVisitor : IXzaarNodeProcessorVisitor
+    public class NodeProcessorVisitor : INodeProcessorVisitor
     {
-        public virtual XzaarAstNode Visit(XzaarAstNode node)
+        public virtual AstNode Visit(AstNode node)
         {
             if (node is ConditionalOperatorNode) return Visit(node as ConditionalOperatorNode);
             //ConditionalOperatorNode Visit(ConditionalOperatorNode conditionalOperator);

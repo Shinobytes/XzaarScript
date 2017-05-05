@@ -17,13 +17,13 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 
         public XzaarType DeclaringType { get; }
 
-        public string Name { get { return name; } }
+        public string Name => name;
 
-        public XzaarType FieldType { get { return type; } }
+        public XzaarType FieldType => type;
 
-        public override XzaarExpressionType NodeType { get { return XzaarExpressionType.Field; } }
+        public override ExpressionType NodeType => ExpressionType.Field;
 
-        public override XzaarType Type { get { return this.type; } }
+        public override XzaarType Type => this.type;
     }
 
 

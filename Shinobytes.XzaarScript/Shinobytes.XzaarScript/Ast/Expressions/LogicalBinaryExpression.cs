@@ -2,22 +2,16 @@
 {
     internal sealed class LogicalBinaryExpression : BinaryExpression
     {
-        private readonly XzaarExpressionType nodeType;
+        private readonly ExpressionType nodeType;
 
-        internal LogicalBinaryExpression(XzaarExpressionType nodeType, XzaarExpression left, XzaarExpression right)
+        internal LogicalBinaryExpression(ExpressionType nodeType, XzaarExpression left, XzaarExpression right)
             : base(left, right)
         {
             this.nodeType = nodeType;
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return XzaarBaseTypes.Boolean; }
-        }
+        public sealed override XzaarType Type => XzaarBaseTypes.Boolean;
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return nodeType; }
-        }
+        public sealed override ExpressionType NodeType => nodeType;
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shinobytes.XzaarScript.Ast;
+using Shinobytes.XzaarScript.Parser;
 
 namespace Shinobytes.XzaarScript.Interpreter.Tests
 {
@@ -13,10 +14,10 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Expression, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Scope, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.Expression, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Scope, basicAst.Children[3].Type);
         }
 
         
@@ -27,12 +28,12 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Literal, basicAst.Children[3].Type);
-            Assert.AreEqual(XzaarSyntaxKind.MemberAccess, basicAst.Children[4].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[5].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Literal, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.MemberAccess, basicAst.Children[4].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[5].Type);
         }
 
         [TestMethod]
@@ -42,10 +43,10 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Literal, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Literal, basicAst.Children[3].Type);
         }
 
         [TestMethod]
@@ -55,10 +56,10 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Literal, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Literal, basicAst.Children[3].Type);
         }
 
         [TestMethod]
@@ -68,10 +69,10 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Literal, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Literal, basicAst.Children[3].Type);
         }
 
 
@@ -82,10 +83,10 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Literal, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Literal, basicAst.Children[3].Type);
         }
 
 
@@ -96,10 +97,10 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Literal, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Literal, basicAst.Children[3].Type);
         }
 
 
@@ -110,15 +111,15 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             var basicAst = parser.Parse();
             Assert.AreEqual(true, basicAst.HasChildren);
 
-            Assert.AreEqual(XzaarSyntaxKind.Keyword, basicAst.Children[0].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Identifier, basicAst.Children[1].Type);
-            Assert.AreEqual(XzaarSyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
-            Assert.AreEqual(XzaarSyntaxKind.Literal, basicAst.Children[3].Type);
+            Assert.AreEqual(SyntaxKind.Keyword, basicAst.Children[0].Type);
+            Assert.AreEqual(SyntaxKind.Identifier, basicAst.Children[1].Type);
+            Assert.AreEqual(SyntaxKind.AssignmentOperator, basicAst.Children[2].Type);
+            Assert.AreEqual(SyntaxKind.Literal, basicAst.Children[3].Type);
         }
 
-        private XzaarSyntaxParser Parser(string code)
+        private SyntaxParser Parser(string code)
         {
-            return new XzaarSyntaxParser(new XzaarScriptLexer(code).Tokenize());
+            return new SyntaxParser(new Lexer(code).Tokenize());
         }
     }
 }

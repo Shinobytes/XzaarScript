@@ -29,30 +29,15 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Conditional; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Conditional;
 
-        public override XzaarType Type
-        {
-            get { return IfTrue.Type; }
-        }
+        public override XzaarType Type => IfTrue.Type;
 
-        public XzaarExpression IfTrue
-        {
-            get { return this.ifTrue; }
-        }
+        public XzaarExpression IfTrue => this.ifTrue;
 
-        public XzaarExpression Test
-        {
-            get { return test; }
-        }
+        public XzaarExpression Test => test;
 
-        public XzaarExpression IfFalse
-        {
-            get { return GetFalse(); }
-        }
+        public XzaarExpression IfFalse => GetFalse();
 
         internal virtual XzaarExpression GetFalse()
         {
@@ -94,10 +79,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _type = type;
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return _type; }
-        }
+        public sealed override XzaarType Type => _type;
     }
     public partial class XzaarExpression
     {

@@ -8,7 +8,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         private readonly ParameterExpression[] parameters;
         private XzaarType returnType;
         private XzaarExpression body;
-        private XzaarExpressionType nodeType;
+        private ExpressionType nodeType;
         private XzaarType type;
         private Func<XzaarType> returnTypeBinding;
 
@@ -21,10 +21,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             this.IsExtern = isExtern;
         }
 
-        public string Name
-        {
-            get { return name; }
-        }
+        public string Name => name;
 
         public ParameterExpression[] GetParameters()
         {
@@ -48,20 +45,14 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        public override XzaarType Type
-        {
-            get { return ReturnType; }
-        }
+        public override XzaarType Type => ReturnType;
 
         public XzaarExpression GetBody()
         {
             return body;
         }
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Call; }
-        }
+        public override ExpressionType NodeType => ExpressionType.Call;
 
         public bool IsExtern { get; set; }
 

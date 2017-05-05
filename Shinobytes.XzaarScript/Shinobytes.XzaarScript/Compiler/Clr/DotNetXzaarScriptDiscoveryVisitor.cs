@@ -20,7 +20,7 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             AssertPossibleStackOverflow(expression);
 
-            if (expression.NodeType == XzaarExpressionType.Block)
+            if (expression.NodeType == ExpressionType.Block)
             {
                 var block = expression as BlockExpression;
                 if (block != null)
@@ -71,7 +71,7 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             // TODO: Dependecy Inject a stack guard validation object to do take care of this for us
             if (ctx.StackRecursionCount > 10)
-                throw new XzaarCompilerException(
+                throw new CompilerException(
                     $"PANIC!! StackOverflow! {expression.GetType()} [{expression.NodeType}] could not be handled.");
 
             if (ctx.LastVisitedExpression == expression)

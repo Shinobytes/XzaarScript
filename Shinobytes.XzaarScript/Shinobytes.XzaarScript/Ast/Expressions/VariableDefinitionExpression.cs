@@ -11,7 +11,7 @@
             AssignmentExpression = assignmentExpression;
         }
 
-        public override XzaarType Type { get { return type; } }        
+        public override XzaarType Type => type;
 
         public XzaarExpression AssignmentExpression { get; }        
     }

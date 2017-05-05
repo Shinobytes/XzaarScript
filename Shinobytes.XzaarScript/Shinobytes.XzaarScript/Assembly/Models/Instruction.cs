@@ -45,10 +45,7 @@ namespace Shinobytes.XzaarScript.Assembly.Models
             // operand arguments only used for function calls
         }
 
-        public bool IsJump
-        {
-            get { return this.OpCode == OpCode.Jmp || this.OpCode == OpCode.Jmpf || this.OpCode == OpCode.Jmpt; }
-        }
+        public bool IsJump => this.OpCode == OpCode.Jmp || this.OpCode == OpCode.Jmpf || this.OpCode == OpCode.Jmpt;
 
         public OpCode OpCode { get; internal set; }
 

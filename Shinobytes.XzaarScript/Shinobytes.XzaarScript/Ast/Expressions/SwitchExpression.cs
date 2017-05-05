@@ -11,13 +11,10 @@
             this.caseExpressions = caseExpressions;
         }
 
-        public XzaarExpression Value { get { return value; } }
-        public XzaarExpression[] Cases { get { return caseExpressions; } }
+        public XzaarExpression Value => value;
+        public XzaarExpression[] Cases => caseExpressions;
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Switch; }
-        }
+        public override ExpressionType NodeType => ExpressionType.Switch;
     }
 
     public class SwitchCaseExpression : XzaarExpression
@@ -30,14 +27,11 @@
             this.matchExpression = matchExpression;
             this.body = body;
         }
-        public bool IsDefaultCase { get { return matchExpression == null; } }
-        public XzaarExpression Match { get { return matchExpression; } }
-        public XzaarExpression Body { get { return body; } }
+        public bool IsDefaultCase => matchExpression == null;
+        public XzaarExpression Match => matchExpression;
+        public XzaarExpression Body => body;
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.SwitchCase; }
-        }
+        public override ExpressionType NodeType => ExpressionType.SwitchCase;
     }
 
     public partial class XzaarExpression

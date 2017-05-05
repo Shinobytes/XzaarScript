@@ -11,6 +11,6 @@ namespace Shinobytes.XzaarScript
 
         protected XzaarMethodBody() { }
 
-        public virtual IList<XzaarLocalVariableInfo> LocalVariables { get { return localVariables.ToList(); } }
+        public virtual IList<XzaarLocalVariableInfo> LocalVariables => localVariables.ToList();
     }
 }

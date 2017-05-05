@@ -4,7 +4,7 @@
 
     public class ForExpression : LoopExpression
     {
-        internal ForExpression(XzaarExpression initiator, XzaarExpression test, XzaarExpression incrementor, XzaarExpression body) : base(body, null, null, XzaarLoopTypes.For)
+        internal ForExpression(XzaarExpression initiator, XzaarExpression test, XzaarExpression incrementor, XzaarExpression body) : base(body, null, null, LoopTypes.For)
         {
             Incrementor = incrementor;
             Test = test;

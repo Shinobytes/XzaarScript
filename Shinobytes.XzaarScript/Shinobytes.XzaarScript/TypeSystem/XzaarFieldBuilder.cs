@@ -16,30 +16,18 @@ namespace Shinobytes.XzaarScript
             this.declaringType = declaringType;
         }
 
-        public override string Name
-        {
-            get { return name; }
-        }
+        public override string Name => name;
 
         public override XzaarType GetXzaarType()
         {
             throw new NotImplementedException();
         }
 
-        public override XzaarMemberTypes MemberType
-        {
-            get { return XzaarMemberTypes.Field; }
-        }
+        public override XzaarMemberTypes MemberType => XzaarMemberTypes.Field;
 
-        public override XzaarType DeclaringType
-        {
-            get { return declaringType; }
-        }
+        public override XzaarType DeclaringType => declaringType;
 
-        public override XzaarType FieldType
-        {
-            get { return fieldType; }
-        }
+        public override XzaarType FieldType => fieldType;
 
         public override object GetValue(object obj)
         {

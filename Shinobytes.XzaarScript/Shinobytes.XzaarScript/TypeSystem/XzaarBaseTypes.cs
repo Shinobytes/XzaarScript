@@ -6,128 +6,56 @@ namespace Shinobytes.XzaarScript
 {
     public static class XzaarBaseTypes
     {
-        public static XzaarType Void
-        {
-            get { return _void; }
-        }
+        public static XzaarType Void => _void;
 
-        public static XzaarType String
-        {
-            get { return _string; }
-        }
+        public static XzaarType String => _string;
 
-        public static XzaarType Number
-        {
-            get { return _number; }
-        }
+        public static XzaarType Number => _number;
 
-        public static XzaarType I8
-        {
-            get { return _i8; }
-        }
+        public static XzaarType I8 => _i8;
 
-        public static XzaarType I16
-        {
-            get { return _i16; }
-        }
+        public static XzaarType I16 => _i16;
 
-        public static XzaarType I32
-        {
-            get { return _i32; }
-        }
+        public static XzaarType I32 => _i32;
 
-        public static XzaarType I64
-        {
-            get { return _i64; }
-        }
+        public static XzaarType I64 => _i64;
 
 
-        public static XzaarType U8
-        {
-            get { return _u8; }
-        }
+        public static XzaarType U8 => _u8;
 
-        public static XzaarType U16
-        {
-            get { return _u16; }
-        }
+        public static XzaarType U16 => _u16;
 
-        public static XzaarType U32
-        {
-            get { return _u32; }
-        }
+        public static XzaarType U32 => _u32;
 
-        public static XzaarType U64
-        {
-            get { return _u64; }
-        }
+        public static XzaarType U64 => _u64;
 
 
-        public static XzaarType F32
-        {
-            get { return _f32; }
-        }
+        public static XzaarType F32 => _f32;
 
-        public static XzaarType F64
-        {
-            get { return _f64; }
-        }
+        public static XzaarType F64 => _f64;
 
 
-        public static XzaarType Boolean
-        {
-            get { return _boolean; }
-        }
+        public static XzaarType Boolean => _boolean;
 
-        public static XzaarType Any
-        {
-            get { return _any; }
-        }
+        public static XzaarType Any => _any;
 
-        public static XzaarType Char
-        {
-            get { return _char; }
-        }
+        public static XzaarType Char => _char;
 
-        public static XzaarType DateTime
-        {
-            get { return _datetime; }
-        }
+        public static XzaarType DateTime => _datetime;
 
-        public static XzaarType Array
-        {
-            get { return _array; }
-        }
+        public static XzaarType Array => _array;
 
-        public static XzaarType StringArray
-        {
-            get { return _stringArray; }
-        }
+        public static XzaarType StringArray => _stringArray;
 
-        public static XzaarType NumberArray
-        {
-            get { return _numberArray; }
-        }
+        public static XzaarType NumberArray => _numberArray;
 
-        public static XzaarType BooleanArray
-        {
-            get { return _booleanArray; }
-        }
+        public static XzaarType BooleanArray => _booleanArray;
 
-        public static XzaarType ObjectArray
-        {
-            get { return _objectArray; }
-        }
+        public static XzaarType ObjectArray => _objectArray;
 
-        public static XzaarType CharArray
-        {
-            get { return _charArray; }
-        }
+        public static XzaarType CharArray => _charArray;
 
-        public static XzaarType DateTimeArray
-        {
-            get { return _datetimeArray; }
-        }
+        public static XzaarType DateTimeArray => _datetimeArray;
 
         internal static List<XzaarType> BaseTypes;
 

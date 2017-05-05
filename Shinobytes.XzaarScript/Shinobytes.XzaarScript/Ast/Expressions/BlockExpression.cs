@@ -26,10 +26,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 
     public class BlockExpression : XzaarExpression
     {       
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Block; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Block;
 
         public override XzaarType Type
         {
@@ -68,14 +65,8 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             throw new InvalidOperationException();
         }
 
-        internal virtual int VariableCount
-        {
-            get
-            {
-                return 0;
-            }
-        }
-        
+        internal virtual int VariableCount => 0;
+
 
         internal static ReadOnlyCollection<XzaarExpression> ReturnReadOnlyExpressions(BlockExpression provider, ref object collection)
         {
@@ -103,7 +94,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 
             return ((ReadOnlyCollection<T>)collectionOrT)[0];
         }
-        internal static ReadOnlyCollection<XzaarExpression> ReturnReadOnly(IXzaarArgumentProvider provider, ref object collection)
+        internal static ReadOnlyCollection<XzaarExpression> ReturnReadOnly(IArgumentProvider provider, ref object collection)
         {
             XzaarExpression tObj = collection as XzaarExpression;
             if (tObj != null)
@@ -125,27 +116,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return EmptyReadOnlyCollection<ParameterExpression>.Instance;
         }
 
-        public ReadOnlyCollection<XzaarExpression> Expressions
-        {
-            get { return GetOrMakeExpressions(); }
-        }
+        public ReadOnlyCollection<XzaarExpression> Expressions => GetOrMakeExpressions();
 
-        public ReadOnlyCollection<ParameterExpression> Variables
-        {
-            get
-            {
-                return GetOrMakeVariables();
-            }
-        }
+        public ReadOnlyCollection<ParameterExpression> Variables => GetOrMakeVariables();
 
-        public XzaarExpression Result
-        {
-            get
-            {
-                return GetExpression(ExpressionCount - 1);
-            }
-        }
-
+        public XzaarExpression Result => GetExpression(ExpressionCount - 1);
     }
     internal sealed class Block2 : BlockExpression
     {
@@ -168,13 +143,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        internal override int ExpressionCount
-        {
-            get
-            {
-                return 2;
-            }
-        }
+        internal override int ExpressionCount => 2;
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
@@ -213,13 +182,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        internal override int ExpressionCount
-        {
-            get
-            {
-                return 3;
-            }
-        }
+        internal override int ExpressionCount => 3;
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
@@ -260,13 +223,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        internal override int ExpressionCount
-        {
-            get
-            {
-                return 4;
-            }
-        }
+        internal override int ExpressionCount => 4;
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
@@ -309,13 +266,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        internal override int ExpressionCount
-        {
-            get
-            {
-                return 5;
-            }
-        }
+        internal override int ExpressionCount => 5;
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
@@ -349,13 +300,8 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return _expressions[index];
         }
 
-        internal override int ExpressionCount
-        {
-            get
-            {
-                return _expressions.Count;
-            }
-        }
+        internal override int ExpressionCount => _expressions.Count;
+
         internal static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IList<T> collection)
         {
             IList<T> value = collection;
@@ -476,15 +422,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        public int Count
-        {
-            get { return _block.ExpressionCount; }
-        }
+        public int Count => _block.ExpressionCount;
 
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
+        public bool IsReadOnly => true;
 
         public bool Remove(Expression item)
         {

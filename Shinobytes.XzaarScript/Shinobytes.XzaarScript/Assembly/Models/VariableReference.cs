@@ -7,10 +7,7 @@
 
         public object InitialValue { get; set; }
 
-        public override MemberTypes MemberType
-        {
-            get { return MemberTypes.Variable; }
-        }
+        public override MemberTypes MemberType => MemberTypes.Variable;
 
         public object ArrayIndex { get; set; }
 
@@ -20,7 +17,7 @@
             set { reference = value; }
         }
 
-        public bool IsRef { get { return this.reference != null; } }
+        public bool IsRef => this.reference != null;
 
         public override string ToString()
         {
@@ -48,10 +45,7 @@
     {
         public VariableReference Instance { get; set; }
 
-        public override MemberTypes MemberType
-        {
-            get { return MemberTypes.Field; }
-        }
+        public override MemberTypes MemberType => MemberTypes.Field;
 
         public override string ToString()
         {

@@ -7,14 +7,8 @@
         {
         }
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Coalesce; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Coalesce;
 
-        public sealed override XzaarType Type
-        {
-            get { return Right.Type; }
-        }
+        public sealed override XzaarType Type => Right.Type;
     }
 }

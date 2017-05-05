@@ -1373,7 +1373,7 @@ print_hello_world()");
             Assert.AreEqual("H\r\n", console.Output);
         }
 
-        [TestMethod, ExpectedException(typeof(XzaarRuntimeException))]
+        [TestMethod, ExpectedException(typeof(RuntimeException))]
         public void Use_non_existing_constant_property_throws()
         {
             var rt = Load("fn test(any console) { console.log(\"Hello World\".bleh) }");
@@ -1515,7 +1515,7 @@ success
         }
 
 
-        private XzaarRuntime Run(string inputCode)
+        private Runtime Run(string inputCode)
         {
             return inputCode
                 .Tokenize()
@@ -1527,7 +1527,7 @@ success
         }
 
 
-        private XzaarRuntime Load(string inputCode)
+        private Runtime Load(string inputCode)
         {
             return inputCode
                 .Tokenize()
@@ -1554,10 +1554,10 @@ success
 
     public class ConsoleWrapperTest
     {
-        private readonly XzaarRuntime rt;
+        private readonly Runtime rt;
         public string Output;
 
-        public ConsoleWrapperTest(XzaarRuntime rt)
+        public ConsoleWrapperTest(Runtime rt)
         {
             this.rt = rt;
         }

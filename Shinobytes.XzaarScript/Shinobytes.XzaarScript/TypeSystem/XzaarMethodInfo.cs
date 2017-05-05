@@ -7,7 +7,7 @@ namespace Shinobytes.XzaarScript
     {
         protected XzaarMethodInfo() { }
 
-        public override XzaarMemberTypes MemberType { get { return XzaarMemberTypes.Method; } }
+        public override XzaarMemberTypes MemberType => XzaarMemberTypes.Method;
 
         public virtual XzaarParameterInfo ReturnParameter { get { throw new NotImplementedException(); } }
 

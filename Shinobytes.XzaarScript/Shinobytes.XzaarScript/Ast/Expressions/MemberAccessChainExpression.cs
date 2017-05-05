@@ -30,12 +30,9 @@
             }
         }
 
-        public override XzaarType Type { get { return ResultType;} }
+        public override XzaarType Type => ResultType;
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.MemberAccess; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.MemberAccess;
     }
 
     public partial class XzaarExpression

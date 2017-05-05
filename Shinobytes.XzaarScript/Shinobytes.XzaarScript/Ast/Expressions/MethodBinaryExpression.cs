@@ -4,7 +4,7 @@
     {
         private readonly XzaarMethodInfo _method;
 
-        internal MethodBinaryExpression(XzaarExpressionType nodeType, XzaarExpression left, XzaarExpression right, XzaarType type, XzaarMethodInfo method)
+        internal MethodBinaryExpression(ExpressionType nodeType, XzaarExpression left, XzaarExpression right, XzaarType type, XzaarMethodInfo method)
             : base(nodeType, left, right, type)
         {
             _method = method;

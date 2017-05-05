@@ -5,10 +5,10 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 {
     internal class ListArgumentProvider : IList<XzaarExpression>
     {
-        private readonly IXzaarArgumentProvider _provider;
+        private readonly IArgumentProvider _provider;
         private readonly Expression _arg0;
 
-        internal ListArgumentProvider(IXzaarArgumentProvider provider, Expression arg0)
+        internal ListArgumentProvider(IArgumentProvider provider, Expression arg0)
         {
             _provider = provider;
             _arg0 = arg0;
@@ -89,15 +89,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        public int Count
-        {
-            get { return _provider.ArgumentCount; }
-        }
+        public int Count => _provider.ArgumentCount;
 
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
+        public bool IsReadOnly => true;
 
         public bool Remove(Expression item)
         {

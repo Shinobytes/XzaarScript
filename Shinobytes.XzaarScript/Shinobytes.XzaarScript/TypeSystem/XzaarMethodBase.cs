@@ -18,9 +18,6 @@ namespace Shinobytes.XzaarScript
 
         public abstract XzaarMethodAttributes Attributes { get; }
 
-        public bool IsGlobal
-        {
-            get { return (Attributes & XzaarMethodAttributes.Global) != 0; }
-        }
+        public bool IsGlobal => (Attributes & XzaarMethodAttributes.Global) != 0;
     }
 }

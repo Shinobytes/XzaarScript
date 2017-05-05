@@ -17,10 +17,7 @@
 
         public XzaarExpression[] FieldInitializers { get; set; }
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.CreateStruct; }
-        }
+        public override ExpressionType NodeType => ExpressionType.CreateStruct;
     }
 
     public partial class XzaarExpression

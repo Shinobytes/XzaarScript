@@ -8,9 +8,6 @@
 
         public ParameterCollection Parameters { get; internal set; }        
 
-        public override MemberTypes MemberType
-        {
-            get { return MemberTypes.Method; }
-        }
+        public override MemberTypes MemberType => MemberTypes.Method;
     }
 }

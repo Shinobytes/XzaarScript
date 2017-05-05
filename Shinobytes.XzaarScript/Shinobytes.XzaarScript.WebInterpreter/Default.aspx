@@ -7,7 +7,7 @@
 
 <script runat="server">
     public string ConsoleOutput;
-    public string CurrentSourceCode = @"// variable names starting with $ 
+    public string CurrentSourceCode = @"// variable localNames starting with $ 
 // are variables grabbed from an external source
 let console = $console
 
@@ -25,7 +25,7 @@ print_hello_world()";
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var rt = new Shinobytes.XzaarScript.XzaarScriptInterpreter(CurrentSourceCode);
+            var rt = new Shinobytes.XzaarScript.ScriptInterpreter(CurrentSourceCode);
             rt.RegisterVariable("$console", console);
             sw.Stop();
 
@@ -65,7 +65,7 @@ print_hello_world()";
 
         public void log(object text)
         {
-            var rtVar = text as XzaarRuntimeVariable;
+            var rtVar = text as RuntimeVariable;
             if (rtVar != null)
             {
                 Output += rtVar.Value + "<br/>";
