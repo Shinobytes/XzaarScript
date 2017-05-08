@@ -85,7 +85,7 @@ namespace Shinobytes.XzaarScript.Parser
             return null;
         }
 
-        public virtual SwitchCaseExpression Visit(CaseNode matchCase)
+        public virtual SwitchCaseExpression Visit(CaseNode @case)
         {
             return null;
         }
@@ -204,79 +204,42 @@ namespace Shinobytes.XzaarScript.Parser
 
 
             if (node is ConditionalOperatorNode) return Visit(node as ConditionalOperatorNode);
-            //XzaarExpression Visit(ConditionalOperatorNode conditionalOperator);
             if (node is EqualityOperatorNode) return Visit(node as EqualityOperatorNode);
-            //XzaarExpression Visit(EqualityOperatorNode equalityOperator);
             if (node is BinaryOperatorNode) return Visit(node as BinaryOperatorNode);
-            //XzaarExpression Visit(BinaryOperatorNode bin);
             if (node is LogicalNotNode) return Visit(node as LogicalNotNode);
-            //XzaarExpression Visit(LogicalNotNode node);
             if (node is ConditionalNode) return Visit(node as ConditionalNode);
-            //XzaarExpression Visit(ConditionalNode conditional);
             if (node is FunctionParametersNode) return Visit(node as FunctionParametersNode);
-            //XzaarExpression Visit(FunctionParametersNode parameters);
             if (node is ReturnNode) return Visit(node as ReturnNode);
-            //XzaarExpression Visit(ReturnNode returnNode);
             if (node is ContinueNode) return Visit(node as ContinueNode);
-            //XzaarExpression Visit(ContinueNode continueNode);
             if (node is BreakNode) return Visit(node as BreakNode);
-            //XzaarExpression Visit(BreakNode breakNode);
             if (node is LabelNode) return Visit(node as LabelNode);
-            //LabelExpression Visit(LabelNode label);
             if (node is GotoNode) return Visit(node as GotoNode);
-            //GotoExpression Visit(GotoNode @goto);
             if (node is MemberAccessChainNode) return Visit(node as MemberAccessChainNode);
-            //MemberAccessChainExpression Visit(MemberAccessChainNode access);
             if (node is CreateStructNode) return Visit(node as CreateStructNode);
-            //CreateStructExpression Visit(CreateStructNode createStruct);
             if (node is MemberAccessNode) return Visit(node as MemberAccessNode);
-            //XzaarExpression Visit(MemberAccessNode access);
             if (node is AssignNode) return Visit(node as AssignNode);
-            //BinaryExpression Visit(AssignNode assign);
             if (node is UnaryNode) return Visit(node as UnaryNode);
-            //XzaarExpression Visit(UnaryNode unary);
             if (node is CaseNode) return Visit(node as CaseNode);
-            //SwitchCaseExpression Visit(CaseNode matchCase);
             if (node is MatchNode) return Visit(node as MatchNode);
-            //SwitchExpression Visit(MatchNode match);
             if (node is DoWhileLoopNode) return Visit(node as DoWhileLoopNode);
-            //DoWhileExpression Visit(DoWhileLoopNode loop);
             if (node is WhileLoopNode) return Visit(node as WhileLoopNode);
-            //WhileExpression Visit(WhileLoopNode loop);
             if (node is ForeachLoopNode) return Visit(node as ForeachLoopNode);
-            //ForEachExpression Visit(ForeachLoopNode loop);
             if (node is ForLoopNode) return Visit(node as ForLoopNode);
-            //ForExpression Visit(ForLoopNode loop);
             if (node is LoopNode) return Visit(node as LoopNode);
-            //LoopExpression Visit(LoopNode loop);
             if (node is DefineVariableNode) return Visit(node as DefineVariableNode);
-            //VariableDefinitionExpression Visit(DefineVariableNode definedVariable);
             if (node is VariableNode) return Visit(node as VariableNode);
-            //ParameterExpression Visit(VariableNode variable);
             if (node is ParameterNode) return Visit(node as ParameterNode);
-            //ParameterExpression Visit(ParameterNode parameter);
             if (node is FunctionCallNode) return Visit(node as FunctionCallNode);
-            //XzaarExpression Visit(FunctionCallNode call);
             if (node is ExpressionNode) return Visit(node as ExpressionNode);
-            //XzaarExpression Visit(ExpressionNode expression);
             if (node is ArgumentNode) return Visit(node as ArgumentNode);
-            //XzaarExpression Visit(ArgumentNode argument);
             if (node is FunctionNode) return Visit(node as FunctionNode);
-            //XzaarExpression Visit(FunctionNode function);
             if (node is StructNode) return Visit(node as StructNode);
-            //StructExpression Visit(StructNode node);
             if (node is FieldNode) return Visit(node as FieldNode);
-            //FieldExpression Visit(FieldNode node);
             if (node is NumberNode) return Visit(node as NumberNode);
-            //ConstantExpression Visit(NumberNode number);
             if (node is LiteralNode) return Visit(node as LiteralNode);
-            //XzaarExpression Visit(LiteralNode literal);
             if (node is BodyNode) return Visit(node as BodyNode);
-            //BlockExpression Visit(BodyNode body);
             if (node is BlockNode) return Visit(node as BlockNode);
-            //BlockExpression Visit(BlockNode block);
             if (node is EmptyNode) return Visit(node as EmptyNode);
-            //XzaarExpression Visit(EmptyNode empty);
             if (node is EntryNode) return Visit(node as EntryNode);
 
             return Visit(node);

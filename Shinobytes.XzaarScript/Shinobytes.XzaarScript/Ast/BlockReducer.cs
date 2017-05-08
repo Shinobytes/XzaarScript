@@ -12,7 +12,7 @@ namespace Shinobytes.XzaarScript.Ast
 
         public override BodyNode Visit(BodyNode block)
         {
-            if (block.Children.Count == 1 && block.Children[0].NodeType == NodeTypes.BLOCK)
+            if (block.Children.Count == 1 && block.Children[0].Kind == SyntaxKind.Block)
             {
                 
                 return AstNode.Body(block.Children[0].Children.Select(Visit).ToArray());
@@ -22,7 +22,7 @@ namespace Shinobytes.XzaarScript.Ast
 
         public override BlockNode Visit(BlockNode block)
         {
-            if (block.Children.Count == 1 && block.Children[0].NodeType == NodeTypes.BLOCK)
+            if (block.Children.Count == 1 && block.Children[0].Kind == SyntaxKind.Block)
             {
                 return AstNode.Block(block.Children[0].Children.Select(Visit).ToArray());
             }
@@ -31,7 +31,7 @@ namespace Shinobytes.XzaarScript.Ast
 
         public override EntryNode Visit(EntryNode entry)
         {
-            if (entry.Body.NodeType == NodeTypes.BLOCK)
+            if (entry.Body.Kind == SyntaxKind.Block)
             {
                 if (entry.Body.Children.Count == 1)
                 {

@@ -10,7 +10,7 @@ namespace Shinobytes.XzaarScript.Ast
         private int currentTokenColumn;
         public override void Add(SyntaxToken item)
         {
-            base.Add(new SyntaxToken(item.Key, item.Type, item.Value, currentTokenIndex++, currentTokenOffset, currentTokenLine, currentTokenColumn));
+            base.Add(new SyntaxToken(item.Kind, item.TypeName, item.Value, currentTokenIndex++, currentTokenOffset, currentTokenLine, currentTokenColumn));
             currentTokenOffset += item.Value.Length;
         }
 

@@ -1,11 +1,13 @@
-﻿namespace Shinobytes.XzaarScript.Parser.Nodes
+﻿using Shinobytes.XzaarScript.Ast;
+
+namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class LoopNode : AstNode
     {
         private readonly AstNode body;
 
         public LoopNode(string type, AstNode body, int nodeIndex)
-            : base(NodeTypes.LOOP, type, null, nodeIndex)
+            : base(SyntaxKind.LoopExpression, type, null, nodeIndex)
         {
             this.body = body;
         }

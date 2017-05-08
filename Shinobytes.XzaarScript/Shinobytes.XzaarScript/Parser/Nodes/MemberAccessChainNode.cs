@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class MemberAccessChainNode : AstNode
@@ -7,7 +9,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private string resultType;
 
         public MemberAccessChainNode(AstNode left, AstNode right, string resultType, int nodeIndex)
-            : base(NodeTypes.ACCESSOR_CHAIN, "ACCESSOR_CHAIN", null, nodeIndex)
+            : base(SyntaxKind.MemberAccess, "ACCESSOR_CHAIN", null, nodeIndex)
         {
             this.left = left;
             this.right = right;

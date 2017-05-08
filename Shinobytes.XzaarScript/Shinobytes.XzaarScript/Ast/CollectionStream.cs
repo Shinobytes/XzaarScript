@@ -41,7 +41,7 @@ namespace Shinobytes.XzaarScript.Ast
 
 
         public bool CurrentIs(Func<T, bool> predicate)
-        {            
+        {
             return Current != null && predicate(Current);
         }
 
@@ -114,6 +114,24 @@ namespace Shinobytes.XzaarScript.Ast
                 return default(T);
             }
             return items[++currentIndex];
+        }
+
+        public T ConsumeExpected(Func<T, bool> predicate)
+        {
+            if (currentIndex >= items.Count)
+            {
+                currentIndex++;
+                return default(T);
+            }
+
+            if (predicate(items[currentIndex]))
+            {
+                return items[currentIndex++];
+            }
+
+
+            throw new ParserException($"Unexpected token found '{items[currentIndex]}'");
+            
         }
 
         public T Consume(Func<T, bool> predicate)

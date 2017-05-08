@@ -4,58 +4,63 @@ namespace Shinobytes.XzaarScript.Ast
 {
     public class SyntaxToken
     {
-        public readonly string Type;
-        public readonly NodeTypes Key;
+        public readonly string TypeName;
+        public readonly SyntaxKind Kind;
         public readonly string Value;
         public readonly int TokenIndex;
         public readonly int SourceIndex;
         public readonly int SourceLine;
         public readonly int SourceColumn;
         public readonly int Size;
+        public readonly bool IsSingleQuouteString;
 
         public SyntaxToken(int tokenIndex, int sourceIndex)
+            : this(SyntaxKind.Undefined, null, null, false, tokenIndex, sourceIndex, 0, 0)
         {
             TokenIndex = tokenIndex;
             SourceIndex = sourceIndex;
         }
 
-        public SyntaxToken(NodeTypes key, string type, string value)
+        public SyntaxToken(SyntaxKind kind, string typeName, string value)
+            : this(kind, typeName, value, false, 0, 0, 0, 0)
         {
-            Key = key;
-            Value = value;
-            Type = type;
-            Size = value.Length;
         }
 
-        internal SyntaxToken(NodeTypes key, string type, string value, int tokenIndex, int sourceIndex, int sourceLine, int sourceColumn)
+        internal SyntaxToken(SyntaxKind kind, string typeName, string value, int tokenIndex, int sourceIndex, int sourceLine, int sourceColumn)
+            : this(kind, typeName, value, false, tokenIndex, sourceIndex, sourceLine, sourceColumn)
+        {
+        }
+
+        internal SyntaxToken(SyntaxKind kind, string typeName, string value, bool isSingleQuouteString, int tokenIndex, int sourceIndex, int sourceLine, int sourceColumn)
         {
             TokenIndex = tokenIndex;
             SourceIndex = sourceIndex;
             SourceLine = sourceLine + 1;
             SourceColumn = sourceColumn + 1;
-
-            Key = key;
+            IsSingleQuouteString = isSingleQuouteString;
+            Kind = kind;
             Value = value;
-            Type = type;
+            TypeName = typeName;
             Size = value.Length;
         }
 
-        public XzaarSyntaxTokenPositionInfo PositionInfo => new XzaarSyntaxTokenPositionInfo(SourceIndex, SourceLine, SourceColumn, -1);
+
+        public TokenPositionInfo PositionInfo => new TokenPositionInfo(SourceIndex, SourceLine, SourceColumn, -1);
 
         public override string ToString()
         {
-            return $"{Key} {Type} {Value}";
+            return $"{Kind} {TypeName} {Value}";
         }
     }
 
-    public struct XzaarSyntaxTokenPositionInfo
+    public struct TokenPositionInfo
     {
         public readonly int Column;
         public readonly int Index;
         public readonly int Line;
         public readonly int NodeIndex;
 
-        public XzaarSyntaxTokenPositionInfo(int index, int line, int column, int nodeIndex)
+        public TokenPositionInfo(int index, int line, int column, int nodeIndex)
         {
             this.Index = index;
             NodeIndex = nodeIndex;
@@ -64,7 +69,7 @@ namespace Shinobytes.XzaarScript.Ast
         }
 
 
-        public static XzaarSyntaxTokenPositionInfo Empty => new XzaarSyntaxTokenPositionInfo();
+        public static TokenPositionInfo Empty => new TokenPositionInfo();
 
         public override string ToString()
         {

@@ -1,4 +1,6 @@
-﻿namespace Shinobytes.XzaarScript.Parser.Nodes
+﻿using Shinobytes.XzaarScript.Ast;
+
+namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class WhileLoopNode : LoopNode
     {
@@ -20,7 +22,7 @@
         public override string ToString()
         {
             var testExpr = test.ToString();
-            if (test.NodeType != NodeTypes.EXPRESSION)
+            if (test.Kind != SyntaxKind.Expression)
                 testExpr = "(" + testExpr + ")";
             return "while " + testExpr + " { " + Body + " }";
         }

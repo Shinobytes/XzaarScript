@@ -1,9 +1,11 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class EntryNode : AstNode
     {
         public EntryNode(AstNode body)
-            : base(NodeTypes.PROGRAM, "PROGRAM", "PROGRAM", -1)
+            : base(SyntaxKind.Block, "PROGRAM", "PROGRAM", -1)
         {
             if (body != null)
                 this.AddChild(body);

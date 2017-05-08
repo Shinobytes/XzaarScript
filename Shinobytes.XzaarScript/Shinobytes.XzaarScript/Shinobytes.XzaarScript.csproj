@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assembly\IO\AssemblyReader.cs" />
@@ -79,7 +80,7 @@
     <Compile Include="Parser\ParserScope.cs" />
     <Compile Include="Ast\NodeReducer.cs" />
     <Compile Include="Ast\NodeStream.cs" />
-    <Compile Include="Ast\NodeParser.cs" />
+    <Compile Include="Ast\LanguageParser.cs" />
     <Compile Include="Ast\NodeTypeBinder.cs" />
     <Compile Include="Ast\SyntaxKind.cs" />
     <Compile Include="Parser\Precedence.cs" />
@@ -87,12 +88,9 @@
     <Compile Include="Parser\LexerException.cs" />
     <Compile Include="Parser\Lexer.cs" />
     <Compile Include="Ast\SyntaxFacts.cs" />
-    <Compile Include="Ast\SyntaxParser.cs" />
+    <Compile Include="Parser\SyntaxParser.cs" />
     <Compile Include="Ast\StringCollectionStream.cs" />
     <Compile Include="Ast\SyntaxTokenCollection.cs" />
-    <Compile Include="Ast\SyntaxTokenStream.cs" />
-    <Compile Include="Ast\Token.cs" />
-    <Compile Include="Parser\ParserException.cs" />
     <Compile Include="Compiler\Clr\DotNetXzaarScriptCompiler.cs" />
     <Compile Include="Compiler\Clr\DotNetXzaarScriptCompilerContext.cs" />
     <Compile Include="Compiler\Clr\DotNetXzaarScriptDiscoveryVisitor.cs" />
@@ -218,7 +216,6 @@
     <Compile Include="Parser\Nodes\CaseNode.cs" />
     <Compile Include="Parser\Nodes\ConditionalNode.cs" />
     <Compile Include="Parser\Nodes\ConditionalOperatorNode.cs" />
-    <Compile Include="Parser\Nodes\ConditionNode.cs" />
     <Compile Include="Parser\Nodes\ContinueNode.cs" />
     <Compile Include="Parser\Nodes\ControlFlowNode.cs" />
     <Compile Include="Parser\Nodes\CreateStructNode.cs" />
@@ -252,7 +249,6 @@
     <Compile Include="Parser\Nodes\BodyNode.cs" />
     <Compile Include="Parser\Nodes\ExpressionNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Parser\Nodes\NodeTypes.cs" />
     <Compile Include="Parser\Nodes\TypeFinderVisitor.cs" />
     <Compile Include="Ast\CompiledScriptBase.cs" />
     <Compile Include="Ast\Expressions\LabelTarget.cs" />
@@ -275,7 +271,7 @@
     <Compile Include="Parser\Nodes\AstNode.cs" />
     <Compile Include="Ast\ParserException.cs" />
     <Compile Include="Ast\SyntaxToken.cs" />
-    <Compile Include="Ast\Tokens.cs" />
+    <Compile Include="Ast\SyntaxTokenProvider.cs" />
     <Compile Include="Ast\ExpressionException.cs" />
     <Compile Include="Ast\Scope.cs" />
     <Compile Include="TypeSystem\XzaarPropertyInfo.cs" />

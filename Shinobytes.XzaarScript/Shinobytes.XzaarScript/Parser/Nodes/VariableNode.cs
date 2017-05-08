@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class VariableNode : AstNode
@@ -7,7 +9,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         public bool IsExtern;
 
         public VariableNode(string type, string name, object value, bool isVariableDefinition, int nodeIndex)
-            : base(NodeTypes.VARIABLE, isVariableDefinition ? "DEFINITION" : null, null, nodeIndex)
+            : base(SyntaxKind.VariableDefinitionExpression, isVariableDefinition ? "DEFINITION" : null, null, nodeIndex)
         {
             Value = value;
             Name = name;

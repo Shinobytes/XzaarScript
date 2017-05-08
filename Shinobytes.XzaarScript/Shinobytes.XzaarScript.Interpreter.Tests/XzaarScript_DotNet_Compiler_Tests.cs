@@ -527,7 +527,6 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .CompileToDotNet();
         }

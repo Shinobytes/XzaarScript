@@ -2735,7 +2735,6 @@ L_0012:
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .Compile();
         }

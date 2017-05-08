@@ -1022,8 +1022,8 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             BinaryExpression b = GetUserDefinedBinaryOperatorOrThrow(binaryType, name, left, right, liftToNull);
 
             //// add the conversion to the result
-            //ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.NodeType);
-            //b = new OpAssignMethodConversionBinaryExpression(b.NodeType, b.Left, b.Right, b.Left.Type, b.Method);
+            //ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.Kind);
+            //b = new OpAssignMethodConversionBinaryExpression(b.Kind, b.Left, b.Right, b.Left.Type, b.Method);
 
             return b;
         }
@@ -1042,8 +1042,8 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //else
             //{
             //    // add the conversion to the result
-            //    ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.NodeType);
-            //    b = new OpAssignMethodConversionBinaryExpression(b.NodeType, b.Left, b.Right, b.Left.Type, b.Method, conversion);
+            //    ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.Kind);
+            //    b = new OpAssignMethodConversionBinaryExpression(b.Kind, b.Left, b.Right, b.Left.Type, b.Method, conversion);
             //}
             return b;
         }

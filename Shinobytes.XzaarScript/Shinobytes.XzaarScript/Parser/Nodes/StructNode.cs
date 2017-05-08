@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class StructNode : AstNode
@@ -5,8 +7,8 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private readonly string name;
         private readonly AstNode[] fields;
 
-        public StructNode(string name, AstNode[] fields, int nodeIndex) 
-            : base(NodeTypes.STRUCT, "STRUCT", null, nodeIndex)
+        public StructNode(string name, AstNode[] fields, int nodeIndex)
+            : base(SyntaxKind.StructDefinitionExpression, "STRUCT", null, nodeIndex)
         {
             this.fields = fields;
             this.name = name;

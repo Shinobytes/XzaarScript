@@ -1,11 +1,13 @@
-﻿namespace Shinobytes.XzaarScript.Parser.Nodes
+﻿using Shinobytes.XzaarScript.Ast;
+
+namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class NegativeNode : AstNode
     {
         public AstNode Expression => this[0];
 
         public NegativeNode(AstNode expression, int nodeIndex)
-            : base(NodeTypes.NEGATIVE, "-", null, nodeIndex)
+            : base(SyntaxKind.NegativeExpression, "-", null, nodeIndex)
         {
 
             this.AddChild(expression);

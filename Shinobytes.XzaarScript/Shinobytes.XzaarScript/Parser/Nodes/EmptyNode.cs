@@ -1,9 +1,11 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class EmptyNode : AstNode
     {
         public EmptyNode(int nodeIndex) 
-            : base(NodeTypes.NULL_EMPTY, null, null, nodeIndex)
+            : base(SyntaxKind.Empty, null, null, nodeIndex)
         {
         }
 

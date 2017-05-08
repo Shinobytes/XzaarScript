@@ -7,27 +7,26 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
     public class SyntaxNode
     {
         private readonly Guid instanceId;
-        private Token trailingToken;
-        private Token leadingToken;
+        private SyntaxToken trailingToken;
+        private SyntaxToken leadingToken;
         private SyntaxKind kind;
 
-        public SyntaxNode(int index, SyntaxKind type, SyntaxKind kind)
-            : this(null, index, null, type, kind)
+        public SyntaxNode(int index, SyntaxKind kind)
+            : this(null, index, null, kind)
         {
         }
 
-        public SyntaxNode(int index, object value, SyntaxKind type, SyntaxKind kind)
-            : this(null, index, value, type, kind)
+        public SyntaxNode(int index, object value, SyntaxKind kind)
+            : this(null, index, value, kind)
         {
         }
 
-        public SyntaxNode(SyntaxNode parent, int index, object value, SyntaxKind type, SyntaxKind kind)
+        public SyntaxNode(SyntaxNode parent, int index, object value, SyntaxKind kind)
         {
             this.instanceId = Guid.NewGuid();
             this.Parent = parent;
             this.Index = index;
             this.Value = value;
-            Type = type;
             Kind = kind;
             this.Children = new List<SyntaxNode>();
             if (this.Parent != null)
@@ -36,18 +35,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             }
         }
 
-        public SyntaxKind Type { get; set; }
-
-        public SyntaxKind Kind
-        {
-            get
-            {
-                if (kind == SyntaxKind.None && Type != SyntaxKind.None)
-                    return Type;
-                return kind;
-            }
-            set { kind = value; }
-        }
+        public SyntaxKind Kind { get; set; }
 
         public int Index { get; set; }
         public object Value { get; set; }
@@ -57,13 +45,13 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public bool HasChildren => Children != null && Children.Count > 0;
 
-        public Token TrailingToken
+        public SyntaxToken TrailingToken
         {
             get { return trailingToken; }
             set { trailingToken = value; }
         }
 
-        public Token LeadingToken
+        public SyntaxToken LeadingToken
         {
             get { return leadingToken; }
             set { leadingToken = value; }
@@ -85,7 +73,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public override string ToString()
         {
-            return this.Index + " " + this.Type + " (" + this.Kind + ") {" + this.Value + "}";
+            return $"{this.Index} {this.Kind} {{{this.Value}}}";
         }
     }
 }

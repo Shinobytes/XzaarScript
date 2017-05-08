@@ -1,4 +1,5 @@
 using System.Linq;
+using Shinobytes.XzaarScript.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
@@ -7,7 +8,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private readonly AstNode function;
 
         public FunctionCallNode(AstNode instance, AstNode function, int nodeIndex, ArgumentNode[] args)
-            : base(NodeTypes.CALL, "FUNCTION", function.Value, nodeIndex)
+            : base(SyntaxKind.FunctionInvocation, "FUNCTION", function.Value, nodeIndex)
         {
             this.Instance = instance;
             this.function = function;

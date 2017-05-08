@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class GotoNode : ControlFlowNode
@@ -7,13 +9,13 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private readonly string labelName;
 
         public GotoNode(AstNode label, int nodeIndex)
-            : base(NodeTypes.GOTO, "GOTO", nodeIndex)
+            : base(SyntaxKind.KeywordGoto, "GOTO", nodeIndex)
         {
             this.label = label;
         }
 
         public GotoNode(string label, int nodeIndex)
-            : base(NodeTypes.GOTO, "GOTO", nodeIndex)
+            : base(SyntaxKind.KeywordGoto, "GOTO", nodeIndex)
         {
             this.labelName = label;
         }

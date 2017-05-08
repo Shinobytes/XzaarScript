@@ -7,9 +7,10 @@ namespace Shinobytes.XzaarScript.Parser
     public class Lexer
     {
         private readonly string code;
-        private readonly StringCollectionStream codeCollectionStream;
+        private readonly StringCollectionStream buffer;
         private readonly List<string> errors = new List<string>();
-        private char[] validHexChars = "0123456789abcdef".ToCharArray();
+        private readonly char[] validHexChars = "0123456789abcdef".ToCharArray();
+        private readonly char[] validBinChars = "01".ToCharArray();
 
         public int line = 1;
         public int column = 1;
@@ -17,29 +18,39 @@ namespace Shinobytes.XzaarScript.Parser
         private int tokenStart = 0;
         private bool verbose;
 
-        public Lexer(string code)
-        {
-            this.code = code;
-            this.codeCollectionStream = new StringCollectionStream(this.code.ToCharArray());
-        }
-
-        public IList<Token> Tokenize(bool verbose = false)
+        public Lexer(string code, bool verbose = false)
         {
             this.verbose = verbose;
-            var tokens = new List<Token>();
-            var currentChar = codeCollectionStream.Current;
-            while (!codeCollectionStream.EndOfStream())
+            this.code = code;
+            this.buffer = new StringCollectionStream(this.code.ToCharArray());
+        }
+
+        public IList<SyntaxToken> Tokenize()
+        {
+
+            var tokens = new List<SyntaxToken>();
+            var currentChar = buffer.Current;
+            while (!buffer.EndOfStream())
             {
                 var token = Tokenize(currentChar);
-                if (token != null) tokens.Add(token);
-                currentChar = codeCollectionStream.Next();
+                if (token != null)
+                {
+                    if (token.Kind != SyntaxKind.String && token.Kind != SyntaxKind.Number)
+                    {
+                        tokens.Add(SyntaxTokenProvider.Get(token.Value));
+                        currentChar = buffer.Next();
+                        continue;
+                    }
+                    tokens.Add(token);
+                }
+                currentChar = buffer.Next();
             }
             return tokens;
         }
 
-        private Token Tokenize(char symbol)
+        private SyntaxToken Tokenize(char symbol)
         {
-            tokenStart = codeCollectionStream.Index;
+            tokenStart = buffer.Index;
             switch (symbol)
             {
                 case '/':
@@ -66,12 +77,12 @@ namespace Shinobytes.XzaarScript.Parser
                 case ',': return Token(SyntaxKind.Comma);
                 case '.': return Token(SyntaxKind.Dot);
                 case ';': return Token(SyntaxKind.Semicolon);
-                case '(': return Token(SyntaxKind.LeftParan);
-                case ')': return Token(SyntaxKind.RightParan);
-                case '[': return Token(SyntaxKind.LeftBracket);
-                case ']': return Token(SyntaxKind.RightBracket);
-                case '{': return Token(SyntaxKind.LeftCurly);
-                case '}': return Token(SyntaxKind.RightCurly);
+                case '(': return Token(SyntaxKind.OpenParan);
+                case ')': return Token(SyntaxKind.CloseParan);
+                case '[': return Token(SyntaxKind.OpenBracket);
+                case ']': return Token(SyntaxKind.CloseBracket);
+                case '{': return Token(SyntaxKind.OpenCurly);
+                case '}': return Token(SyntaxKind.CloseCurly);
                 case '\n':
                     line++;
                     column = 1;
@@ -92,12 +103,12 @@ namespace Shinobytes.XzaarScript.Parser
             }
         }
 
-        private Token WalkIdentifier()
+        private SyntaxToken WalkIdentifier()
         {
-            while (!codeCollectionStream.EndOfStream() && (IsIdentifier(codeCollectionStream.Current) || IsNumber(codeCollectionStream.Current)))
+            while (!buffer.EndOfStream() && (IsIdentifier(buffer.Current) || IsNumber(buffer.Current)))
             {
-                if (!IsIdentifier(codeCollectionStream.PeekNext()) && !IsNumber(codeCollectionStream.PeekNext())) break;
-                codeCollectionStream.Next();
+                if (!IsIdentifier(buffer.PeekNext()) && !IsNumber(buffer.PeekNext())) break;
+                buffer.Next();
             }
 
             return Token(SyntaxKind.Identifier);
@@ -114,28 +125,33 @@ namespace Shinobytes.XzaarScript.Parser
             return lowered >= 'a' && lowered <= 'z' || lowered == '_' || lowered == '@' || lowered == '$';
         }
 
-        private Token WalkNumber()
+        private SyntaxToken WalkNumber()
         {
             var isFloatingPoint = false;
 
-            while (!codeCollectionStream.EndOfStream())
+            while (!buffer.EndOfStream())
             {
-                var next = codeCollectionStream.PeekNext();
+                var next = buffer.PeekNext();
                 if (next == '.')
                 {
                     if (isFloatingPoint) return Token(SyntaxKind.Number);
                     isFloatingPoint = true;
 
-                    if (!IsNumber(codeCollectionStream.PeekAt(2)))
+                    if (!IsNumber(buffer.PeekAt(2)))
                     {
                         break;
                     }
 
-                    codeCollectionStream.Next();
-                    next = codeCollectionStream.PeekNext();
+                    buffer.Next();
+                    next = buffer.PeekNext();
                     if (next == '.') return Error("Unexpected '.' found in middle of a number");
 
                     continue;
+                }
+
+                if (next == 'b')
+                {
+                    return WalkBinaryNumber();
                 }
 
                 if (next == 'x')
@@ -144,71 +160,69 @@ namespace Shinobytes.XzaarScript.Parser
                 }
 
                 if (!IsNumber(next)) break;
-                codeCollectionStream.Next();
+                buffer.Next();
             }
 
             return Token(SyntaxKind.Number);
         }
 
-        private Token WalkHexNumber()
+        private SyntaxToken WalkBinaryNumber()
         {
-            var v0 = codeCollectionStream.Current;
-            var vX = codeCollectionStream.PeekNext();
+            var v0 = buffer.Current;
+            var vB = buffer.PeekNext();
+            if (v0 != '0' || char.ToLower(vB) != 'b') return Error("Invalid binary constant value");
+            buffer.Advance(2);
+            while (!buffer.EndOfStream())
+            {
+                if (!validBinChars.Contains(buffer.PeekNext())) break;
+                buffer.Next();
+            }
+            return Token(SyntaxKind.Number);
+        }
+
+        private SyntaxToken WalkHexNumber()
+        {
+            var v0 = buffer.Current;
+            var vX = buffer.PeekNext();
             if (v0 != '0' || char.ToLower(vX) != 'x') return Error("Invalid hexadecimal constant value");
-            codeCollectionStream.Advance(2);
-            while (!codeCollectionStream.EndOfStream())
+            buffer.Advance(2);
+            while (!buffer.EndOfStream())
             {
-                if (!validHexChars.Contains(codeCollectionStream.PeekNext())) break;
-                codeCollectionStream.Next();
+                if (!validHexChars.Contains(buffer.PeekNext())) break;
+                buffer.Next();
             }
             return Token(SyntaxKind.Number);
         }
 
-        private Token WalkDoubleQuouteString()
+        private SyntaxToken WalkString(char stringChar)
         {
-            while (!codeCollectionStream.EndOfStream() && codeCollectionStream.PeekNext() != '"')
+            while (!buffer.EndOfStream() && buffer.PeekNext() != stringChar)
             {
-                var value = codeCollectionStream.Next();
-                if (value == '\\' && codeCollectionStream.PeekNext() == '"')
+                var value = buffer.Next();
+                if (value == '\\' && buffer.PeekNext() == stringChar)
                 {
-                    codeCollectionStream.Next();
+                    buffer.Next();
                     continue;
                 }
                 if (value == '\n') line++;
             }
-            codeCollectionStream.Advance(1);
+            buffer.Advance(1);
             return Token(SyntaxKind.String, 1, -2);
         }
 
-        private Token WalkSingleQuouteString()
+        private SyntaxToken WalkDoubleQuouteString() => WalkString('"');
+
+        private SyntaxToken WalkSingleQuouteString() => WalkString('\'');
+
+        private SyntaxToken WalkMultilineComment()
         {
-            while (!codeCollectionStream.EndOfStream() && codeCollectionStream.PeekNext() != '\'')
+            while (!buffer.EndOfStream())
             {
-                var value = codeCollectionStream.Next();
-                if (value == '\\' && codeCollectionStream.PeekNext() == '\'')
-                {
-                    codeCollectionStream.Next();
-                    continue;
-                }
+                var value = buffer.Next();
                 if (value == '\n') line++;
-            }
-            codeCollectionStream.Advance(1);
-            return Token(SyntaxKind.String, 1, -2);
-        }
-
-        private Token WalkMultilineComment()
-        {
-            while (!codeCollectionStream.EndOfStream())
-            {
-                var value = codeCollectionStream.Next();
-                if (value == '\n')
+                if (buffer.PeekNext() == '*' && buffer.PeekAt(2) == '/')
                 {
-                    line++;
-                }
-                if (codeCollectionStream.PeekNext() == '*'
-                    && codeCollectionStream.PeekAt(2) == '/')
-                {
-                    codeCollectionStream.Advance(2);
+                    buffer.Advance(2);
                     if (verbose) return Token(SyntaxKind.CommentMultiLine);
                     return null;
                 }
@@ -217,43 +231,38 @@ namespace Shinobytes.XzaarScript.Parser
             return null;
         }
 
-        private Token WalkSingleLineComment()
+        private SyntaxToken WalkSingleLineComment()
         {
-            while (!codeCollectionStream.EndOfStream() && codeCollectionStream.PeekNext() != '\n') codeCollectionStream.Next();
+            while (!buffer.EndOfStream() && buffer.PeekNext() != '\n') buffer.Next();
             if (verbose) return Token(SyntaxKind.CommentSingleLine);
             return null;
         }
 
-        private Token Token(SyntaxKind type, int i1 = 0, int i2 = 0)
+        private SyntaxToken Token(SyntaxKind kind, int i1 = 0, int i2 = 0)
         {
             try
             {
-                var tokenLength = codeCollectionStream.Index - tokenStart;
+                var tokenLength = buffer.Index - tokenStart;
                 var tokenValue = code.Substring(tokenStart + i1, tokenLength + i2 + 1);
                 column += tokenLength;
                 var charString = code.Substring(tokenStart, 1) == "'";
-                return new Token(type, tokenValue)
-                {
-                    Line = this.line,
-                    Column = this.column,
-                    IsCharString = charString,
-                };
+                return new SyntaxToken(kind, kind.ToString(), tokenValue, charString, 0, 0, this.line, this.column);
             }
             catch
             {
-                return Error("Unexpected end of code. Maybe you forgot to close the '" + type + "'?");
+                return Error("Unexpected end of code. Maybe you forgot to close the '" + kind + "'?");
             }
         }
 
         private bool Match(char symbol)
         {
-            return codeCollectionStream.MatchNext(symbol) == symbol;
+            return buffer.MatchNext(symbol) == symbol;
         }
 
         public bool HasErrors => errors.Count > 0;
         public IList<string> Errors => errors;
 
-        private Token Error(string message)
+        private SyntaxToken Error(string message)
         {
             this.errors.Add("[SyntaxError]: " + message + ". At line " + line);
             return null;

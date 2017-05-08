@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class ConditionalOperatorNode : AstNode
@@ -6,7 +8,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private AstNode right;
 
         public ConditionalOperatorNode(int operatingOrderWeight, AstNode left, string op, AstNode right, int nodeIndex)
-            : base(NodeTypes.CONDITIONAL, null, null, nodeIndex)
+            : base(SyntaxKind.ConditionalExpression, null, null, nodeIndex)
         {
             this.left = left;
             this.right = right;

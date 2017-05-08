@@ -1,9 +1,11 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class ReturnNode : ControlFlowNode
     {
         public ReturnNode(AstNode returnExpression, int nodeIndex)
-            : base(NodeTypes.RETURN, "RETURN", nodeIndex)
+            : base(SyntaxKind.KeywordReturn, "RETURN", nodeIndex)
         {
             ReturnExpression = returnExpression;
         }

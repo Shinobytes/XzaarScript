@@ -13,52 +13,52 @@ namespace Shinobytes.XzaarScript.Extensions
 {
     public static class ScriptVmExtensions
     {
-        public static IList<Token> Tokenize(this string code)
+        public static IList<SyntaxToken> Tokenize(this string code)
         {
-            var lexer = new Lexer(code);
+            var lexer = new Lexer(code, false);
             var result = lexer.Tokenize();
             if (lexer.Errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, lexer.Errors.ToArray()));
             return result;
         }
 
-        public static IList<Token> Tokenize(this string code, out IList<string> errors)
+        public static IList<SyntaxToken> Tokenize(this string code, out IList<string> errors)
         {
-            var lexer = new Lexer(code);
+            var lexer = new Lexer(code, false);
             var result = lexer.Tokenize();
             errors = lexer.Errors;
             if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, lexer.Errors.ToArray()));
             return result;
         }
 
-        public static SyntaxNode Parse(this IList<Token> tokens)
+        public static EntryNode Parse(this IList<SyntaxToken> tokens)
         {
-            var parser = new SyntaxParser(tokens);
-            var result = parser.Parse();
+            var parser = new LanguageParser(tokens);
+            var result = parser.Parse() as EntryNode;
             if (parser.Errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, parser.Errors.ToArray()));
             return result;
         }
 
-        public static SyntaxNode Parse(this IList<Token> tokens, out IList<string> errors)
+        public static EntryNode Parse(this IList<SyntaxToken> tokens, out IList<string> errors)
         {
-            var parser = new SyntaxParser(tokens);
+            var parser = new LanguageParser(tokens); // new SyntaxParser(tokens);
             var result = parser.Parse();
             errors = parser.Errors;
             if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, errors.ToArray()));
-            return result;
+            return result as EntryNode;
         }
 
-        public static EntryNode Transform(this SyntaxNode tokens)
+        public static EntryNode Transform(this IList<SyntaxToken> tokens)
         {
-            var transformer = new NodeParser(tokens);
-            var result = transformer.Transform() as EntryNode;
+            var transformer = new LanguageParser(tokens);
+            var result = transformer.Parse() as EntryNode;
             if (transformer.Errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, transformer.Errors.ToArray()));
             return result;
         }
 
-        public static EntryNode Transform(this SyntaxNode tokens, out IList<string> errors)
+        public static EntryNode Transform(this IList<SyntaxToken> tokens, out IList<string> errors)
         {
-            var transformer = new NodeParser(tokens);
-            var result = transformer.Transform() as EntryNode;
+            var transformer = new LanguageParser(tokens);
+            var result = transformer.Parse() as EntryNode;
             errors = transformer.Errors;
             if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, errors.ToArray()));
             return result;
@@ -73,7 +73,9 @@ namespace Shinobytes.XzaarScript.Extensions
 
         public static AnalyzedTree AnalyzeExpression(this EntryNode node, out IList<string> errors)
         {
-            return new ExpressionAnalyzer().AnalyzeExpression(node, out errors);
+            var analyzeExpression = new ExpressionAnalyzer().AnalyzeExpression(node, out errors);
+            if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, errors.ToArray()));
+            return analyzeExpression;
         }
 
 

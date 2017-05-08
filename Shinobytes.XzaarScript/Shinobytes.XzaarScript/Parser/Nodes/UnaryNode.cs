@@ -1,4 +1,6 @@
-﻿namespace Shinobytes.XzaarScript.Parser.Nodes
+﻿using Shinobytes.XzaarScript.Ast;
+
+namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class UnaryNode : AstNode
     {
@@ -7,7 +9,7 @@
         private readonly AstNode item;
 
         public UnaryNode(bool isPostUnary, bool isIncrementor, AstNode item, int nodeIndex)
-            : base(NodeTypes.UNARY_OPERATOR, "UNARY", null, nodeIndex)
+            : base(SyntaxKind.UnaryExpression, "UNARY", null, nodeIndex)
         {
             this.isPostUnary = isPostUnary;
             this.isIncrementor = isIncrementor;

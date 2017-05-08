@@ -77,7 +77,7 @@ namespace Shinobytes.XzaarScript.Compiler
             if (expression is LabelExpression) return Visit(expression as LabelExpression);
             //Label Visit(LabelExpression label);
             if (expression is ParameterExpression) return Visit(expression as ParameterExpression);
-            //ParameterDefinition Visit(ParameterExpression parameter);
+            //ParameterDefinition Visit(ParameterDefinitionExpression parameter);
             if (expression is FunctionExpression) return Visit(expression as FunctionExpression);
             //MethodDefinition Visit(FunctionExpression function);
             if (expression is StructExpression) return Visit(expression as StructExpression);

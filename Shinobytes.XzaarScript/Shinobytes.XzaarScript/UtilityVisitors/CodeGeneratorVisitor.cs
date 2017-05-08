@@ -381,7 +381,7 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
 
             //        var added = false;
             //        var f = mb.Expression as FieldExpression;
-            //        var p = mb.Expression as ParameterExpression;
+            //        var p = mb.Expression as ParameterDefinitionExpression;
             //        var c = mb.Expression as ConstantExpression;
             //        if (p != null)
             //        {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Shinobytes.XzaarScript.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
@@ -9,7 +10,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private readonly CaseNode[] cases;
 
         public MatchNode(AstNode valueExpression, CaseNode[] cases, int nodeIndex)
-            : base(NodeTypes.MATCH, "MATCH", null, nodeIndex)
+            : base(SyntaxKind.MatchExpression, "MATCH", null, nodeIndex)
         {
             this.valueExpression = valueExpression;
             this.cases = cases;

@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class ParameterNode : AstNode
@@ -5,7 +7,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private bool isExtern;
 
         public ParameterNode(string name, string type, int nodeIndex)
-            : base(NodeTypes.PARAMETER, null, null, nodeIndex)
+            : base(SyntaxKind.ParameterDefinitionExpression, null, null, nodeIndex)
         {
             Name = name;
             Type = type;

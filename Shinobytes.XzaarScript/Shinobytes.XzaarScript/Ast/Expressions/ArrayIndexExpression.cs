@@ -32,7 +32,7 @@
 //            }
 //        }
 
-//        public override ExpressionType NodeType
+//        public override ExpressionType Kind
 //        {
 //            get { return ExpressionType.ArrayIndex; }
 //        }

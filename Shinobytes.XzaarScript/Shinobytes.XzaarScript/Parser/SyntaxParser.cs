@@ -8,13 +8,13 @@ namespace Shinobytes.XzaarScript.Ast
 {
     public class SyntaxParser
     {
-        private readonly SyntaxTokenStream tokenStream;
+        private readonly TokenStream tokenStream;
         private readonly List<string> errors = new List<string>();
         private int currentNodeIndex = 0;
 
-        public SyntaxParser(IList<Token> tokens)
+        public SyntaxParser(IList<SyntaxToken> tokens)
         {
-            this.tokenStream = new SyntaxTokenStream(tokens);
+            this.tokenStream = new TokenStream(tokens);
         }
 
         public bool HasErrors => errors.Count > 0;
@@ -24,7 +24,7 @@ namespace Shinobytes.XzaarScript.Ast
         {
             Reset();
 
-            var entry = new SyntaxNode(NextIndex(), SyntaxKind.Scope, SyntaxKind.Scope)
+            var entry = new SyntaxNode(NextIndex(), SyntaxKind.Block)
             {
                 TrailingToken = tokenStream.Current,
                 LeadingToken = tokenStream.PeekNext()
@@ -47,19 +47,19 @@ namespace Shinobytes.XzaarScript.Ast
             return entry;
         }
 
-        private SyntaxNode WalkToken(Token token)
+        private SyntaxNode WalkToken(SyntaxToken token)
         {
-            if (token.Type == SyntaxKind.RightBracket) return Error("Unexpected ending bracket ']'", token);
-            if (token.Type == SyntaxKind.RightParan) return Error("Unexpected ending paranthesis ')'", token);
-            if (token.Type == SyntaxKind.RightCurly) return Error("Unexpected ending curly bracket '}'", token);
+            if (token.Kind == SyntaxKind.CloseBracket) return Error("Unexpected ending bracket ']'", token);
+            if (token.Kind == SyntaxKind.CloseParan) return Error("Unexpected ending paranthesis ')'", token);
+            if (token.Kind == SyntaxKind.CloseCurly) return Error("Unexpected ending curly bracket '}'", token);
 
-            if (token.Type == SyntaxKind.LeftParan) return WalkExpression(token);
-            if (token.Type == SyntaxKind.LeftBracket) return WalkBracketExpression(token);
-            if (token.Type == SyntaxKind.LeftCurly) return WalkScope(token);
+            if (token.Kind == SyntaxKind.OpenParan) return WalkExpression(token);
+            if (token.Kind == SyntaxKind.OpenBracket) return WalkBracketExpression(token);
+            if (token.Kind == SyntaxKind.OpenCurly) return WalkScope(token);
 
             object outputValue = token.Value;
 
-            switch (token.Type)
+            switch (token.Kind)
             {
                 case SyntaxKind.Number:
                     if (outputValue.ToString().Contains("."))
@@ -68,28 +68,27 @@ namespace Shinobytes.XzaarScript.Ast
                         outputValue = Convert.ToInt32(outputValue.ToString().Substring(2), 16);
                     else
                         outputValue = int.Parse(outputValue.ToString());
-                    return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.Literal, SyntaxKind.LiteralNumber)
+                    return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.Number)
                     {
                         TrailingToken = tokenStream.PeekPrevious(),
                         LeadingToken = tokenStream.PeekNext()
                     };
 
                 case SyntaxKind.String:
-                    return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.Literal, SyntaxKind.LiteralString)
+                    return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.String)
                     {
                         TrailingToken = tokenStream.PeekPrevious(),
                         LeadingToken = tokenStream.PeekNext()
                     };
                 case SyntaxKind.Identifier:
                     {
-                        if (SyntaxFacts.IsKeyword(outputValue + "")) return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.Keyword, SyntaxFacts.GetKeywordSubType(outputValue + ""))
+                        if (SyntaxFacts.IsKeyword(outputValue + "")) return new SyntaxNode(NextIndex(), outputValue, SyntaxFacts.GetKeywordSubType(outputValue + ""))
                         {
                             TrailingToken = tokenStream.PeekPrevious(),
                             LeadingToken = tokenStream.PeekNext()
                         };
                         // if (SyntaxFacts.IsKnownConstant(outputValue + "")) return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.Constant, SyntaxKind.Constant);
-                        return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.Identifier,
-                            SyntaxKind.Identifier)
+                        return new SyntaxNode(NextIndex(), outputValue, SyntaxKind.Identifier)
                         {
                             TrailingToken = tokenStream.PeekPrevious(),
                             LeadingToken = tokenStream.PeekNext()
@@ -97,8 +96,8 @@ namespace Shinobytes.XzaarScript.Ast
                     }
                 default:
                     {
-                        return OperatorNode(NextIndex(), outputValue, token.Type);
-                        // return new XzaarNode(NextIndex(), outputValue, NodeType.Identifier);
+                        return OperatorNode(NextIndex(), outputValue, token.Kind);
+                        // return new XzaarNode(NextIndex(), outputValue, Kind.Identifier);
                     }
             }
         }
@@ -106,8 +105,7 @@ namespace Shinobytes.XzaarScript.Ast
         private SyntaxNode OperatorNode(int nextIndex, object outputValue, SyntaxKind tokenType)
         {
             var nodeType = SyntaxFacts.GetNodeType(tokenType);
-            var nodeSubType = SyntaxFacts.GetSubKind(nodeType, tokenType);
-            return new SyntaxNode(nextIndex, outputValue, nodeType, nodeSubType)
+            return new SyntaxNode(nextIndex, outputValue, nodeType)
             {
                 TrailingToken = tokenStream.PeekPrevious(),
                 LeadingToken = tokenStream.PeekNext()
@@ -115,34 +113,34 @@ namespace Shinobytes.XzaarScript.Ast
         }
 
 
-        private SyntaxNode WalkScope(Token trailingToken)
+        private SyntaxNode WalkScope(SyntaxToken trailingToken)
         {
             var token = tokenStream.PeekNext();
             if (token == null) return Error("Unexpected end of script. No matching ending '}' was found.", trailingToken);
-            return WalkRecursive(trailingToken, SyntaxKind.Scope, SyntaxKind.RightCurly);
+            return WalkRecursive(trailingToken, SyntaxKind.Block, SyntaxKind.CloseCurly);
         }
 
 
-        private SyntaxNode WalkBracketExpression(Token trailingToken)
+        private SyntaxNode WalkBracketExpression(SyntaxToken trailingToken)
         {
             var token = tokenStream.PeekNext();
             if (token == null) return Error("Unexpected end of script. No matching ending ']' was found.", trailingToken);
-            return WalkRecursive(trailingToken, SyntaxKind.ArrayIndexExpression, SyntaxKind.RightBracket);
+            return WalkRecursive(trailingToken, SyntaxKind.ArrayIndexExpression, SyntaxKind.CloseBracket);
         }
 
-        private SyntaxNode WalkExpression(Token trailingToken)
+        private SyntaxNode WalkExpression(SyntaxToken trailingToken)
         {
             var token = tokenStream.PeekNext();
             if (token == null) return Error("Unexpected end of script. No matching ending ')' was found.", trailingToken);
-            return WalkRecursive(trailingToken, SyntaxKind.Expression, SyntaxKind.RightParan);
+            return WalkRecursive(trailingToken, SyntaxKind.Expression, SyntaxKind.CloseParan);
         }
 
-        private SyntaxNode WalkRecursive(Token trailingToken, SyntaxKind type, SyntaxKind endingTokenType)
+        private SyntaxNode WalkRecursive(SyntaxToken trailingToken, SyntaxKind type, SyntaxKind endingTokenType)
         {
             var node = new SyntaxNode(NextIndex(), type, type);
             node.TrailingToken = trailingToken;
             var token = tokenStream.Next();
-            while (!tokenStream.EndOfStream() && token != null && token.Type != endingTokenType)
+            while (!tokenStream.EndOfStream() && token != null && token.Kind != endingTokenType)
             {
                 var n = WalkToken(token);
                 if (n != null)
@@ -150,7 +148,7 @@ namespace Shinobytes.XzaarScript.Ast
                     node.AddChild(n);
                 }
                 token = tokenStream.Next();
-                if (token != null && token.Type == endingTokenType)
+                if (token != null && token.Kind == endingTokenType)
                 {
                     node.LeadingToken = token;
                 }
@@ -159,10 +157,10 @@ namespace Shinobytes.XzaarScript.Ast
             return node;
         }
 
-        private SyntaxNode Error(string message, Token trailingToken)
+        private SyntaxNode Error(string message, SyntaxToken trailingToken)
         {
             if (trailingToken != null)
-                message += ". At line " + trailingToken.Line;
+                message += ". At line " + trailingToken.SourceLine;
             this.errors.Add("[Error] " + message);
             return null;
         }

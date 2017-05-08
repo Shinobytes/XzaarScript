@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class FieldNode : AstNode
@@ -6,7 +8,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private readonly string declaringType;
 
         public FieldNode(string type, string name, string declaringType, int nodeIndex)
-            : base(NodeTypes.FIELD, "FIELD", null, nodeIndex)
+            : base(SyntaxKind.FieldDefinitionExpression, "FIELD", null, nodeIndex)
         {
             this.Type = type;
             this.name = name;

@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class CreateStructNode : AstNode
@@ -5,14 +7,14 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private readonly StructNode structNode;
 
         public CreateStructNode(StructNode structNode, int nodeIndex)
-            : base(NodeTypes.CREATE_STRUCT, "CREATE_STRUCT", null, nodeIndex)
+            : base(SyntaxKind.TypeInstantiation, "CREATE_STRUCT", null, nodeIndex)
         {
             this.structNode = structNode;
             this.Type = this.structNode.ValueText;
         }
 
         public CreateStructNode(StructNode structNode, AstNode[] structFieldInitializers, int nodeIndex)
-            : base(NodeTypes.CREATE_STRUCT, "CREATE_STRUCT", null, nodeIndex)
+            : base(SyntaxKind.TypeInstantiation, "CREATE_STRUCT", null, nodeIndex)
         {
             FieldInitializers = structFieldInitializers;
             this.structNode = structNode;

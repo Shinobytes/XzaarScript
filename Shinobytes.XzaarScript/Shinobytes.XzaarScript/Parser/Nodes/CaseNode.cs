@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class CaseNode : ControlFlowNode
@@ -6,7 +8,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private readonly AstNode body;
 
         public CaseNode(AstNode test, AstNode body, int nodeIndex)
-            : base(NodeTypes.CASE, "CASE", nodeIndex)
+            : base(SyntaxKind.KeywordCase, "CASE", nodeIndex)
         {
             this.test = test;
             this.body = body;

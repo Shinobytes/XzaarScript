@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using Shinobytes.XzaarScript.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class FunctionParametersNode : AstNode
     {
         public FunctionParametersNode(int nodeIndex)
-            : base(NodeTypes.PARAMETERS, null, null, nodeIndex) { }
+            : base(SyntaxKind.ParameterListExpression, null, null, nodeIndex) { }
 
         public IList<ParameterNode> Parameters => Children.Cast<ParameterNode>().ToList();
 

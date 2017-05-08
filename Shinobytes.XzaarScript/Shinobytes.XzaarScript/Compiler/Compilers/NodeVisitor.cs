@@ -327,15 +327,15 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return Error("'" + item + "' cannot be negated");
         }
 
-        public SwitchCaseExpression Visit(CaseNode matchCase)
+        public SwitchCaseExpression Visit(CaseNode @case)
         {
-            var body = Visit(matchCase.Body);
-            if (matchCase.IsDefaultCase)
+            var body = Visit(@case.Body);
+            if (@case.IsDefaultCase)
             {
                 return XzaarExpression.DefaultCase(body);
             }
 
-            var test = Visit(matchCase.Test);
+            var test = Visit(@case.Test);
             return XzaarExpression.Case(test, body);
         }
 
@@ -482,7 +482,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
 
             var f = call.Function;
 
-            if (f.NodeType == NodeTypes.FUNCTION)
+            if (f.Kind == SyntaxKind.FunctionDefinitionExpression)
             {
                 // using an already declared function
                 var function = f as FunctionNode;
@@ -502,12 +502,11 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
                 }
             }
 
-            else if (f.NodeType == NodeTypes.LITERAL || f.NodeType == NodeTypes.ACCESSOR_CHAIN)
+            else if (SyntaxFacts.IsLiteral(f.Kind) || SyntaxFacts.IsMemberAccess(f.Kind))
             {
                 var functionName = "";
-                if (f.NodeType == NodeTypes.ACCESSOR_CHAIN)
+                if (f is MemberAccessChainNode chain)
                 {
-                    var chain = f as MemberAccessChainNode;
                     functionName = chain.Accessor.ValueText;
                     if (call.Instance == null) call.Instance = chain.LastAccessor;
                 }
@@ -814,7 +813,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
         private void DiscoverStructsAndFunctions(EntryNode node)
         {
             var items = node.Children;
-            if (node.Body.NodeType == NodeTypes.BLOCK)
+            if (node.Body.Kind == SyntaxKind.Block)
                 items = node.Body.Children;
 
             foreach (var c in items)

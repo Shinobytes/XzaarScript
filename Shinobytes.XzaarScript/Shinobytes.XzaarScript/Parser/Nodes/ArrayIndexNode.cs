@@ -1,10 +1,11 @@
 using System.Linq;
+using Shinobytes.XzaarScript.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class ArrayIndexNode : BlockNode
     {
-        public ArrayIndexNode(int nodeIndex) : base(NodeTypes.ARRAYINDEX, nodeIndex)
+        public ArrayIndexNode(int nodeIndex) : base(SyntaxKind.ArrayIndexExpression, nodeIndex)
         {
         }
 

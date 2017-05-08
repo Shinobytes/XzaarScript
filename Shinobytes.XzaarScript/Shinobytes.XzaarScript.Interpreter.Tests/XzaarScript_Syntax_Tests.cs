@@ -180,7 +180,7 @@ var c = apa == 8 || apa < 1 * 2", code);
         }
         [TestMethod]
         public void Conditional_Statement_2()
-        {            
+        {
             var code = FormatCode("let apa = 0 let c = ((apa == 8) || (apa < (1 * 2))) || (apa >= 100)");
             Assert.AreEqual(
 @"var apa = 0
@@ -1874,7 +1874,7 @@ print_hello_world()", code);
             var code = FormatCode("let j = 0xff");
             Assert.AreEqual("var j = 255", code);
         }
-        
+
         [TestMethod]
         public void Assign_return_value_of_hidden_function_to_variable_and_print_value()
         {
@@ -2112,21 +2112,21 @@ var result = looper()", code);
   return s.Val.Test
 }", code);
         }
-        
-        private NodeParser Transformer(string code)
+
+        private LanguageParser Transformer(string code)
         {
-            return new NodeParser(new SyntaxParser(new Lexer(code).Tokenize()).Parse());
+            return new LanguageParser(new Lexer(code).Tokenize());
         }
 
-        private AstNode Reduce(string code, out NodeParser parser)
+        private AstNode Reduce(string code, out LanguageParser parser)
         {
             parser = Transformer(code);
-            return new NodeReducer().Process(parser.Transform());
+            return new NodeReducer().Process(parser.Parse());
         }
 
         private string FormatCode(string code)
         {
-            NodeParser parser;
+            LanguageParser parser;
             var ast = new NodeTypeBinder().Process(Reduce(code, out parser));
             var analyzer = new ExpressionAnalyzer();
             var analyzed = analyzer.AnalyzeExpression(ast as EntryNode);

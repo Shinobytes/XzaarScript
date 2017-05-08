@@ -27,7 +27,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //}
 
             //// validate that we can read the node
-            //switch (expression.NodeType)
+            //switch (expression.Kind)
             //{
             //    case ExpressionType.Index:
             //        IndexExpression index = (IndexExpression)expression;

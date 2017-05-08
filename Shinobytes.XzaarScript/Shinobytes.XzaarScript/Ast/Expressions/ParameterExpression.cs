@@ -33,7 +33,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                         case TypeCode.Boolean: return new PrimitiveParameterExpression<Boolean>(name);
                         case TypeCode.Byte: return new PrimitiveParameterExpression<Byte>(name);
                         case TypeCode.Char: return new PrimitiveParameterExpression<Char>(name);
-                        case TypeCode.DateTime: return new PrimitiveParameterExpression<DateTime>(name);                        
+                        case TypeCode.Date: return new PrimitiveParameterExpression<DateTime>(name);                        
                         case TypeCode.Decimal: return new PrimitiveParameterExpression<Decimal>(name);
                         case TypeCode.Double: return new PrimitiveParameterExpression<Double>(name);
                         case TypeCode.Int16: return new PrimitiveParameterExpression<Int16>(name);

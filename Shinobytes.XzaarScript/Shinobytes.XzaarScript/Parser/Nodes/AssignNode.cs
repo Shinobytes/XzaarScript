@@ -1,4 +1,6 @@
-﻿namespace Shinobytes.XzaarScript.Parser.Nodes
+﻿using Shinobytes.XzaarScript.Ast;
+
+namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class AssignNode : AstNode
     {
@@ -6,7 +8,7 @@
         private AstNode right;
 
         public AssignNode(AstNode left, AstNode right, int nodeIndex)
-            : base(NodeTypes.ASSIGN, null, null, nodeIndex)
+            : base(SyntaxKind.AssignmentExpression, null, null, nodeIndex)
         {
             this.left = left;
             this.right = right;

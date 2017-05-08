@@ -205,6 +205,7 @@ namespace Shinobytes.XzaarScript.Compiler
                     target = typeof(double);
                     break;
                 case "datetime":
+                case "date":
                     target = typeof(DateTime);
                     break;
                 case "timespan":

@@ -13,14 +13,14 @@ namespace Shinobytes.XzaarScript.Parser
         private readonly List<DefineVariableNode> variables = new List<DefineVariableNode>();
 
         private readonly ParserScope parent;
-        private readonly NodeStream scopeNodes;
+        private readonly TokenStream tokens;
         private readonly int depth;
         private readonly string name;
 
-        private ParserScope(ParserScope parent, NodeStream scopeNodes, int depth)
+        private ParserScope(ParserScope parent, TokenStream tokens, int depth)
         {
             this.parent = parent;
-            this.scopeNodes = scopeNodes;
+            this.tokens = tokens;
             this.depth = depth;
             if (parent != null)
             {
@@ -31,19 +31,19 @@ namespace Shinobytes.XzaarScript.Parser
         public ParserScope()
         {
             name = "GLOBAL";
-            scopeNodes = new NodeStream(new List<SyntaxNode>());
+            tokens = new TokenStream(new List<SyntaxToken>());
         }
 
         public bool IsGlobalScope => name == "GLOBAL";
 
-        public NodeStream Nodes => this.scopeNodes;
+        public TokenStream Tokens => this.tokens;
 
-        public ParserScope BeginScope(NodeStream scopeNodes)
+        public ParserScope BeginScope(TokenStream tokens)
         {
             if (depth + 1 >= OVERFLOW_RROTECTION_MAXIMUM_DEPTH)
                 throw new ParserException("PANIC! Maximum scope depth reached!!!");
 
-            return new ParserScope(this, scopeNodes, this.depth + 1);
+            return new ParserScope(this, tokens, this.depth + 1);
         }
 
         public ParserScope EndScope()

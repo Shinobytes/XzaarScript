@@ -9,10 +9,12 @@ using Shinobytes.XzaarScript.Utilities;
 
 namespace Shinobytes.XzaarScript.Ast
 {
-    public class NodeParser
+    public class LanguageParser
     {
-        private readonly SyntaxNode ast;
+        private readonly TokenStream tokens;
+
         private ParserScope currentScope;
+
         private readonly List<string> errors = new List<string>();
         private readonly List<ErrorNode> errorNodes = new List<ErrorNode>();
 
@@ -22,13 +24,14 @@ namespace Shinobytes.XzaarScript.Ast
         private readonly Dictionary<string, StructNode> definedStructs = new Dictionary<string, StructNode>();
         private AstNode lastWalkedExpression;
 
-        public NodeParser(SyntaxNode ast)
+
+        public LanguageParser(IList<SyntaxToken> tokens)
         {
-            this.ast = ast;
+            this.tokens = new TokenStream(tokens);
             this.currentScope = new ParserScope();
         }
 
-        public AstNode Transform()
+        public AstNode Parse()
         {
             return new EntryNode(WalkAllNodes());
         }
@@ -40,9 +43,9 @@ namespace Shinobytes.XzaarScript.Ast
         private AstNode WalkAllNodes()
         {
             var nodes = new List<AstNode>();
-            this.BeginScope(new NodeStream(ast.Children));
+            this.BeginScope(this.tokens);
 
-            // var currentNode = this.Nodes.Current;
+            // var currentNode = this.Tokens.CurrentToken;
             while (!this.EndOfStream())
             {
                 try
@@ -53,12 +56,12 @@ namespace Shinobytes.XzaarScript.Ast
                 }
                 catch (Exception exc)
                 {
-                    return Error(exc.Message, Nodes.Current);
+                    return Error(exc.Message, Tokens.Current);
                 }
-                // currentNode = this.Nodes.Next();
+                // currentNode = this.Tokens.Next();
             }
 
-            this.EndScope(SyntaxKind.Scope);
+            this.EndScope();
             return AstNode.Block(nodes.ToArray());
         }
 
@@ -74,102 +77,13 @@ namespace Shinobytes.XzaarScript.Ast
             //       care to know whether our resulting node can be chained 
             //       with the next. It saves us alot of headache and code maintenance
 
-            Nodes.Consume(n => n.Type == SyntaxKind.StatementTerminator);
+            var i = Tokens.Consume(n => n.Kind == SyntaxKind.Semicolon);
 
-            if (Nodes.EndOfStream()) return null;
+            if (i != null || Tokens.EndOfStream()) return null;
 
-            switch (Nodes.Current.Type)
-            {
-                case SyntaxKind.Identifier:
-                    {
-                        if (Nodes.PeekNext() != null && Nodes.PeekNext().Kind == SyntaxKind.Colon)
-                            return lastWalkedExpression = WalkLabel();
-                        return lastWalkedExpression = WalkExpressionStatement(); // return WalkIdentifier();
-                    }
-                case SyntaxKind.Keyword: return lastWalkedExpression = WalkKeyword();
-                case SyntaxKind.UnaryOperator: return lastWalkedExpression = WalkUnaryOperator();
-                case SyntaxKind.AggregateObjectIndex:
-                //case SyntaxKind.ArrayIndexExpression:
-                //    return WalkObjectIndex();
-                case SyntaxKind.ArithmeticOperator: return lastWalkedExpression = WalkArithmeticOperator();
-                case SyntaxKind.EqualityOperator: return lastWalkedExpression = WalkEqualityOperator();
-                case SyntaxKind.LogicalConditionalOperator: return lastWalkedExpression = WalkLogicalConditionalOperator();
-                case SyntaxKind.ConditionalOperator: return lastWalkedExpression = WalkConditionalOperator();
-                case SyntaxKind.AssignmentOperator: return lastWalkedExpression = WalkAssignmentOperator();
-                case SyntaxKind.Constant: return lastWalkedExpression = WalkConstantValue();
-                case SyntaxKind.Literal:
-                    return lastWalkedExpression = Nodes.Current.Kind == SyntaxKind.LiteralNumber
-                        ? WalkNumberLiteral()
-                        : WalkStringLiteral();
-                // case SyntaxKind.Expression: return WalkExpression();
-                case SyntaxKind.Scope:
-                    return lastWalkedExpression = WalkScope();
-                //case SyntaxKind.MemberAccess: return WalkMemberAccess();
-                default:
-                    {
-                        return lastWalkedExpression = Error("Unexpected node type '" + Nodes.Current.Type + "' found.", Nodes.Current);
-                    }
-            }
-        }
+            var valueLower = CurrentToken.Value?.ToLower();
 
-        private AstNode WalkLabel()
-        {
-            var labelName = WalkIdentifier();
-            var colon = Nodes.Consume(x => x.Kind == SyntaxKind.Colon);
-
-            var label = AstNode.Label(labelName.ValueText);
-
-            this.labels.Add(label);
-
-            return label;
-        }
-
-        private AstNode WalkGoto()
-        {
-            if (Nodes.PeekNext().Kind == SyntaxKind.KeywordCase)
-            {
-                return Error("Goto case has not been implemented yet.", Nodes.Current);
-            }
-            var before = Nodes.Current;
-            var target = WalkIdentifier();
-            var label = labels.FirstOrDefault(l => l.Name == target.ValueText);
-            if (label == null)
-                return Error("No labels with the name '" + target.ValueText + "' could be found.", before);
-
-            return AstNode.Goto(target.ValueText);
-        }
-
-        private AstNode WalkExpressionStatement()
-        {
-            return WalkExpressionStatement(this.WalkExpressionCore());
-        }
-
-        private AstNode WalkExpressionStatement(AstNode expression)
-        {
-
-            if (this.Nodes.Current != null && this.Nodes.Current.Kind == SyntaxKind.Semicolon)
-            {
-                this.Nodes.Consume();
-            }
-
-            return expression;
-
-            //if (expression.NodeType == NodeTypes.EXPRESSION)
-            //    return expression;
-
-            //return AstNode.Expression(expression);
-
-
-            // return _syntaxFactory.ExpressionStatement(expression, semicolon);
-        }
-
-        private AstNode WalkKeyword()
-        {
-            var keyword = Nodes.Current.StringValue.ToLower();
-
-
-
-            switch (keyword)
+            switch (valueLower)
             {
                 case "fn": return WalkFunction();
                 case "let":
@@ -201,69 +115,164 @@ namespace Shinobytes.XzaarScript.Ast
                 case "date":
                 case "any":
                     return WalkType();
-                default:
-                    return Error("Unexpected keyword '" + keyword + "' found.", Nodes.Current);
             }
+
+            if (SyntaxFacts.IsPrefixUnaryExpression(CurrentToken.Kind)) return lastWalkedExpression = WalkUnaryOperator();
+            if (SyntaxFacts.IsMath(CurrentToken.Kind)) return lastWalkedExpression = WalkArithmeticOperator();
+            if (SyntaxFacts.IsAssignment(CurrentToken.Kind)) return lastWalkedExpression = WalkAssignmentOperator();
+            switch (CurrentToken.Kind)
+            {
+
+                case SyntaxKind.Identifier:
+                    {
+                        if (Tokens.NextIs(SyntaxKind.Colon))
+                            return lastWalkedExpression = WalkLabel();
+                        return lastWalkedExpression = WalkExpressionStatement(); // return WalkIdentifier();
+                    }
+
+                case SyntaxKind.AggregateObjectIndex:
+                    return lastWalkedExpression = WalkManyExpressions();
+
+                //case SyntaxKind.ArrayIndexExpression:
+                //    return WalkObjectIndex();
+
+                //case SyntaxKind.UnaryOperator: return lastWalkedExpression = WalkUnaryOperator();
+                //case SyntaxKind.LogicalConditionalOperator: return lastWalkedExpression = WalkLogicalConditionalOperator();
+                case SyntaxKind.Number: return lastWalkedExpression = ParseSubExpressionCore(Precedence.Expression);
+                case SyntaxKind.String: return lastWalkedExpression = ParseSubExpressionCore(Precedence.Expression);
+                // case SyntaxKind.Expression: return WalkManyExpressions();
+                case SyntaxKind.OpenCurly:
+                    return lastWalkedExpression = WalkBody();
+                default: return lastWalkedExpression = Error("Unexpected token type '" + Tokens.Current.Kind + "' found.", Tokens.Current);
+
+            }
+        }
+
+        private AstNode WalkLabel()
+        {
+            var labelName = WalkIdentifier();
+            var colon = Tokens.Consume(SyntaxKind.Colon);
+
+            var label = AstNode.Label(labelName.ValueText);
+
+            this.labels.Add(label);
+
+            return label;
+        }
+
+        private AstNode WalkGoto()
+        {
+            if (Tokens.PeekNext().Kind == SyntaxKind.KeywordCase)
+            {
+                return Error("Goto case has not been implemented yet.", Tokens.Current);
+            }
+            var before = Tokens.Current;
+            var target = WalkIdentifier();
+            var label = labels.FirstOrDefault(l => l.Name == target.ValueText);
+            if (label == null)
+                return Error("No labels with the name '" + target.ValueText + "' could be found.", before);
+
+            return AstNode.Goto(target.ValueText);
+        }
+
+        private AstNode WalkExpressionStatement()
+        {
+            return WalkExpressionStatement(this.WalkExpressionCore());
+        }
+
+        private AstNode WalkExpressionStatement(AstNode expression)
+        {
+
+            if (this.Tokens.Current != null && this.Tokens.Current.Kind == SyntaxKind.Semicolon)
+            {
+                this.Tokens.Consume();
+            }
+
+            return expression;
+
+            //if (expression.Kind == SyntaxKind.EXPRESSION)
+            //    return expression;
+
+            //return AstNode.Expression(expression);
+
+
+            // return _syntaxFactory.ExpressionStatement(expression, semicolon);
         }
 
         private AstNode WalkContinue()
         {
-            Nodes.Consume(n => n.Kind == SyntaxKind.KeywordContinue);
-            return AstNode.Continue();
+            try
+            {
+                Tokens.Consume(n => n.Kind == SyntaxKind.KeywordContinue);
+                return AstNode.Continue();
+            }
+            finally
+            {
+                Tokens.Consume(SyntaxKind.Semicolon);
+            }
         }
 
         private AstNode WalkBreak()
         {
-            Nodes.Consume(n => n.Kind == SyntaxKind.KeywordBreak);
-            return AstNode.Break();
+            try
+            {
+                Tokens.Consume(n => n.Kind == SyntaxKind.KeywordBreak);
+                return AstNode.Break();
+            }
+            finally
+            {
+                Tokens.Consume(SyntaxKind.Semicolon);
+            }
         }
 
         private AstNode WalkKnownConstant()
         {
-            var value = this.Nodes.Consume().StringValue;
+            var value = this.Tokens.Consume().Value;
             return AstNode.Identifier(value);
         }
 
         private AstNode WalkType()
         {
             var isArray = false;
-            var current = Nodes.Consume();
-            if (Nodes.Current != null)
+            var current = Tokens.Consume();
+            if (Tokens.Current != null)
             {
-                if (Nodes.Current.Kind == SyntaxKind.AggregateObjectIndex ||
-                    Nodes.Current.Kind == SyntaxKind.ArrayIndexExpression)
+                if (Tokens.CurrentIs(x => SyntaxFacts.IsOpenIndexer(x.Kind)) && Tokens.NextIs(x => SyntaxFacts.IsCloseIndexer(x.Kind)))
                 {
                     isArray = true;
-                    Nodes.Consume();
+                    Tokens.Advance(2);
                 }
             }
-            return AstNode.Identifier(current.StringValue + (isArray ? "[]" : ""));
+            return AstNode.Identifier(current.Value + (isArray ? "[]" : ""));
         }
 
         private AstNode WalkReturn()
         {
-            Nodes.Consume(n => n.Kind == SyntaxKind.KeywordReturn);
-
-            var nextNode = Nodes.Current;
-            if (nextNode != null && nextNode.Kind != SyntaxKind.KeywordCase)
+            try
             {
-                var result = WalkSubExpression(Precedence.Expression);
-                return AstNode.Return(result);
+                Tokens.Consume(n => n.Kind == SyntaxKind.KeywordReturn);
+                var nextNode = Tokens.Current;
+                if (nextNode != null && nextNode.Kind != SyntaxKind.KeywordCase)
+                {
+                    var result = WalkSubExpression(Precedence.Expression);
+                    return AstNode.Return(result);
+                }
+                return AstNode.Return();
             }
-            return AstNode.Return();
+            finally
+            {
+                Tokens.Consume(SyntaxKind.Semicolon);
+            }
         }
 
         private AstNode WalkNumberLiteral()
         {
-            var value = AstNode.NumberLiteral(Nodes.Consume(x => x.Kind == SyntaxKind.LiteralNumber).Value);
-
-            return WalkPostFixExpression(value);
+            return AstNode.NumberLiteral(Tokens.Consume(SyntaxKind.Number).Value);
         }
 
         private AstNode WalkStringLiteral()
         {
-            var value = AstNode.StringLiteral(Nodes.Consume(x => x.Kind == SyntaxKind.LiteralString).StringValue);
-            return WalkPostFixExpression(value);
+            return AstNode.StringLiteral(Tokens.Consume(SyntaxKind.String).Value);
         }
 
         private string FindMemberType(
@@ -342,48 +351,42 @@ namespace Shinobytes.XzaarScript.Ast
             return memberType;
         }
 
-        private bool CanBeChained(NodeTypes nType, SyntaxKind currentKind)
-        {
-            if (nType == NodeTypes.ACCESS && currentKind == SyntaxKind.MemberAccess) return true;
-            if (nType == NodeTypes.ACCESS && currentKind == SyntaxKind.ArrayIndexExpression) return true;
-            if (nType == NodeTypes.ACCESS && currentKind == SyntaxKind.ArithmeticOperator) return true;
-            return true;
-        }
-
         private ArgumentNode[] WalkArrayArgumentList()
         {
-            return WalkArgumentList(SyntaxKind.ArrayIndexExpression);
+            return WalkArgumentList(SyntaxKind.OpenBracket, SyntaxKind.CloseBracket);
         }
 
 
         private ArgumentNode[] WalkArgumentList()
         {
-            return WalkArgumentList(SyntaxKind.Expression);
+            return WalkArgumentList(SyntaxKind.OpenParan, SyntaxKind.CloseParan);
         }
 
-        private ArgumentNode[] WalkArgumentList(SyntaxKind kind)
+        private ArgumentNode[] WalkArgumentList(SyntaxKind open, SyntaxKind close)
         {
             var args = new List<ArgumentNode>();
-            if (PrepareScope())
+            if (PrepareScope(open))
             {
                 int index = 0;
                 while (!this.EndOfStream())
                 {
+                    if (CurrentToken.Kind == close)
+                        break;
                     if (!IsPossibleExpression() && !IsPossibleStatement())
                     {
                         var errNode = "";
-                        if (Nodes.Current != null) errNode = Nodes.Current.StringValue;
-                        Error("'" + errNode + "' is not a valid argument.", Nodes.Current);
+                        if (Tokens.Current != null) errNode = Tokens.Current.Value;
+                        Error("'" + errNode + "' is not a valid argument.", Tokens.Current);
                         return null;
                     }
                     var astNode = WalkSubExpression(Precedence.Expression);
-                    if (astNode != null && astNode.NodeType != NodeTypes.SEPARATOR || Nodes.Current == null)
+                    if (astNode != null && astNode.Kind != SyntaxKind.Comma || Tokens.Current == null)
                         args.Add(AstNode.Argument(astNode, index++));
 
-                    if (Nodes.Current != null && Nodes.Current.Kind == SyntaxKind.Separator)
-                        Nodes.Consume(n => n.Kind == SyntaxKind.Separator);
+                    if (Tokens.Current != null && Tokens.Current.Kind == SyntaxKind.Comma)
+                        Tokens.Consume(n => n.Kind == SyntaxKind.Comma);
                 }
-                EndScope(kind);
+                EndScope(close);
             }
             return args.ToArray();
         }
@@ -392,20 +395,24 @@ namespace Shinobytes.XzaarScript.Ast
         private AstNode WalkParameterList()
         {
             var args = new List<ParameterNode>();
+            Tokens.ConsumeExpected(SyntaxKind.OpenParan);
             if (PrepareScope())
             {
 
                 int index = 0;
                 while (!this.EndOfStream())
                 {
-                    var before = this.Nodes.Current;
+                    var before = this.Tokens.Current;
 
-                    var possibleIdentifier = this.Nodes.PeekAt(1);
+                    if (before.Kind == SyntaxKind.CloseParan)
+                        break;
+
+                    var possibleIdentifier = this.Tokens.PeekAt(1);
                     if (possibleIdentifier != null && possibleIdentifier.Kind == SyntaxKind.Colon)
                     {
                         // typescript/rust style
                         var name = WalkIdentifier();
-                        var colon = Nodes.Consume(n => n.Kind == SyntaxKind.Colon);
+                        var colon = Tokens.Consume(n => n.Kind == SyntaxKind.Colon);
                         var type = WalkType();
                         args.Add(AstNode.Parameter(name, type));
                     }
@@ -417,20 +424,32 @@ namespace Shinobytes.XzaarScript.Ast
                         args.Add(AstNode.Parameter(name, type));
                     }
 
-                    //this.Nodes.Next(); 
-                    if (before == this.Nodes.Current || (this.Nodes.Current != null && this.Nodes.Current.Type == SyntaxKind.Separator)) Nodes.Consume();
+                    //this.Tokens.Next(); 
+                    if (before == this.Tokens.Current || (this.Tokens.Current != null && this.Tokens.Current.Kind == SyntaxKind.Comma)) Tokens.Consume();
                 }
-                EndScope(SyntaxKind.Expression);
+                EndScope(SyntaxKind.CloseParan);
             }
             return AstNode.Parameters(args.ToArray());
         }
 
-
-        private bool PrepareScope(IList<SyntaxNode> nodes = null)
+        private bool PrepareScope(SyntaxKind scopeStart)
         {
-            if ((nodes != null) || (this.Nodes.Current != null))
+            if (this.Tokens.Current != null)
             {
-                BeginScope(new NodeStream(nodes ?? this.Nodes.Current.Children));
+                Tokens.ConsumeExpected(scopeStart);
+
+                BeginScope(Tokens);
+
+                return true;
+            }
+            return false;
+        }
+
+        private bool PrepareScope()
+        {
+            if (this.Tokens.Current != null)
+            {
+                BeginScope(Tokens);
 
                 return true;
             }
@@ -439,29 +458,29 @@ namespace Shinobytes.XzaarScript.Ast
 
         private AstNode WalkScope()
         {
-            var node = Nodes.Current;
+            var node = Tokens.Current;
             AstNode scopeNode = null;
             var nodes = new List<AstNode>();
-            if (node.HasChildren)
-            {
-                BeginScope(new NodeStream(node.Children));
+            //if (node.HasChildren)
+            //{
+            //    BeginScope(new NodeStream(node.Children));
 
-                while (!this.EndOfStream())
-                {
-                    var astNode = Walk();
-                    if (astNode != null) nodes.Add(astNode);
-                    //this.Nodes.Next();
-                }
-                EndScope(SyntaxKind.Scope);
-            }
+            //    while (!this.EndOfStream())
+            //    {
+            //        var astNode = Walk();
+            //        if (astNode != null) nodes.Add(astNode);
+            //        //this.Tokens.Next();
+            //    }
+            //    EndScope(SyntaxKind.Scope);
+            //}
 
 
             return AstNode.Block(nodes.ToArray());
         }
 
-        private AstNode WalkExpression()
+        private AstNode WalkManyExpressions()
         {
-            var node = Nodes.Current;
+            var node = Tokens.Current;
             AstNode scopeNode = null;
             var nodes = new List<AstNode>();
 
@@ -471,7 +490,7 @@ namespace Shinobytes.XzaarScript.Ast
                 {
                     var astNode = WalkExpressionCore();
                     if (astNode != null) nodes.Add(astNode);
-                    //this.Nodes.Next();
+                    //this.Tokens.Next();
                 }
                 EndScope(SyntaxKind.Expression);
             }
@@ -628,44 +647,30 @@ namespace Shinobytes.XzaarScript.Ast
             }
         }
 
-        private AstNode WalkConstantValue()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        private AstNode WalkConditionalOperator()
-        {
-            AssertMinExpectedNodeCount(1);
-            // get previous
-            // op
-            // get next
-            throw new System.NotImplementedException();
-        }
-
         private AstNode WalkAssignmentOperator()
         {
-            var assign = Nodes.Consume(n => n.Type == SyntaxKind.AssignmentOperator);
+            var assign = Tokens.Consume(n => SyntaxFacts.IsAssignment(n.Kind));
             // go back once if we are currently on the assignment
-            // if (SyntaxFacts.IsAssignmentExpression(Nodes.Current.Kind) || SyntaxFacts.IsExpectedAssignmentOperator(Nodes.Current.Kind)) Nodes.Previous();
+            // if (SyntaxFacts.IsAssignment(Tokens.CurrentToken.Kind) || SyntaxFacts.IsExpectedAssignmentOperator(Tokens.CurrentToken.Kind)) Tokens.Previous();
 
             return WalkExpressionCore();
         }
 
         private AstNode WalkNewArrayInstance()
         {
-            var old = Nodes.Current;
-            if (Nodes.Current.Kind == SyntaxKind.ArrayIndexExpression)
+            var old = Tokens.Current;
+            if (SyntaxFacts.IsOpenIndexer(Tokens.Current.Kind))
             {
                 // array initializer
-                var args = WalkArgumentList();
+                var args = WalkArrayArgumentList();
 
-                if (Nodes.Current == old) Nodes.Consume(x => x.Kind == SyntaxKind.ArrayIndexExpression);
+                if (Tokens.Current == old) Tokens.Consume(x => SyntaxFacts.IsCloseIndexer(x.Kind));
 
-                // Nodes.Consume(i => i.Kind == SyntaxKind.ArrayIndexExpression);
+                // Tokens.Consume(i => i.Kind == SyntaxKind.ArrayIndexExpression);
 
                 return AstNode.NewArrayInstance(args);
             }
-            return Error("Unexpected type '" + Nodes.Current?.Kind + "' found. We expected a new array 'a = []' expression.", Nodes.Current);
+            return Error("Unexpected type '" + Tokens.Current?.Kind + "' found. We expected a new array 'a = []' expression.", Tokens.Current);
         }
 
         private AstNode WalkLogicalConditionalOperator()
@@ -676,7 +681,7 @@ namespace Shinobytes.XzaarScript.Ast
             var leftSide = lastWalkedExpression;
 
             if (leftSide == null)
-                return Error("We were unable to build the logical expression. Perhaps it is a bit too complex? Try and simplify it and avoid using paranthesis if possible!", Nodes.Current);
+                return Error("We were unable to build the logical expression. Perhaps it is a bit too complex? Try and simplify it and avoid using paranthesis if possible!", Tokens.Current);
 
             var rightSide = WalkSubExpression(Precedence.Expression);
 
@@ -725,16 +730,6 @@ namespace Shinobytes.XzaarScript.Ast
             throw new System.NotImplementedException();
         }
 
-        private AstNode WalkEqualityOperator()
-        {
-            AssertMinExpectedNodeCount(1);
-            // get previous
-            // op
-            // get next
-
-            throw new System.NotImplementedException();
-        }
-
         private AstNode WalkArithmeticOperator()
         {
             AssertMinExpectedNodeCount(1);
@@ -742,9 +737,7 @@ namespace Shinobytes.XzaarScript.Ast
             // op
             // get next
 
-            return WalkExpression();
-
-            throw new System.NotImplementedException();
+            return WalkManyExpressions();
         }
 
         //private AstNode WalkObjectIndex()
@@ -752,9 +745,9 @@ namespace Shinobytes.XzaarScript.Ast
         //    // if previous is assignment, it is an array initializer            
         //    // otherwise a normal object index
 
-        //    var item = this.Nodes.Previous();
+        //    var item = this.Tokens.Previous();
 
-        //    if (item == null && this.Nodes.Current != null && this.Nodes.Current.Kind == SyntaxKind.ArrayIndexExpression)
+        //    if (item == null && this.Tokens.CurrentToken != null && this.Tokens.CurrentToken.Kind == SyntaxKind.ArrayIndexExpression)
         //    {
         //        var result = WalkNewArrayInstance();
 
@@ -771,26 +764,7 @@ namespace Shinobytes.XzaarScript.Ast
             AssertMinExpectedNodeCount(2);
             // |++|+|--|-|!| (expr)
 
-            var unary = this.Nodes.Consume();
-
-            var expr = this.Walk();
-
-            if (expr.NodeType == NodeTypes.UNARY_OPERATOR)
-            {
-                // oh no! we need to split these up and go back one step
-                // we are about to do a unary operation on a unary operation.
-                // ex:
-                // --i ++i becomes --i++ i
-                // that is baadururur!
-                var unary2 = (UnaryNode)expr;
-                expr = unary2.Item;
-                var prev = Nodes.Previous(); // go back one step, so we can forget even touching this unary
-                Debug.Assert(prev.Index == unary.Index + 2); // make sure we are recovering from the correct node.
-            }
-
-            // var type = SyntaxFacts.GetPrefixUnaryExpression(unary.Kind);
-
-            return AstNode.PrefixUnary(unary, expr);
+            return this.WalkSubExpression(Precedence.Expression);
         }
 
         private AstNode WalkEnum()
@@ -814,9 +788,12 @@ namespace Shinobytes.XzaarScript.Ast
             AssertMinExpectedNodeCount(3);
             // struct name { body }
 
-            var @struct = Nodes.Consume(n => n.Kind == SyntaxKind.KeywordStruct);
+            var @struct = Tokens.Consume(n => n.Kind == SyntaxKind.KeywordStruct);
 
             var name = WalkIdentifier();
+
+            tokens.ConsumeExpected(SyntaxKind.OpenCurly);
+
 
             var fields = WalkStructFields(name.ValueText);
 
@@ -824,23 +801,31 @@ namespace Shinobytes.XzaarScript.Ast
 
             this.definedStructs.Add(name.ValueText, str);
 
+            tokens.ConsumeExpected(SyntaxKind.CloseCurly);
+
             return str;
         }
 
         private AstNode[] WalkStructFields(string declaringTypeName)
         {
             var fields = new List<AstNode>();
-            if (PrepareScope(Nodes.Current.Children))
+            if (PrepareScope())
             {
                 while (!EndOfStream())
                 {
-                    var possibleIdentifier = Nodes.PeekNext();
+                    var possibleIdentifier = Tokens.PeekNext();
+
+                    if (tokens.Current.Kind == SyntaxKind.CloseCurly)
+                    {
+                        break;
+                    }
+
                     if (possibleIdentifier != null && possibleIdentifier.Kind == SyntaxKind.Colon)
                     {
                         // tsstyle/rust-style
                         // name : type
                         var name = WalkIdentifier();
-                        var colon = Nodes.Consume();
+                        var colon = Tokens.Consume();
                         var type = WalkType();
                         fields.Add(AstNode.Field(type.ValueText, name.ValueText, declaringTypeName));
                     }
@@ -852,15 +837,20 @@ namespace Shinobytes.XzaarScript.Ast
                         var name = WalkIdentifier();
                         fields.Add(AstNode.Field(type.ValueText, name.ValueText, declaringTypeName));
                     }
-                    if (Nodes.Current != null &&
-                        (Nodes.Current.Kind == SyntaxKind.Separator ||
-                         Nodes.Current.Kind == SyntaxKind.StatementTerminator))
+
+                    if (Tokens.Current != null)
                     {
-                        Nodes.Consume();
+                        if (Tokens.Current.Kind == SyntaxKind.Comma ||
+                            Tokens.Current.Kind == SyntaxKind.Semicolon)
+                            Tokens.Consume();
+                        else if (tokens.Current.Kind == SyntaxKind.CloseCurly)
+                        {
+                            break;
+                        }
                     }
                 }
 
-                EndScope(SyntaxKind.Scope);
+                EndScope();
             }
 
             return fields.ToArray();
@@ -870,20 +860,34 @@ namespace Shinobytes.XzaarScript.Ast
         {
             // similar to WalkStructFields, but here we expect to assign the values of the target struct and separate the expressions by a comma
             var fieldAssignments = new List<AstNode>();
-            if (PrepareScope(Nodes.Current.Children))
+            if (PrepareScope(SyntaxKind.OpenCurly))
             {
                 while (!EndOfStream())
                 {
-                    var assignment = Walk();
-                    if (assignment.NodeType != NodeTypes.ASSIGN)
-                    {
-                        return new[] { Error("You're suppose to assign the values here", Nodes.Current) };
-                    }
+                    if (SyntaxFacts.IsCloseBody(CurrentToken.Kind))
+                        break;
+
+
+
+
+                    var assignment = WalkAssignmentOperator();
+
+                    // throw new NotImplementedException();
+
+
+                    // var assignment = Walk();
+                    //if (assignment.Kind != SyntaxKind.Equals)
+                    //{
+                    //    return new[] { Error("You're suppose to assign the values here", Tokens.Current) };
+                    //}
+
+
                     fieldAssignments.Add(assignment);
-                    Nodes.Consume(x => x.Kind == SyntaxKind.Separator);
+
+                    Tokens.Consume(SyntaxKind.Comma);
                 }
 
-                EndScope(SyntaxKind.Scope);
+                EndScope(SyntaxKind.CloseCurly);
             }
 
             return fieldAssignments.ToArray();
@@ -897,14 +901,14 @@ namespace Shinobytes.XzaarScript.Ast
             // case (expr) : { body } break|continue|return
 
 
-            if (Nodes.Current.Kind == SyntaxKind.KeywordCase)
+            if (Tokens.Current.Kind == SyntaxKind.KeywordCase)
             {
                 AssertMinExpectedNodeCount(4);
 
-                var @case = Nodes.Consume(x => x.Kind == SyntaxKind.KeywordCase);
+                var @case = Tokens.Consume(SyntaxKind.KeywordCase);
                 Debug.Assert(@case != null);
                 var test = WalkExpressionStatement();
-                var colon = Nodes.Consume(x => x.Kind == SyntaxKind.Colon);
+                var colon = Tokens.Consume(SyntaxKind.Colon);
                 var switchCaseBody = WalkSwitchCaseBody();
                 Debug.Assert(switchCaseBody != null);
 
@@ -914,9 +918,9 @@ namespace Shinobytes.XzaarScript.Ast
             {
                 AssertMinExpectedNodeCount(3);
 
-                var defaultCase = Nodes.Consume(x => x.Kind == SyntaxKind.KeywordDefault);
+                var defaultCase = Tokens.Consume(SyntaxKind.KeywordDefault);
                 Debug.Assert(defaultCase != null);
-                var colon = Nodes.Consume(x => x.Kind == SyntaxKind.Colon);
+                var colon = Tokens.Consume(SyntaxKind.Colon);
                 var switchCaseBody = WalkSwitchCaseBody();
                 Debug.Assert(switchCaseBody != null);
 
@@ -930,84 +934,91 @@ namespace Shinobytes.XzaarScript.Ast
 
         private AstNode WalkSwitchCaseBody()
         {
-            if (Nodes.Current != null && Nodes.Current.Kind == SyntaxKind.KeywordCase)
-                return Error("Multiple switch case labels are not supported at this time! Please make sure you add a 'break' or 'return' after declaring your switch case!", Nodes.Current);
+            if (Tokens.Current != null && Tokens.Current.Kind == SyntaxKind.KeywordCase)
+                return Error("Multiple switch case labels are not supported at this time! Please make sure you add a 'break' or 'return' after declaring your switch case!", Tokens.Current);
 
-            if (Nodes.Current == null)
-                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Nodes.Current);
+            if (Tokens.Current == null)
+                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Tokens.Current);
 
 
             AstNode result = null;
 
             var childStatements = new List<AstNode>();
 
-            if (Nodes.Current != null)
+            if (Tokens.Current != null)
             {
-                if (Nodes.Current.Kind == SyntaxKind.Scope)
+                if (SyntaxFacts.IsOpenBody(Tokens.Current.Kind))
                 {
-                    var scope = Nodes.Current;
-                    if (PrepareScope(scope.Children))
+                    var scope = Tokens.Current;
+                    if (PrepareScope(SyntaxKind.OpenCurly))
                     {
                         while (!EndOfStream())
                         {
-                            if (Nodes.Current.Kind == SyntaxKind.KeywordReturn ||
-                                Nodes.Current.Kind == SyntaxKind.KeywordBreak ||
-                                Nodes.Current.Kind == SyntaxKind.KeywordContinue)
+                            if (Tokens.Current.Kind == SyntaxKind.CloseCurly) break;
+                            if (Tokens.Current.Kind == SyntaxKind.KeywordReturn ||
+                            Tokens.Current.Kind == SyntaxKind.KeywordBreak ||
+                            Tokens.Current.Kind == SyntaxKind.KeywordContinue)
                             {
                                 childStatements.Add(Walk());
                                 break;
                             }
-                            childStatements.Add(WalkExpressionStatement());
+                            var stmt = WalkExpressionStatement();
+                            if (stmt != null)
+                                childStatements.Add(stmt);
                         }
 
-                        EndScope(SyntaxKind.Scope);
+                        EndScope(SyntaxKind.CloseCurly);
                     }
                 }
                 else
                 {
-                    while (Nodes.Current != null)
+                    while (Tokens.Current != null)
                     {
-                        if (Nodes.Current.Kind == SyntaxKind.KeywordReturn ||
-                            Nodes.Current.Kind == SyntaxKind.KeywordBreak ||
-                            Nodes.Current.Kind == SyntaxKind.KeywordContinue)
+                        if (Tokens.Current.Kind == SyntaxKind.KeywordReturn ||
+                            Tokens.Current.Kind == SyntaxKind.KeywordBreak ||
+                            Tokens.Current.Kind == SyntaxKind.KeywordContinue)
                         {
-                            childStatements.Add(Walk());
+                            var breakStmt = Walk();
+                            if (breakStmt != null) childStatements.Add(breakStmt);
                             break;
                         }
-                        childStatements.Add(WalkExpressionStatement());
+                        var stmt = WalkExpressionStatement();
+                        if (stmt != null) childStatements.Add(stmt);
                     }
                 }
 
-                if (Nodes.Current != null && (Nodes.Current.Kind == SyntaxKind.KeywordReturn ||
-                    Nodes.Current.Kind == SyntaxKind.KeywordBreak ||
-                    Nodes.Current.Kind == SyntaxKind.KeywordContinue))
+                if (Tokens.Current != null && (Tokens.Current.Kind == SyntaxKind.KeywordReturn ||
+                    Tokens.Current.Kind == SyntaxKind.KeywordBreak ||
+                    Tokens.Current.Kind == SyntaxKind.KeywordContinue))
                 {
-                    childStatements.Add(Walk());
+                    var breakStmt = Walk();
+                    if (breakStmt != null)
+                        childStatements.Add(breakStmt);
                 }
 
                 result = AstNode.Block(childStatements.ToArray());
                 // result
             }
 
-            if (Nodes.Current != null && (Nodes.Current.Kind != SyntaxKind.KeywordReturn &&
-                Nodes.Current.Kind != SyntaxKind.KeywordBreak &&
-                Nodes.Current.Kind != SyntaxKind.KeywordContinue))
+            if (Tokens.Current != null && (Tokens.Current.Kind != SyntaxKind.KeywordReturn &&
+                Tokens.Current.Kind != SyntaxKind.KeywordBreak &&
+                Tokens.Current.Kind != SyntaxKind.KeywordContinue))
             {
                 if (childStatements.Count > 0)
                 {
                     var lastChildStatement = childStatements[childStatements.Count - 1];
-                    if (lastChildStatement.NodeType == NodeTypes.RETURN || lastChildStatement.NodeType == NodeTypes.BREAK || lastChildStatement.NodeType == NodeTypes.CONTINUE)
+                    if (lastChildStatement.Kind == SyntaxKind.KeywordReturn || lastChildStatement.Kind == SyntaxKind.KeywordBreak || lastChildStatement.Kind == SyntaxKind.KeywordContinue)
                         return result;
                 }
-                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Nodes.Current);
+                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Tokens.Current);
             }
 
-            if (Nodes.Current == null && childStatements.Count == 0)
-                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Nodes.Current);
+            if (Tokens.Current == null && childStatements.Count == 0)
+                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Tokens.Current);
 
             var child = childStatements[childStatements.Count - 1];
-            if (child.NodeType != NodeTypes.RETURN && child.NodeType != NodeTypes.BREAK && child.NodeType != NodeTypes.CONTINUE)
-                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Nodes.Current);
+            if (child.Kind != SyntaxKind.KeywordReturn && child.Kind != SyntaxKind.KeywordBreak && child.Kind != SyntaxKind.KeywordContinue)
+                return Error("Missing expected end of switch case, please add a 'break' or 'return' after declaring your switch case!", Tokens.Current);
 
             return result;
         }
@@ -1017,34 +1028,34 @@ namespace Shinobytes.XzaarScript.Ast
             AssertMinExpectedNodeCount(3);
             // switch (expr) { body }
 
-            var @switch = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordSwitch);
+            var @switch = this.Tokens.Consume(SyntaxKind.KeywordSwitch);
 
-            var expr = this.WalkExpression();
+            Tokens.ConsumeExpected(SyntaxKind.OpenParan);
 
-            var scope = this.Nodes.Consume(x => x.Kind == SyntaxKind.Scope);
+            var expr = this.WalkExpressionCore();
 
-            Debug.Assert(scope != null);
+            Tokens.ConsumeExpected(SyntaxKind.CloseParan);
 
             var switchCases = new List<CaseNode>();
 
-            if (PrepareScope(scope.Children))
+            if (PrepareScope(SyntaxKind.OpenCurly))
             {
+
                 while (this.IsPossibleSwitchCase())
                 {
                     var swcase = this.WalkSwitchCase() as CaseNode;
                     if (swcase != null)
                         switchCases.Add(swcase);
                 }
-                EndScope(SyntaxKind.Scope);
+                EndScope(SyntaxKind.CloseCurly);
             }
-
 
             return AstNode.Switch(expr, switchCases.ToArray());
         }
 
         private bool IsPossibleSwitchCase()
         {
-            return this.Nodes.Current != null && ((this.Nodes.Current.Kind == SyntaxKind.KeywordCase) || (this.Nodes.Current.Kind == SyntaxKind.KeywordDefault));
+            return this.Tokens.Current != null && ((this.Tokens.Current.Kind == SyntaxKind.KeywordCase) || (this.Tokens.Current.Kind == SyntaxKind.KeywordDefault));
         }
 
         private AstNode WalkForeachLoop()
@@ -1052,7 +1063,7 @@ namespace Shinobytes.XzaarScript.Ast
             AssertMinExpectedNodeCount(3);
             // foreach (expr) { body }
 
-            var @foreach = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordForEach);
+            var @foreach = this.Tokens.Consume(SyntaxKind.KeywordForEach);
 
             var exprList = this.WalkForEachStatementExpressionList();
 
@@ -1070,78 +1081,87 @@ namespace Shinobytes.XzaarScript.Ast
             // while we only expect 3 items, we expect the second item to have 3 nodes
             // this wont be tested until later
 
-            var @for = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordFor);
+            var @for = this.Tokens.Consume(SyntaxKind.KeywordFor);
+
+
 
             var exprList = this.WalkForStatementExpressionList();
 
-            Debug.Assert(exprList.Children.Count == 3);
-
             var body = this.WalkStatementOrBody();
-
 
             return AstNode.For(exprList[0], exprList[1], exprList[2], body);
         }
 
         private AstNode WalkForStatementExpressionList()
         {
-            return WalkStatementExpressionList(SyntaxKind.StatementTerminator);
+            return WalkStatementExpressionList(SyntaxKind.OpenParan, SyntaxKind.Semicolon, SyntaxKind.CloseParan, 3);
         }
 
         private AstNode WalkForEachStatementExpressionList()
         {
-            return WalkStatementExpressionList(SyntaxKind.KeywordIn);
+            return WalkStatementExpressionList(SyntaxKind.OpenParan, SyntaxKind.KeywordIn, SyntaxKind.CloseParan, 2);
         }
 
 
-        private AstNode WalkStatementExpressionList(SyntaxKind separator)
+        private AstNode WalkStatementExpressionList(SyntaxKind open, SyntaxKind separator, SyntaxKind close, int expectedExpressionCount)
         {
-            var forExprHolder = this.Nodes.Consume(x => x.Kind == SyntaxKind.Expression);
-            if (!forExprHolder.HasChildren)
-                return Error("Well, this is awkward. Are you sure that you know how to declare a for statement?", Nodes.Current);
-
-            var expressions = SplitExpression(forExprHolder, separator);
-
-            var exprList = new List<AstNode>();
-
-            // 0: variable declaration/instantiation
-            // 1: conditional test
-            // 2: incrementor
-            for (var i = 0; i < expressions.Count; i++)
+            this.Tokens.ConsumeExpected(open);
+            try
             {
-                if (PrepareScope(expressions[i]))
+                var exprList = new List<AstNode>();
+
+                var expr = this.Walk();
+                if (expr != null) exprList.Add(expr);
+
+                while (!EndOfStream())
                 {
+                    if (CurrentToken.Kind == close)
+                        break;
 
-                    var before = this.Nodes.Current;
-                    var astNode = Walk();
-                    if (astNode != null) exprList.Add(astNode);
-                    if (before == this.Nodes.Current) Nodes.Consume();
+                    if (CurrentToken.Kind != separator)
+                    {
+                        var expr2 = this.WalkExpressionCore();
+                        if (expr2 != null) exprList.Add(expr2);
+                    }
 
-                    EndScope(SyntaxKind.Expression);
+                    Tokens.Consume(separator);
+
+                    if (CurrentToken.Kind == close)
+                        break;
                 }
-            }
 
-            return AstNode.Expression(exprList.ToArray());
-        }
+                //if (!forExprHolder.HasChildren)
+                //    return Error("Well, this is awkward. Are you sure that you know how to declare a for statement?", Tokens.CurrentToken);
 
-        private List<List<SyntaxNode>> SplitExpression(SyntaxNode expr, SyntaxKind separator)
-        {
-            var expressions = new List<SyntaxNode>();
-            var finalExpressions = new List<List<SyntaxNode>>();
-            foreach (var item in expr.Children)
-            {
-                if (item.Kind == separator)
-                {
-                    finalExpressions.Add(new List<SyntaxNode>(expressions.ToArray()));
-                    expressions.Clear();
-                    continue;
-                }
-                expressions.Add(item);
+                //var expressions = SplitExpression(forExprHolder, separator);
+
+                //var exprList = new List<AstNode>();
+
+                //// 0: variable declaration/instantiation
+                //// 1: conditional test
+                //// 2: incrementor
+                //for (var i = 0; i < expressions.Count; i++)
+                //{
+                //    if (PrepareScope(expressions[i]))
+                //    {
+
+                //        var before = this.Tokens.CurrentToken;
+                //        var astNode = Walk();
+                //        if (astNode != null) exprList.Add(astNode);
+                //        if (before == this.Tokens.CurrentToken) Tokens.Consume();
+
+                //        EndScope(SyntaxKind.Expression);
+                //    }
+                //}
+
+                //return AstNode.Expression(exprList.ToArray());
+
+                return AstNode.Expression(exprList.ToArray());
             }
-            if (expressions.Count > 0)
+            finally
             {
-                finalExpressions.Add(new List<SyntaxNode>(expressions.ToArray()));
+                this.Tokens.ConsumeExpected(close);
             }
-            return finalExpressions;
         }
 
         private AstNode WalkDoWhileLoop()
@@ -1151,17 +1171,21 @@ namespace Shinobytes.XzaarScript.Ast
 
             AstNode result = null;
 
-            var @do = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordDo);
+            var @do = this.Tokens.Consume(SyntaxKind.KeywordDo);
 
             var body = this.WalkStatementOrBody();
 
-            var @while = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordWhile);
+            var @while = this.Tokens.Consume(SyntaxKind.KeywordWhile);
 
-            var condition = this.WalkExpression();
+            Tokens.ConsumeExpected(x => SyntaxFacts.IsOpenStatement(x.Kind));
+
+            var condition = this.WalkExpressionCore();
+
+            Tokens.ConsumeExpected(x => SyntaxFacts.IsCloseStatement(x.Kind));
 
             result = AstNode.DoWhile(condition, body);
 
-            Nodes.Consume();
+            // Tokens.Consume();
 
             return result;
         }
@@ -1173,15 +1197,21 @@ namespace Shinobytes.XzaarScript.Ast
 
             AstNode result = null;
 
-            var @while = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordWhile);
+            var @while = this.Tokens.Consume(SyntaxKind.KeywordWhile);
 
-            var condition = this.WalkExpression();
+
+            Tokens.ConsumeExpected(x => SyntaxFacts.IsOpenStatement(x.Kind));
+
+            var condition = this.WalkExpressionCore();
+
+            Tokens.ConsumeExpected(x => SyntaxFacts.IsCloseStatement(x.Kind));
+
 
             var body = this.WalkStatementOrBody();
 
             result = AstNode.While(condition, body);
 
-            Nodes.Consume();
+            // Tokens.Consume();
 
             return result;
         }
@@ -1192,7 +1222,7 @@ namespace Shinobytes.XzaarScript.Ast
             AssertMinExpectedNodeCount(2);
             // loop { body }
 
-            var loop = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordLoop);
+            var loop = this.Tokens.Consume(SyntaxKind.KeywordLoop);
             var body = this.WalkStatementOrBody();
             return AstNode.Loop(body);
         }
@@ -1205,9 +1235,13 @@ namespace Shinobytes.XzaarScript.Ast
             // if (expr) { body }         
             AstNode result = null;
 
-            var @if = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordIf);
+            var @if = this.Tokens.Consume(SyntaxKind.KeywordIf);
 
-            var condition = this.WalkExpression(); // this.ParseExpressionCore();
+            Tokens.ConsumeExpected(x => SyntaxFacts.IsOpenStatement(x.Kind));
+
+            var condition = this.WalkExpressionCore(); // this.ParseExpressionCore();
+
+            Tokens.ConsumeExpected(x => SyntaxFacts.IsCloseStatement(x.Kind));
 
             var ifTrue = this.WalkStatementOrBody();
 
@@ -1227,7 +1261,7 @@ namespace Shinobytes.XzaarScript.Ast
 
         private AstNode WalkElseClause()
         {
-            if (this.Nodes.Current == null || this.Nodes.Current.Kind != SyntaxKind.KeywordElse)
+            if (this.Tokens.Current == null || this.Tokens.Current.Kind != SyntaxKind.KeywordElse)
             {
                 return null;
             }
@@ -1241,7 +1275,7 @@ namespace Shinobytes.XzaarScript.Ast
             // else <statement: { body }>
             // else <statement: if (expr) { body }>
 
-            var @else = this.Nodes.Consume(x => x.Kind == SyntaxKind.KeywordElse);
+            var @else = this.Tokens.Consume(SyntaxKind.KeywordElse);
 
             var statement = this.WalkStatementOrBody();
 
@@ -1263,23 +1297,26 @@ namespace Shinobytes.XzaarScript.Ast
 
             var varTypeExplicit = false;
             var varType = "any";
-            var letVar = Nodes.Consume(x => x.Kind == SyntaxKind.KeywordVar);
+            var letVar = Tokens.Consume(SyntaxKind.KeywordVar);
             var name = WalkIdentifier();
 
-            if (Nodes.Current != null && Nodes.Current.Kind == SyntaxKind.Colon)
+            if (Tokens.Current != null && Tokens.Current.Kind == SyntaxKind.Colon)
             {
-                var colon = Nodes.Consume();
+                var colon = Tokens.Consume();
                 varTypeExplicit = true;
                 varType = WalkType().ValueText;
             }
 
-            var isAssign = Nodes.Current != null && SyntaxFacts.IsAssignmentExpression(Nodes.Current.Type);
+            var isAssign = Tokens.Current != null && SyntaxFacts.IsAssignment(Tokens.Current.Kind);
             if (isAssign)
             {
-                var assign = Nodes.Consume();
-                var before = Nodes.Current;
-                var valueAssignment = WalkAssignmentOperator();
-                if (before == Nodes.Current) Nodes.Consume();
+                var assign = Tokens.Consume();
+                var before = Tokens.Current;
+                AstNode valueAssignment = null;
+
+                valueAssignment = WalkAssignmentOperator();
+
+                if (before == Tokens.Current) Tokens.Consume();
 
                 if (valueAssignment == null && HasErrors)
                     return errorNodes.Last();
@@ -1300,7 +1337,7 @@ namespace Shinobytes.XzaarScript.Ast
 
                 return AddVariable(AstNode.DefineVariable(varType, name.ValueText, valueAssignment));
             }
-            // Nodes.Consume();
+            // Tokens.Consume();
             return AddVariable(AstNode.DefineVariable(varType, name.ValueText, null));
         }
 
@@ -1403,18 +1440,21 @@ namespace Shinobytes.XzaarScript.Ast
             // fn name (expr) { body }
             // fn name (expr) -> type { body }
 
-            var fn = Nodes.Consume(x => x.Kind == SyntaxKind.KeywordFn);
+            var fn = Tokens.Consume(SyntaxKind.KeywordFn);
+
             var name = WalkIdentifier();
+
             var parameterList = WalkParameterList();
+
             var parameters = AstNode.Parameters(parameterList);
 
             currentParameters.AddRange(parameters.Parameters);
 
             var functionName = name.ValueText;
-            if (Nodes.Current.Type == SyntaxKind.PointerMemberAccess || Nodes.Current.Type == SyntaxKind.Colon)
+            if (Tokens.Current.Kind == SyntaxKind.MinusGreater || Tokens.Current.Kind == SyntaxKind.Colon)
             {
                 AssertMinExpectedNodeCount(3);
-                var access = Nodes.Consume();
+                var access = Tokens.Consume();
 
                 var returnType = WalkType().ValueText;
                 var function = AstNode.Function(functionName, returnType, parameters);
@@ -1429,12 +1469,11 @@ namespace Shinobytes.XzaarScript.Ast
             {
 
                 var function = AstNode.Function(functionName, parameters);
-                if (definedFunctions.ContainsKey(functionName)) return Error($"A function with the same name '{function.Name}' already exists", Nodes.Current);
+                if (definedFunctions.ContainsKey(functionName)) return Error($"A function with the same name '{function.Name}' already exists", Tokens.Current);
                 definedFunctions.Add(functionName, function);
 
                 var body = WalkBody(functionName);
-                if (body != null)
-                    function.SetBody(body);
+                if (body != null) function.SetBody(body);
                 return function;
             }
         }
@@ -1442,45 +1481,50 @@ namespace Shinobytes.XzaarScript.Ast
         private AstNode WalkStatementOrBody()
         {
             var stmts = new List<AstNode>();
-            if (this.Nodes.Current != null && this.Nodes.Current.Kind == SyntaxKind.Scope)
+            if (this.Tokens.Current != null && SyntaxFacts.IsOpenBody(this.Tokens.Current.Kind))
             {
                 return WalkBody();
             }
             else
             {
                 var statement = WalkStatement();
-                if (statement != null)
-                    stmts.Add(statement);
+                if (statement != null) stmts.Add(statement);
+
             }
             return AstNode.Body(stmts.ToArray());
         }
 
         private AstNode WalkBody(string name = null)
         {
-            if (Nodes.Current == null || Nodes.Current.Kind != SyntaxKind.Scope)
+            if (Tokens.Current == null || !SyntaxFacts.IsOpenBody(CurrentToken.Kind))
             {
                 if (!string.IsNullOrEmpty(name))
-                    return Error("The function '" + name + "' is clearly missing a body!!", Nodes.Current);
-                return Error("We expected a new scope or body to be declared.. But it wasnt?", Nodes.Current);
+                    return Error("The function '" + name + "' is clearly missing a body!!", Tokens.Current);
+                return Error("We expected a new scope or body to be declared.. But it wasnt?", Tokens.Current);
             }
+
             var stmts = new List<AstNode>();
-            if (PrepareScope())
+            if (PrepareScope(SyntaxKind.OpenCurly))
             {
                 while (!this.EndOfStream())
                 {
+                    Tokens.Consume(SyntaxKind.Semicolon);
+
+                    if (SyntaxFacts.IsCloseBody(CurrentToken.Kind))
+                        break;
 
                     var statement = WalkStatement();
                     if (statement != null)
                         stmts.Add(statement);
 
                     //var astNode = WalkSubExpression(Precedence.Expression);
-                    //if (astNode != null && astNode.NodeType != NodeTypes.SEPARATOR || Nodes.Current == null)
+                    //if (astNode != null && astNode.Kind != SyntaxKind.SEPARATOR || Tokens.CurrentToken == null)
                     //    args.Add(AstNode.Argument(astNode, index++));
 
-                    //if (Nodes.Current != null && Nodes.Current.Kind == SyntaxKind.Separator)
-                    //    Nodes.Consume(n => n.Kind == SyntaxKind.Separator);
+                    //if (Tokens.CurrentToken != null && Tokens.CurrentToken.Kind == SyntaxKind.Separator)
+                    //    Tokens.Consume(n => n.Kind == SyntaxKind.Separator);
                 }
-                EndScope(SyntaxKind.Scope);
+                EndScope(SyntaxKind.CloseCurly);
             }
             return AstNode.Body(stmts.ToArray());
         }
@@ -1489,21 +1533,21 @@ namespace Shinobytes.XzaarScript.Ast
         {
             AstNode item = null;
 
-            if (Nodes.Current.Kind != SyntaxKind.Identifier
-                && Nodes.PeekNext() != null && Nodes.PeekNext().Kind == SyntaxKind.Identifier)
-                Nodes.Consume();
+            if (Tokens.Current.Kind != SyntaxKind.Identifier
+                && Tokens.PeekNext() != null && Tokens.PeekNext().Kind == SyntaxKind.Identifier)
+                Tokens.Consume();
 
-            var identifier = Nodes.Consume(x => x.Kind == SyntaxKind.Identifier);
+            var identifier = Tokens.Consume(SyntaxKind.Identifier);
             if (identifier == null)
-                return Error("Identifier expected", Nodes.Current);
+                return Error("Identifier expected", Tokens.Current);
 
-            var stringValue = identifier.StringValue;
+            var stringValue = identifier.Value;
 
 
             if (definedStructs.ContainsKey(stringValue))
             {
                 var structDefinition = definedStructs[stringValue];
-                if (Nodes.CurrentIs(n => n.Kind == SyntaxKind.Scope))
+                if (Tokens.CurrentIs(n => SyntaxFacts.IsOpenBody(n.Kind)))
                 {
                     var structInit = WalkStructInitializer();
 
@@ -1523,18 +1567,18 @@ namespace Shinobytes.XzaarScript.Ast
         private AstNode WalkExpressionCore()
         {
             AstNode subExpr = null;
-            var before = this.Nodes.Current;
-            var isExpression = before.Type == SyntaxKind.Expression;
+            var before = this.Tokens.Current;
+            var isExpression = before.Kind == SyntaxKind.Expression;
             if (isExpression)
             {
-                subExpr = this.WalkExpression();
+                subExpr = this.WalkManyExpressions();
             }
             else
             {
                 subExpr = this.WalkSubExpression(Precedence.Expression);
             }
 
-            //if (isExpression && subExpr.NodeType != NodeTypes.EXPRESSION)
+            //if (isExpression && subExpr.Kind != SyntaxKind.EXPRESSION)
             //{
             //    return AstNode.Expression(subExpr);
             //}
@@ -1552,7 +1596,7 @@ namespace Shinobytes.XzaarScript.Ast
         {
             AstNode expr = null;
 
-            var tk = this.Nodes.Current.Kind;
+            var tk = this.Tokens.Current.Kind;
             switch (tk)
             {
                 case SyntaxKind.Identifier:
@@ -1565,10 +1609,14 @@ namespace Shinobytes.XzaarScript.Ast
                 case SyntaxKind.KeywordNull:
                     expr = WalkKnownConstant();
                     break;
-                case SyntaxKind.LiteralNumber:
-                case SyntaxKind.LiteralString:
-                case SyntaxKind.Literal:
-                    expr = Walk();
+                case SyntaxKind.OpenParan:
+                    expr = WalkCastOrParenExpressionOrLambdaOrTuple(precedence);
+                    break;
+                case SyntaxKind.Number:
+                    expr = WalkNumberLiteral();
+                    break;
+                case SyntaxKind.String:
+                    expr = WalkStringLiteral();
                     break;
                 //case SyntaxKind.KeywordNew:
                 //    expr = this.ParseNewExpression();
@@ -1585,12 +1633,20 @@ namespace Shinobytes.XzaarScript.Ast
             return this.WalkPostFixExpression(expr);
         }
 
+        private AstNode WalkCastOrParenExpressionOrLambdaOrTuple(Precedence precedence)
+        {
+            var openParen = Tokens.ConsumeExpected(SyntaxKind.OpenParan);
+            var expression = WalkSubExpression(Precedence.Expression);
+            Tokens.ConsumeExpected(SyntaxKind.CloseParan);
+            return expression;
+        }
+
         private AstNode WalkPostFixExpression(AstNode expr)
         {
             // Debug.Assert(expr != null);
-            if (expr == null && this.Nodes.Current != null)
+            if (expr == null && this.Tokens.Current != null)
             {
-                if (this.Nodes.Current.Kind == SyntaxKind.ArrayIndexExpression)
+                if (this.Tokens.Current.Kind == SyntaxKind.OpenBracket)
                 {
                     expr = WalkNewArrayInstance();
                     // array initializer, no need for expr to have a value.
@@ -1600,19 +1656,21 @@ namespace Shinobytes.XzaarScript.Ast
 
             while (!this.HasErrors)
             {
-                if (this.Nodes.Current == null) return expr;
-                SyntaxKind tk = this.Nodes.Current.Kind;
+                if (this.Tokens.Current == null) return expr;
+                SyntaxKind tk = this.Tokens.Current.Kind;
                 switch (tk)
                 {
-                    case SyntaxKind.Expression:
+                    case SyntaxKind.OpenParan:
                         expr = AstNode.Call(expr, this.WalkArgumentList());
                         break;
 
+                    case SyntaxKind.OpenBracket:
                     case SyntaxKind.AggregateObjectIndex:
-                    case SyntaxKind.ArrayIndexExpression:
-                        var walkArrayArgumentList = WalkArrayArgumentList();
-                        if (walkArrayArgumentList == null) return errorNodes.LastOrDefault();
-                        expr = AstNode.MemberAccess(expr, walkArrayArgumentList.FirstOrDefault()); // we only support one item for now                        
+                        {
+                            var walkArrayArgumentList = WalkArrayArgumentList();
+                            if (walkArrayArgumentList == null) return errorNodes.LastOrDefault();
+                            expr = AstNode.MemberAccess(expr, walkArrayArgumentList.FirstOrDefault()); // we only support one item for now                                                    
+                        }
                         break;
                     case SyntaxKind.UnaryIncrement:
                     case SyntaxKind.UnaryDecrement:
@@ -1623,20 +1681,19 @@ namespace Shinobytes.XzaarScript.Ast
 
                         var type = SyntaxFacts.GetPostfixUnaryExpression(tk);
 
-                        expr = AstNode.PostfixUnary(Nodes.Consume(), expr, type);
+                        expr = AstNode.PostfixUnary(Tokens.Consume(), expr, type);
                         // expr = _syntaxFactory.PostfixUnaryExpression(SyntaxFacts.GetPostfixUnaryExpression(tk), expr, this.EatToken());
                         break;
 
+
+                    case SyntaxKind.MinusGreater:
+                    case SyntaxKind.ColonColon:
                     case SyntaxKind.MemberAccess:
                     case SyntaxKind.Dot:
                         var identifier = WalkIdentifier();
                         expr = AstNode.MemberAccessChain(expr, AstNode.MemberAccess(identifier, expr.Type, FindMemberType(expr.ValueText, expr.Type, identifier)));
                         break;
-                    case SyntaxKind.PointerMemberAccess:
-                    case SyntaxKind.MinusGreater:
-                        // expr = _syntaxFactory.MemberAccessExpression(SyntaxKind.PointerMemberAccess, expr, this.Nodes.Next(), Walk(this.Nodes.Next()));
-                        throw new Exception("pointer member access");
-                        break;
+
                         //case SyntaxKind.Dot:
                         //    // if we have the error situation:
                         //    //
@@ -1681,7 +1738,7 @@ namespace Shinobytes.XzaarScript.Ast
 
         private AstNode WalkPostfixUnary(SyntaxKind type, AstNode item)
         {
-            var token = this.Nodes.Consume();
+            var token = this.Tokens.Consume();
             return AstNode.PostfixUnary(token, item);
         }
 
@@ -1699,16 +1756,16 @@ namespace Shinobytes.XzaarScript.Ast
             // return
             // if (...
             // parse out a missing name node for the expression, and keep on going
-            var tk = this.Nodes.Current.Kind;
+            var tk = this.Tokens.Current.Kind;
             if (SyntaxFacts.IsInvalidSubExpression(tk))
             {
-                return this.Error(tk + " is not a valid sub expression", Nodes.Current);
+                return this.Error(tk + " is not a valid sub expression", Tokens.Current);
             }
 
 
             if (tk == SyntaxKind.Expression)
             {
-                leftOperand = WalkExpression();
+                leftOperand = WalkManyExpressions();
             }
 
 
@@ -1718,7 +1775,7 @@ namespace Shinobytes.XzaarScript.Ast
             {
                 opKind = SyntaxFacts.GetPrefixUnaryExpression(tk);
                 newPrecedence = SyntaxFacts.GetPrecedence(opKind);
-                var opToken = this.Nodes.Consume();
+                var opToken = this.Tokens.Consume();
                 var operand = this.WalkSubExpression(newPrecedence);
                 //if (SyntaxFacts.IsIncrementOrDecrementOperator(opToken.Kind))
                 //{
@@ -1742,12 +1799,14 @@ namespace Shinobytes.XzaarScript.Ast
             while (true)
             {
                 // We either have a binary or assignment operator here, or we're finished.
-                if (this.Nodes.Current == null) // check for end of expression
+
+                if (CurrentToken == null)
                     break;
 
-                tk = this.Nodes.Current.Kind;
-
+                tk = CurrentToken.Kind;
                 bool isAssignmentOperator = false;
+
+
                 if (SyntaxFacts.IsExpectedBinaryOperator(tk) || SyntaxFacts.IsBinaryExpression(tk))
                 {
                     if (SyntaxFacts.IsExpectedBinaryOperator(tk))
@@ -1755,18 +1814,17 @@ namespace Shinobytes.XzaarScript.Ast
                     else
                         opKind = tk;
                 }
-                else if (SyntaxFacts.IsExpectedAssignmentOperator(tk) || SyntaxFacts.IsAssignmentExpression(tk))
+                else if (SyntaxFacts.IsExpectedAssignmentOperator(tk) || SyntaxFacts.IsAssignment(tk))
                 {
-                    if (SyntaxFacts.IsExpectedAssignmentOperator(tk))
-                        opKind = SyntaxFacts.GetAssignmentExpression(tk);
-                    else
-                        opKind = tk;
+                    //if (SyntaxFacts.IsExpectedAssignmentOperator(tk))
+                    //    opKind = SyntaxFacts.GetAssignmentExpression(tk);
+                    //else
+                    opKind = tk;
                     isAssignmentOperator = true;
                 }
                 else
                 {
-                    if (Nodes.Current.Type == SyntaxKind.StatementTerminator)
-                        Nodes.Consume();
+                    Tokens.Consume(SyntaxKind.Semicolon);
                     break;
                 }
 
@@ -1776,13 +1834,19 @@ namespace Shinobytes.XzaarScript.Ast
 
                 // check for >> or >>=
                 bool doubleOp = false;
+                if (tk == SyntaxKind.GreaterEquals
+                    && (this.Tokens.PeekNext().Kind == SyntaxKind.Greater || this.Tokens.PeekNext().Kind == SyntaxKind.GreaterEquals))
+                {
+
+                }
+
                 //if (tk == SyntaxKind.GreaterEquals
-                //    && (this.Nodes.PeekNext().Kind == SyntaxKind.Greater || this.Nodes.PeekNext().Kind == SyntaxKind.GreaterEquals))
+                //    && (this.Tokens.PeekNext().Kind == SyntaxKind.Greater || this.Tokens.PeekNext().Kind == SyntaxKind.GreaterEquals))
                 //{
                 //    // check to see if they really are adjacent
-                //    if (this.Nodes.Current.GetTrailingTriviaWidth() == 0 && this.Nodes.PeekNext().GetLeadingTriviaWidth() == 0)
+                //    if (this.Tokens.CurrentToken.GetTrailingTriviaWidth() == 0 && this.Tokens.PeekNext().GetLeadingTriviaWidth() == 0)
                 //    {
-                //        if (this.Nodes.PeekNext().Kind == SyntaxKind.Greater)
+                //        if (this.Tokens.PeekNext().Kind == SyntaxKind.Greater)
                 //        {
                 //            opKind = SyntaxFacts.GetBinaryExpression(SyntaxKind.GreaterGreater);
                 //        }
@@ -1809,50 +1873,52 @@ namespace Shinobytes.XzaarScript.Ast
                 }
 
                 // Precedence is okay, so we'll "take" this operator.
-                var opToken = Nodes.Consume(); // this.EatContextualToken(tk);
-                //if (doubleOp)
-                //{
-                //    // combine tokens into a single token
-                //    var opToken2 = this.EatToken();
-                //    var kind = opToken2.Kind == SyntaxKind.GreaterThanToken ? SyntaxKind.GreaterThanGreaterThanToken : SyntaxKind.GreaterThanGreaterThanEqualsToken;
-                //    opToken = SyntaxFactory.Token(opToken.GetLeadingTrivia(), kind, opToken2.GetTrailingTrivia());
-                //}
+                var opToken = Tokens.Consume(); // this.EatContextualToken(tk);
+                                                //if (doubleOp)
+                                                //{
+                                                //    // combine tokens into a single token
+                                                //    var opToken2 = this.EatToken();
+                                                //    var kind = opToken2.Kind == SyntaxKind.GreaterThanToken ? SyntaxKind.GreaterThanGreaterThanToken : SyntaxKind.GreaterThanGreaterThanEqualsToken;
+                                                //    opToken = SyntaxFactory.Token(opToken.GetLeadingTrivia(), kind, opToken2.GetTrailingTrivia());
+                                                //}
 
 
                 if (isAssignmentOperator)
                 {
                     // leftOperand = CheckValidLvalue(leftOperand);
                     var rightOperand = this.WalkSubExpression(newPrecedence);
+
+
                     switch (opKind)
                     {
-                        case SyntaxKind.Assign:
+                        case SyntaxKind.Equals:
                             leftOperand = AstNode.Assign(leftOperand, rightOperand);
                             break;
-                        case SyntaxKind.AssignAnd:
+                        case SyntaxKind.AndEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, '&', rightOperand));
                             break;
-                        case SyntaxKind.AssignOr:
+                        case SyntaxKind.OrEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, '|', rightOperand));
                             break;
-                        case SyntaxKind.AssignMultiply:
+                        case SyntaxKind.MultiplyEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, '*', rightOperand));
                             break;
-                        case SyntaxKind.AssignDivide:
+                        case SyntaxKind.DivideEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, '/', rightOperand));
                             break;
-                        case SyntaxKind.AssignMinus:
+                        case SyntaxKind.MinusEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, '-', rightOperand));
                             break;
-                        case SyntaxKind.AssignPlus:
+                        case SyntaxKind.PlusEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, '+', rightOperand));
                             break;
-                        case SyntaxKind.AssignLeftShift:
+                        case SyntaxKind.LessLessEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, "<<", rightOperand));
                             break;
-                        case SyntaxKind.AssignRightShift:
+                        case SyntaxKind.GreaterGreaterEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, ">>", rightOperand));
                             break;
-                        case SyntaxKind.AssignModulo:
+                        case SyntaxKind.ModuloEquals:
                             leftOperand = AstNode.Assign(leftOperand, AstNode.BinaryOperator((int)newPrecedence, leftOperand, '%', rightOperand));
                             break;
                     }
@@ -1861,7 +1927,7 @@ namespace Shinobytes.XzaarScript.Ast
                 }
                 else
                 {
-                    leftOperand = AstNode.BinaryOperator((int)newPrecedence, leftOperand, opToken.StringValue, this.WalkSubExpression(newPrecedence));
+                    leftOperand = AstNode.BinaryOperator((int)newPrecedence, leftOperand, opToken.Value, this.WalkSubExpression(newPrecedence));
                 }
             }
 
@@ -1877,9 +1943,9 @@ namespace Shinobytes.XzaarScript.Ast
 
             //if (tk == SyntaxKind.Question && precedence <= Precedence.Ternary)
             //{
-            //    var questionToken = this.Nodes.Next();
+            //    var questionToken = this.Tokens.Next();
             //    var colonLeft = this.ParseExpressionCore();
-            //    var colon = this.Nodes.Next(); // SyntaxKind.Colon
+            //    var colon = this.Tokens.Next(); // SyntaxKind.Colon
             //    var colonRight = this.ParseExpressionCore();
             //    leftOperand = AstNode.ConditionalExpression(leftOperand, questionToken, colonLeft, colon, colonRight);
             //}
@@ -1890,7 +1956,7 @@ namespace Shinobytes.XzaarScript.Ast
 
         private bool IsPossibleStatement()
         {
-            var tk = this.Nodes.Current.Kind;
+            var tk = this.Tokens.Current.Kind;
             switch (tk)
             {
                 case SyntaxKind.KeywordBreak:
@@ -1904,7 +1970,8 @@ namespace Shinobytes.XzaarScript.Ast
                 case SyntaxKind.KeywordReturn:
                 case SyntaxKind.KeywordSwitch:
                 case SyntaxKind.KeywordWhile:
-                case SyntaxKind.Scope:
+                case SyntaxKind.OpenParan:
+                case SyntaxKind.OpenBracket:
                 case SyntaxKind.Semicolon:
                     return true;
 
@@ -1923,18 +1990,14 @@ namespace Shinobytes.XzaarScript.Ast
 
         private bool IsPossibleExpression()
         {
-            var tk = this.Nodes.Current.Kind;
+            var tk = this.Tokens.Current.Kind;
             switch (tk)
             {
-
                 case SyntaxKind.ArgList:
-                case SyntaxKind.Constant:
-
                 case SyntaxKind.Expression:
                 case SyntaxKind.ArrayIndexExpression:
-                case SyntaxKind.LiteralNumber:
-                case SyntaxKind.LiteralString:
-                case SyntaxKind.Literal:
+                case SyntaxKind.Number:
+                case SyntaxKind.String:
                 case SyntaxKind.KeywordNew:
                 case SyntaxKind.KeywordTrue:
                 case SyntaxKind.KeywordFalse:
@@ -1950,15 +2013,15 @@ namespace Shinobytes.XzaarScript.Ast
                            || (SyntaxFacts.IsPredefinedType(tk) && tk != SyntaxKind.KeywordVoid)
                            || SyntaxFacts.IsAnyUnaryExpression(tk)
                            || SyntaxFacts.IsBinaryExpression(tk)
-                           || SyntaxFacts.IsAssignmentExpressionOperatorToken(tk);
+                           || SyntaxFacts.IsAssignment(tk);
             }
         }
 
         private void AssertMinExpectedNodeCount(int count)
         {
-            if (count > Nodes.Available)
+            if (count > Tokens.Available)
                 Error("Oh no! Unexpected end of script. We expected "
-                                                    + count + " more nodes, but there are only " + Nodes.Available + " left.", Nodes.Current);
+                                                    + count + " more nodes, but there are only " + Tokens.Available + " left.", Tokens.Current);
         }
 
 
@@ -1966,9 +2029,24 @@ namespace Shinobytes.XzaarScript.Ast
         //{
         //    var msg = "[Error] " + message;
         //    this.errors.Add(msg);
-        //    this.Nodes.Interrupted = true;
+        //    this.Tokens.Interrupted = true;
         //    return AstNode.Error(message);
         //}
+
+        private AstNode Error(string message, SyntaxToken token)
+        {
+            var msg = "[Error] " + message;
+            if (token != null)
+            {
+                msg += ". At line " + token.SourceLine;
+            }
+
+            var errorNode = AstNode.Error(message);
+            this.errors.Add(msg);
+            this.Tokens.Interrupted = true;
+            this.errorNodes.Add(errorNode);
+            return errorNode;
+        }
 
         private AstNode Error(string message, SyntaxNode token = null)
         {
@@ -1977,36 +2055,43 @@ namespace Shinobytes.XzaarScript.Ast
             {
                 if (token.TrailingToken != null)
                 {
-                    msg += ". At line " + token.TrailingToken.Line;
+                    msg += ". At line " + token.TrailingToken.SourceLine;
                 }
             }
             var errorNode = AstNode.Error(message, token);
 
             this.errors.Add(msg);
-            this.Nodes.Interrupted = true;
+            this.Tokens.Interrupted = true;
             this.errorNodes.Add(errorNode);
             return errorNode;
         }
 
+        private SyntaxToken CurrentToken => Tokens.Current;
+
         private bool EndOfStream()
         {
-            return this.HasErrors || Nodes.EndOfStream();
+            return this.HasErrors || Tokens.EndOfStream();
         }
 
-        private NodeStream Nodes => this.currentScope.Nodes;
+        private TokenStream Tokens => this.currentScope.Tokens;
 
-        private void BeginScope(NodeStream scopeNodes)
+        private void BeginScope(TokenStream tokens)
         {
-            this.currentScope = currentScope.BeginScope(scopeNodes);
+            this.currentScope = currentScope.BeginScope(tokens);
+        }
+
+        private void EndScope()
+        {
+            this.currentScope = currentScope.EndScope();
         }
 
         private void EndScope(SyntaxKind endType)
         {
             this.currentScope = currentScope.EndScope();
 
-            if (Nodes.Current != null)
+            if (Tokens.Current != null)
             {
-                Nodes.Consume(n => n.Kind == endType);
+                Tokens.Consume(n => n.Kind == endType);
             }
 
             // Debug.Assert(node != null);

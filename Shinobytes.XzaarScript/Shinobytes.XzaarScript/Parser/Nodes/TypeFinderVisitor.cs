@@ -50,6 +50,35 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return null;
         }
 
+        public override ForExpression Visit(ForLoopNode loop)
+        {
+            if (loop.Body != null) Visit(loop.Body);
+            return null;
+        }
+
+
+        public override ForEachExpression Visit(ForeachLoopNode loop)
+        {
+            if (loop.Body != null) Visit(loop.Body);
+            return null;
+        }
+
+        public override SwitchCaseExpression Visit(CaseNode @case)
+        {
+            if (@case.Body != null) Visit(@case.Body);
+            return null;
+        }
+
+        public override SwitchExpression Visit(MatchNode loop)
+        {
+            if (loop.Cases != null)
+                foreach (var @case in loop.Cases)
+                    if (@case != null)
+                        Visit(@case);
+
+            return null;
+        }
+
         public override XzaarExpression Visit(ReturnNode returnNode)
         {
             if (returnNode.ReturnExpression != null)
@@ -99,12 +128,12 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         private XzaarType TryGetTypeFromExpression(AstNode expr, FunctionNode currentFunction = null)
         {
-            if (expr.NodeType == NodeTypes.NULL_EMPTY)
+            if (expr.Kind == SyntaxKind.Empty)
             {
                 return XzaarBaseTypes.Void;
             }
-
-            if (expr.NodeType == NodeTypes.MATH)
+            
+            if (SyntaxFacts.IsMath(expr.Kind))
             {
                 var m = expr as BinaryOperatorNode;
                 if (m != null)
@@ -119,16 +148,43 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
                 return XzaarBaseTypes.Number;
             }
 
-            if (expr.NodeType == NodeTypes.EQUALITY_OPERATOR || expr.NodeType == NodeTypes.EQUALITY)
+            if (SyntaxFacts.IsEquality(expr.Kind))
             {
                 return XzaarBaseTypes.Boolean;
             }
 
-            if (expr.NodeType == NodeTypes.LITERAL)
+            if (expr.Kind == SyntaxKind.KeywordTrue || expr.Kind == SyntaxKind.KeywordFalse)
+                return XzaarBaseTypes.Boolean;
+
+            if (SyntaxFacts.IsLiteral(expr.Kind))
+            {
+                switch (expr.NodeName.ToLower())
+                {
+                    case "string": return XzaarBaseTypes.String;
+                    case "number": return XzaarBaseTypes.Number;
+                    case "name":
+                        {
+                            var constValue = (expr.Value + "").ToLower();
+                            if (constValue == "true" || constValue == "false")
+                                return XzaarBaseTypes.Boolean;
+                            if (expr.Value + "" == "null")
+                                return XzaarBaseTypes.Any;
+                        }
+                        break;
+                }
+            }
+
+            if (expr.Kind == SyntaxKind.KeywordNull)
+                return XzaarBaseTypes.Any;
+
+            if (expr.Kind == SyntaxKind.KeywordTrue || expr.Kind == SyntaxKind.KeywordTrue)
+                return XzaarBaseTypes.Boolean;
+
+            if (expr.Kind == SyntaxKind.Identifier || SyntaxFacts.IsLiteral(expr.Kind))
             {
                 var nn = expr.NodeName.ToLower();
                 if (nn == "string") return XzaarBaseTypes.String;
-                if (nn == "datetime") return XzaarBaseTypes.DateTime;
+                if (nn == "date") return XzaarBaseTypes.Date;
                 if (nn == "number") return XzaarBaseTypes.Number;
                 if (nn == "array") return XzaarBaseTypes.Array;
                 if (nn == "char") return XzaarBaseTypes.Char;
@@ -157,13 +213,13 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
                 }
             }
 
-            if (expr.NodeType == NodeTypes.EXPRESSION)
+            if (expr.Kind == SyntaxKind.Expression)
             {
                 // expression can include either a boolean return, number, string or object. well any actaully. damn xD
                 throw new NotImplementedException();
             }
 
-            if (expr.NodeType == NodeTypes.ACCESS)
+            if (SyntaxFacts.IsMemberAccess(expr.Kind))
             {
                 var access = expr as MemberAccessNode;
                 if (access != null)
@@ -183,12 +239,12 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
                 return null;
             }
 
-            if (expr.NodeType == NodeTypes.UNARY_OPERATOR)
+            if (SyntaxFacts.IsAnyUnaryExpression(expr.Kind))
             {
                 return XzaarBaseTypes.Number;
             }
 
-            if (expr.NodeType == NodeTypes.CALL)
+            if (expr.Kind == SyntaxKind.FunctionInvocation)
             {
                 var function = context.FindFunctionByExpression(expr);
 
@@ -237,10 +293,10 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private FunctionNode TryGetCurrentFunctionFromExpression(ReturnNode returnNode)
         {
             AstNode node = returnNode;
-            while (node != null && node.NodeType != NodeTypes.FUNCTION)
+            while (node != null && node.Kind != SyntaxKind.FunctionDefinitionExpression)
             {
                 node = node.Parent;
-                if (node.NodeType == NodeTypes.FUNCTION) return node as FunctionNode;
+                if (node != null && node.Kind == SyntaxKind.FunctionDefinitionExpression) return node as FunctionNode;
             }
             return null;
         }

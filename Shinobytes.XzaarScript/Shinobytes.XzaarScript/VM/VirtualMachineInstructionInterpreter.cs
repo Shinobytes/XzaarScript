@@ -340,7 +340,7 @@ namespace Shinobytes.XzaarScript.VM
         {
             var method = instruction.Arguments[0] as MethodDefinition;
             if (method == null || method.IsExtern)
-                throw new RuntimeException("Function needs to be defined in the script its being used by. External functions not implemented yet");
+                throw new RuntimeException("FunctionDefinitionExpression needs to be defined in the script its being used by. External functions not implemented yet");
 
             var returnVariableRef = instruction.Arguments[1];
             var targetVariable = rt.FindVariable(returnVariableRef.Name);

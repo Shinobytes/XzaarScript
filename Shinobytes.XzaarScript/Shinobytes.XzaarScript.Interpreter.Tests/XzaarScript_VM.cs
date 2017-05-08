@@ -1520,7 +1520,6 @@ success
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .Compile()
                 .Run();
@@ -1532,7 +1531,6 @@ success
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .Compile()
                 .Load();

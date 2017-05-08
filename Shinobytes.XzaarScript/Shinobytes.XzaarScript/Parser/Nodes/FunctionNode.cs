@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Shinobytes.XzaarScript.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
@@ -14,7 +15,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private Func<XzaarType> returnTypeBinding;
 
         internal FunctionNode(string name, FunctionParametersNode parameters, int nodeIndex)
-            : base(NodeTypes.FUNCTION, "EXTERN", name, nodeIndex)
+            : base(SyntaxKind.FunctionDefinitionExpression, "EXTERN", name, nodeIndex)
         {
             Name = name;
             Parameters = parameters;
@@ -23,7 +24,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         }
 
         internal FunctionNode(string name, XzaarType returnType, FunctionParametersNode parameters, int nodeIndex)
-            : base(NodeTypes.FUNCTION, "EXTERN", name, nodeIndex)
+            : base(SyntaxKind.FunctionDefinitionExpression, "EXTERN", name, nodeIndex)
         {
             this.returnType = returnType;
             if (this.returnType != null) this.Type = this.returnType.Name;
@@ -34,7 +35,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         }
 
         internal FunctionNode(string name, FunctionParametersNode parameters, AstNode body, int nodeIndex)
-            : base(NodeTypes.FUNCTION, null, name, nodeIndex)
+            : base(SyntaxKind.FunctionDefinitionExpression, null, name, nodeIndex)
         {
             Name = name;
             Parameters = parameters;
@@ -44,7 +45,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         }
 
         internal FunctionNode(string name, XzaarType returnType, FunctionParametersNode parameters, AstNode body, int nodeIndex)
-            : base(NodeTypes.FUNCTION, null, name, nodeIndex)
+            : base(SyntaxKind.FunctionDefinitionExpression, null, name, nodeIndex)
         {
             this.returnType = returnType;
             if (this.returnType != null) this.Type = this.returnType.Name;

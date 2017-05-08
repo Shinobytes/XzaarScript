@@ -107,7 +107,7 @@ namespace Shinobytes.XzaarScript
                 case "f64": return TypeCode.Double;
                 case "string": return TypeCode.String;
                 case "object": case "any": return TypeCode.Any;
-                case "datetime": return TypeCode.DateTime;
+                case "datetime": return TypeCode.Date;
             }
             if (this != UnderlyingSystemType && UnderlyingSystemType != null)
                 return XzaarType.GetTypeCode(UnderlyingSystemType);

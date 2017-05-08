@@ -1,9 +1,11 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class ArgumentNode : AstNode
     {
         public ArgumentNode(AstNode item, /*XzaarNode arrayIndex, */int index, int nodeIndex)
-            : base(NodeTypes.ARGUMENT, null, null, nodeIndex)
+            : base(SyntaxKind.ArgumentExpression, null, null, nodeIndex)
         {
             Item = item;
             //ArrayIndex = arrayIndex;

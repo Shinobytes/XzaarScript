@@ -21,7 +21,7 @@ namespace Shinobytes.XzaarScript.Parser
         XzaarExpression Visit(MemberAccessNode access);
         BinaryExpression Visit(AssignNode assign);
         XzaarExpression Visit(UnaryNode unary);
-        SwitchCaseExpression Visit(CaseNode matchCase);
+        SwitchCaseExpression Visit(CaseNode @case);
         SwitchExpression Visit(MatchNode match);
         DoWhileExpression Visit(DoWhileLoopNode loop);
         WhileExpression Visit(WhileLoopNode loop);

@@ -1,9 +1,11 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class BreakNode : ControlFlowNode
     {
         public BreakNode(int nodeIndex)
-            : base(NodeTypes.BREAK, "BREAK", nodeIndex)
+            : base(SyntaxKind.KeywordBreak, "BREAK", nodeIndex)
         {
         }
 
@@ -17,5 +19,5 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return "break";
         }
     }
-  
+
 }

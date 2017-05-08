@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
+using System.Windows.Forms.ComponentModel.Com2Interop;
 using Shinobytes.XzaarScript.Parser;
 using Shinobytes.XzaarScript.Parser.Nodes;
 
@@ -20,17 +21,11 @@ namespace Shinobytes.XzaarScript.Ast
             "null", "true", "false"
         };
 
+        public static bool IsKeyword(object strObject) => IsKeyword(strObject.ToString());
 
-        public static bool IsKeyword(string s)
-        {
+        public static bool IsKeyword(string s) => knownKeywords.Contains(s.ToLower()) || IsKnownConstant(s);
 
-            return knownKeywords.Contains(s.ToLower()) || IsKnownConstant(s);
-        }
-
-        public static bool IsKnownConstant(string s)
-        {
-            return knownConstants.Contains(s.ToLower());
-        }
+        public static bool IsKnownConstant(string s) => knownConstants.Contains(s.ToLower());
 
         public static SyntaxKind GetKeywordSubType(string keyword)
         {
@@ -74,87 +69,86 @@ namespace Shinobytes.XzaarScript.Ast
             return SyntaxKind.None;
         }
 
+        //public static SyntaxKind GetSubKind(SyntaxKind syntaxKind, SyntaxKind tokenType)
+        //{
+        //    switch (syntaxKind)
+        //    {
+        //        case SyntaxKind.String:
+        //        case SyntaxKind.Number:
+        //        case SyntaxKind.Number:
+        //        case SyntaxKind.String:
+        //            return syntaxKind;
 
-        public static SyntaxKind GetSubKind(SyntaxKind syntaxKind, SyntaxKind tokenType)
-        {
-            switch (syntaxKind)
-            {
-                case SyntaxKind.Literal:
-                    {
-                        if (tokenType == SyntaxKind.Number) return SyntaxKind.LiteralNumber;
-                        if (tokenType == SyntaxKind.String) return SyntaxKind.LiteralString;
-                        break;
-                    }
-                case SyntaxKind.UnaryOperator:
-                    {
-                        if (tokenType == SyntaxKind.Not) return SyntaxKind.UnaryNot;
-                        // if (tokenType == TokenType.Tilde)
-                        if (tokenType == SyntaxKind.Plus) return SyntaxKind.UnaryPlus;
-                        if (tokenType == SyntaxKind.Minus) return SyntaxKind.UnaryMinus;
-                        if (tokenType == SyntaxKind.PlusPlus) return SyntaxKind.UnaryIncrement;
-                        if (tokenType == SyntaxKind.MinusMinus) return SyntaxKind.UnaryDecrement;
-                        break;
-                    }
-                case SyntaxKind.ArithmeticOperator:
-                    {
-                        if (tokenType == SyntaxKind.Multiply) return SyntaxKind.ArithmeticMultiply;
-                        if (tokenType == SyntaxKind.Divide) return SyntaxKind.ArithmeticDivide;
-                        if (tokenType == SyntaxKind.Plus) return SyntaxKind.ArithmeticAdd;
-                        if (tokenType == SyntaxKind.Minus) return SyntaxKind.ArithmeticSubtract;
-                        if (tokenType == SyntaxKind.Modulo) return SyntaxKind.ArithmeticModulo;
-                        break;
-                    }
-                case SyntaxKind.LogicalConditionalOperator:
-                    {
-                        if (tokenType == SyntaxKind.Less) return SyntaxKind.ConditionalLessThan;
-                        if (tokenType == SyntaxKind.Greater) return SyntaxKind.ConditionalGreaterThan;
-                        if (tokenType == SyntaxKind.LessEquals) return SyntaxKind.ConditionalLessOrEquals;
-                        if (tokenType == SyntaxKind.GreaterEquals) return SyntaxKind.ConditionalGreaterOrEquals;
-                        if (tokenType == SyntaxKind.OrOr) return SyntaxKind.LogicalOr;
-                        if (tokenType == SyntaxKind.AndAnd) return SyntaxKind.LogicalAnd;
-                        break;
-                    }
-                case SyntaxKind.EqualityOperator:
-                    {
-                        if (tokenType == SyntaxKind.EqualsEquals) return SyntaxKind.EqualityEquals;
-                        if (tokenType == SyntaxKind.NotEquals) return SyntaxKind.EqualityNotEquals;
-                        break;
-                    }
-                case SyntaxKind.LogicalBitOperator:
-                    {
-                        if (tokenType == SyntaxKind.And) return SyntaxKind.BitAnd;
-                        // if (tokenType == TokenType.Xor) return SyntaxKind.BitXor;
-                        if (tokenType == SyntaxKind.Or) return SyntaxKind.BitOr;
-                        break;
-                    }
-                case SyntaxKind.ConditionalOperator:
-                    {
-                        if (tokenType == SyntaxKind.AndAnd) return SyntaxKind.LogicalAnd;
-                        if (tokenType == SyntaxKind.OrOr) return SyntaxKind.LogicalOr;
-                        break;
-                    }
-                //case NodeType.NullCoalescingOperator:
-                //    {
-                //        if (tokenType == TokenType.QuestionQuestion) return SyntaxKind...;                        
-                //        break;
-                //    }
-                case SyntaxKind.AssignmentOperator:
-                    {
-                        if (tokenType == SyntaxKind.Equals) return SyntaxKind.Assign;
-                        if (tokenType == SyntaxKind.PlusEquals) return SyntaxKind.AssignPlus;
-                        if (tokenType == SyntaxKind.MinusEquals) return SyntaxKind.AssignMinus;
-                        if (tokenType == SyntaxKind.DivideEquals) return SyntaxKind.AssignDivide;
-                        if (tokenType == SyntaxKind.MultiplyEquals) return SyntaxKind.AssignMultiply;
-                        if (tokenType == SyntaxKind.ModuloEquals) return SyntaxKind.AssignModulo;
-                        if (tokenType == SyntaxKind.LessLessEquals) return SyntaxKind.AssignLeftShift;
-                        if (tokenType == SyntaxKind.GreaterGreaterEquals) return SyntaxKind.AssignRightShift;
-                        if (tokenType == SyntaxKind.EqualsGreater) return SyntaxKind.Lambda;
-                        if (tokenType == SyntaxKind.OrEquals) return SyntaxKind.AssignOr;
-                        break;
-                    }
-            }
-            return SyntaxKind.None;
-        }
+        //        case SyntaxKind.UnaryOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.Not) return SyntaxKind.UnaryNot;
+        //                // if (tokenType == TokenType.Tilde)
+        //                if (tokenType == SyntaxKind.Plus) return SyntaxKind.UnaryPlus;
+        //                if (tokenType == SyntaxKind.Minus) return SyntaxKind.UnaryMinus;
+        //                if (tokenType == SyntaxKind.PlusPlus) return SyntaxKind.UnaryIncrement;
+        //                if (tokenType == SyntaxKind.MinusMinus) return SyntaxKind.UnaryDecrement;
+        //                break;
+        //            }
+        //        case SyntaxKind.ArithmeticOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.Multiply) return SyntaxKind.ArithmeticMultiply;
+        //                if (tokenType == SyntaxKind.Divide) return SyntaxKind.ArithmeticDivide;
+        //                if (tokenType == SyntaxKind.Plus) return SyntaxKind.ArithmeticAdd;
+        //                if (tokenType == SyntaxKind.Minus) return SyntaxKind.ArithmeticSubtract;
+        //                if (tokenType == SyntaxKind.Modulo) return SyntaxKind.ArithmeticModulo;
+        //                break;
+        //            }
+        //        case SyntaxKind.LogicalConditionalOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.Less) return SyntaxKind.ConditionalLessThan;
+        //                if (tokenType == SyntaxKind.Greater) return SyntaxKind.ConditionalGreaterThan;
+        //                if (tokenType == SyntaxKind.LessEquals) return SyntaxKind.ConditionalLessOrEquals;
+        //                if (tokenType == SyntaxKind.GreaterEquals) return SyntaxKind.ConditionalGreaterOrEquals;
+        //                if (tokenType == SyntaxKind.OrOr) return SyntaxKind.LogicalOr;
+        //                if (tokenType == SyntaxKind.AndAnd) return SyntaxKind.LogicalAnd;
+        //                break;
+        //            }
+        //        case SyntaxKind.EqualityOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.EqualsEquals) return SyntaxKind.EqualsEquals;
+        //                if (tokenType == SyntaxKind.NotEquals) return SyntaxKind.NotEquals;
+        //                break;
+        //            }
+        //        case SyntaxKind.LogicalBitOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.And) return SyntaxKind.BitAnd;
+        //                // if (tokenType == TokenType.Xor) return SyntaxKind.BitXor;
+        //                if (tokenType == SyntaxKind.Or) return SyntaxKind.BitOr;
+        //                break;
+        //            }
+        //        case SyntaxKind.ConditionalOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.AndAnd) return SyntaxKind.LogicalAnd;
+        //                if (tokenType == SyntaxKind.OrOr) return SyntaxKind.LogicalOr;
+        //                break;
+        //            }
+        //        case SyntaxKind.NullCoalescingOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.QuestionQuestion) return SyntaxKind.NullCoalescingOperator;
+        //                break;
+        //            }
+        //        case SyntaxKind.AssignmentOperator:
+        //            {
+        //                if (tokenType == SyntaxKind.Equals) return SyntaxKind.Assign;
+        //                if (tokenType == SyntaxKind.PlusEquals) return SyntaxKind.AssignPlus;
+        //                if (tokenType == SyntaxKind.MinusEquals) return SyntaxKind.AssignMinus;
+        //                if (tokenType == SyntaxKind.DivideEquals) return SyntaxKind.AssignDivide;
+        //                if (tokenType == SyntaxKind.MultiplyEquals) return SyntaxKind.AssignMultiply;
+        //                if (tokenType == SyntaxKind.ModuloEquals) return SyntaxKind.AssignModulo;
+        //                if (tokenType == SyntaxKind.LessLessEquals) return SyntaxKind.AssignLeftShift;
+        //                if (tokenType == SyntaxKind.GreaterGreaterEquals) return SyntaxKind.AssignRightShift;
+        //                if (tokenType == SyntaxKind.EqualsGreater) return SyntaxKind.Lambda;
+        //                if (tokenType == SyntaxKind.OrEquals) return SyntaxKind.AssignOr;
+        //                break;
+        //            }
+        //    }
+        //    return SyntaxKind.None;
+        //}
 
         public static SyntaxKind GetNodeType(SyntaxKind tokenType)
         {
@@ -162,20 +156,19 @@ namespace Shinobytes.XzaarScript.Ast
             {
                 case SyntaxKind.Dot: return SyntaxKind.MemberAccess;
 
-                // case TokenType.QuestionMarkDot: return NodeType.NullConditionalMemberAccess;
+                // case TokenType.QuestionMarkDot: return Kind.NullConditionalMemberAccess;
                 case SyntaxKind.Identifier: return SyntaxKind.Identifier;
 
                 case SyntaxKind.Number:
                 case SyntaxKind.String:
-                    return SyntaxKind.Literal;
-
                 case SyntaxKind.MinusGreater:
-                    return SyntaxKind.PointerMemberAccess;
+                    return tokenType;
 
                 case SyntaxKind.MinusMinus:
                 case SyntaxKind.PlusPlus:
                 case SyntaxKind.Not:
-                    return SyntaxKind.UnaryOperator;
+                    // return SyntaxKind.UnaryOperator;
+                    return tokenType;
 
                 case SyntaxKind.MinusEquals:
                 case SyntaxKind.PlusEquals:
@@ -188,7 +181,8 @@ namespace Shinobytes.XzaarScript.Ast
                 case SyntaxKind.OrEquals:
                 case SyntaxKind.GreaterGreaterEquals:
                 case SyntaxKind.LessLessEquals:
-                    return SyntaxKind.AssignmentOperator;
+                    // return SyntaxKind.AssignmentOperator;
+                    return tokenType;
 
                 case SyntaxKind.GreaterGreater:
                 case SyntaxKind.LessLess:
@@ -197,7 +191,8 @@ namespace Shinobytes.XzaarScript.Ast
                 case SyntaxKind.Multiply:
                 case SyntaxKind.Divide:
                 case SyntaxKind.Modulo:
-                    return SyntaxKind.ArithmeticOperator;
+                    // return SyntaxKind.ArithmeticOperator;
+                    return tokenType;
 
                 case SyntaxKind.GreaterEquals:
                 case SyntaxKind.Greater:
@@ -205,26 +200,29 @@ namespace Shinobytes.XzaarScript.Ast
                 case SyntaxKind.Less:
                 case SyntaxKind.AndAnd:
                 case SyntaxKind.OrOr:
-                    return SyntaxKind.LogicalConditionalOperator;
+                    // return SyntaxKind.LogicalConditionalOperator;
+                    return tokenType;
 
                 case SyntaxKind.Or:
                 case SyntaxKind.And:
-                    return SyntaxKind.LogicalBitOperator;
+                    // return SyntaxKind.LogicalBitOperator;
+                    return tokenType;
 
                 case SyntaxKind.EqualsEquals:
                 case SyntaxKind.NotEquals:
-                    return SyntaxKind.EqualityOperator;
+                    // return SyntaxKind.EqualityOperator;
+                    return tokenType;
 
                 case SyntaxKind.ColonColon:
                 case SyntaxKind.Colon:
                     return tokenType;
 
                 case SyntaxKind.Comma:
-                    return SyntaxKind.Separator;
+                    return SyntaxKind.Comma;
 
                 case SyntaxKind.Semicolon:
-                    return SyntaxKind.StatementTerminator;
-                    // case TokenType.QuestionMark: return NodeType.EqualityOperator;
+                    return SyntaxKind.Semicolon;
+                    // case TokenType.QuestionMark: return Kind.EqualityOperator;
             }
 
             return SyntaxKind.Identifier;
@@ -234,17 +232,18 @@ namespace Shinobytes.XzaarScript.Ast
         {
             switch (op)
             {
-                case SyntaxKind.Assign:
-                case SyntaxKind.AssignPlus:
-                case SyntaxKind.AssignMinus:
-                case SyntaxKind.AssignMultiply:
-                case SyntaxKind.AssignDivide:
-                case SyntaxKind.AssignModulo:
-                case SyntaxKind.AssignAnd:
-                case SyntaxKind.AssignXor:
-                case SyntaxKind.AssignOr:
-                case SyntaxKind.AssignLeftShift:
-                case SyntaxKind.AssignRightShift:
+                case SyntaxKind.Equals:
+                case SyntaxKind.PlusEquals:
+                case SyntaxKind.MinusEquals:
+                case SyntaxKind.MultiplyEquals:
+                case SyntaxKind.DivideEquals:
+                case SyntaxKind.ModuloEquals:
+                case SyntaxKind.AndEquals:
+                case SyntaxKind.CaretEquals:
+                case SyntaxKind.OrEquals:
+                case SyntaxKind.LessLessEquals:
+                case SyntaxKind.GreaterGreaterEquals:
+                case SyntaxKind.QuestionQuestion:
                     // case SyntaxKind.Coalesce:
                     return true;
                 default:
@@ -275,27 +274,18 @@ namespace Shinobytes.XzaarScript.Ast
 
         public static Precedence GetPrecedence(SyntaxKind op)
         {
+            if (IsAssignment(op)) return Precedence.Assignment;
+
             switch (op)
             {
-                case SyntaxKind.Assign:
-                case SyntaxKind.AssignPlus:
-                case SyntaxKind.AssignMinus:
-                case SyntaxKind.AssignMultiply:
-                case SyntaxKind.AssignDivide:
-                case SyntaxKind.AssignModulo:
-                case SyntaxKind.AssignAnd:
-                case SyntaxKind.AssignXor:
-                case SyntaxKind.AssignOr:
-                case SyntaxKind.AssignLeftShift:
-                case SyntaxKind.AssignRightShift: return Precedence.Assignment;
                 // case SyntaxKind.CoalesceExpression: return Precedence.Coalescing;
                 case SyntaxKind.LogicalOr: return Precedence.ConditionalOr;
                 case SyntaxKind.LogicalAnd: return Precedence.ConditionalAnd;
                 case SyntaxKind.BitOr: return Precedence.LogicalOr;
                 case SyntaxKind.BitXor: return Precedence.LogicalXor;
                 case SyntaxKind.BitAnd: return Precedence.LogicalAnd;
-                case SyntaxKind.EqualityEquals:
-                case SyntaxKind.EqualityNotEquals: return Precedence.Equality;
+                case SyntaxKind.EqualsEquals:
+                case SyntaxKind.NotEquals: return Precedence.Equality;
                 case SyntaxKind.ConditionalLessThan:
                 case SyntaxKind.ConditionalLessOrEquals:
                 case SyntaxKind.ConditionalGreaterThan:
@@ -304,15 +294,15 @@ namespace Shinobytes.XzaarScript.Ast
                     //case SyntaxKind.AsExpression:
                     //case SyntaxKind.IsPatternExpression:
                     return Precedence.Relational;
-                case SyntaxKind.ArithmeticLeftShift:
-                case SyntaxKind.ArithmeticRightShift: return Precedence.Shift;
-                case SyntaxKind.ArithmeticAdd:
-                case SyntaxKind.ArithmeticSubtract: return Precedence.Additive;
-                case SyntaxKind.ArithmeticMultiply:
-                case SyntaxKind.ArithmeticDivide:
-                case SyntaxKind.ArithmeticModulo: return Precedence.Mutiplicative;
-                case SyntaxKind.UnaryPlus:
-                case SyntaxKind.UnaryMinus:
+                case SyntaxKind.LessLess:
+                case SyntaxKind.GreaterGreater: return Precedence.Shift;
+                case SyntaxKind.Plus:
+                case SyntaxKind.Minus: return Precedence.Additive;
+                case SyntaxKind.Multiply:
+                case SyntaxKind.Divide:
+                case SyntaxKind.Modulo: return Precedence.Mutiplicative;
+                case SyntaxKind.PlusPlus:
+                case SyntaxKind.MinusMinus:
                 case SyntaxKind.BitNot:
                 case SyntaxKind.Not:
                 case SyntaxKind.UnaryIncrement:
@@ -342,32 +332,21 @@ namespace Shinobytes.XzaarScript.Ast
             //     pre-decrement-expression
             //     await-expression
 
-            switch (node.Type)
+            switch (node.Kind)
             {
                 case SyntaxKind.PostfixDecrement:
                 case SyntaxKind.PostfixIncrement:
                 case SyntaxKind.FunctionInvocation:
                     return true;
-                    //case NodeType.NullConditionalMemberAccess:
+                    //case Kind.NullConditionalMemberAccess:
                     //    var access = ... get the non-null node and check with that one
                     //    return IsStatementExpression(node....);
             }
+            if (IsAssignment(node.Kind))
+                return true;
 
             switch (node.Kind)
             {
-
-                case SyntaxKind.Assign:
-                // case ObjectCreationExpression:
-                case SyntaxKind.AssignPlus:
-                case SyntaxKind.AssignMinus:
-                case SyntaxKind.AssignMultiply:
-                case SyntaxKind.AssignDivide:
-                case SyntaxKind.AssignModulo:
-                case SyntaxKind.AssignAnd:
-                case SyntaxKind.AssignOr:
-                case SyntaxKind.AssignXor:
-                case SyntaxKind.AssignLeftShift:
-                case SyntaxKind.AssignRightShift:
                 case SyntaxKind.UnaryIncrement:
                 case SyntaxKind.UnaryDecrement:
                     return true;
@@ -377,45 +356,21 @@ namespace Shinobytes.XzaarScript.Ast
             }
         }
 
-        public static bool IsExpectedPrefixUnaryOperator(SyntaxKind kind)
-        {
-            return IsPrefixUnaryExpression(kind);
-        }
+        public static bool IsExpectedPrefixUnaryOperator(SyntaxKind kind) => IsPrefixUnaryExpression(kind);
 
-        public static bool IsExpectedBinaryOperator(SyntaxKind kind)
-        {
-            return IsBinaryExpression(kind);
-        }
+        public static bool IsExpectedBinaryOperator(SyntaxKind kind) => IsBinaryExpression(kind);
 
-        public static bool IsExpectedAssignmentOperator(SyntaxKind kind)
-        {
-            return IsAssignmentExpressionOperatorToken(kind);
-        }
+        public static bool IsExpectedAssignmentOperator(SyntaxKind kind) => IsAssignment(kind);
 
+        public static bool IsAnyUnaryExpression(SyntaxKind token) => IsPrefixUnaryExpression(token) || IsPostfixUnaryExpression(token);
 
-        public static bool IsAnyUnaryExpression(SyntaxKind token)
-        {
-            return IsPrefixUnaryExpression(token) || IsPostfixUnaryExpression(token);
-        }
+        public static bool IsPrefixUnaryExpression(SyntaxKind token) => GetPrefixUnaryExpression(token) != SyntaxKind.None;
 
-        public static bool IsPrefixUnaryExpression(SyntaxKind token)
-        {
-            return GetPrefixUnaryExpression(token) != SyntaxKind.None;
-        }
+        public static bool IsPrefixUnaryExpressionOperatorToken(SyntaxKind token) => GetPrefixUnaryExpression(token) != SyntaxKind.None;
 
-        public static bool IsPrefixUnaryExpressionOperatorToken(SyntaxKind token)
-        {
-            return GetPrefixUnaryExpression(token) != SyntaxKind.None;
-        }
-        public static bool IsPostfixUnaryExpression(SyntaxKind token)
-        {
-            return GetPostfixUnaryExpression(token) != SyntaxKind.None;
-        }
+        public static bool IsPostfixUnaryExpression(SyntaxKind token) => GetPostfixUnaryExpression(token) != SyntaxKind.None;
 
-        public static bool IsPostfixUnaryExpressionToken(SyntaxKind token)
-        {
-            return GetPostfixUnaryExpression(token) != SyntaxKind.None;
-        }
+        public static bool IsPostfixUnaryExpressionToken(SyntaxKind token) => GetPostfixUnaryExpression(token) != SyntaxKind.None;
 
         public static SyntaxKind GetPostfixUnaryExpression(SyntaxKind token)
         {
@@ -431,12 +386,13 @@ namespace Shinobytes.XzaarScript.Ast
         {
             switch (token)
             {
-                case SyntaxKind.ArithmeticAdd: case SyntaxKind.UnaryPlus: case SyntaxKind.Plus: return SyntaxKind.UnaryPlus;
-                case SyntaxKind.ArithmeticSubtract: case SyntaxKind.UnaryMinus: case SyntaxKind.Minus: return SyntaxKind.UnaryMinus;
+                case SyntaxKind.Plus: return SyntaxKind.PlusPlus;
+                case SyntaxKind.Minus: return SyntaxKind.MinusMinus;
                 // case SyntaxKind.UnaryNot: case SyntaxKind.Tilde: return SyntaxKind.UnaryNot;
                 case SyntaxKind.UnaryNot: case SyntaxKind.Not: return SyntaxKind.UnaryNot;
                 case SyntaxKind.UnaryIncrement: case SyntaxKind.PlusPlus: return SyntaxKind.UnaryIncrement;
                 case SyntaxKind.UnaryDecrement: case SyntaxKind.MinusMinus: return SyntaxKind.UnaryDecrement;
+                case SyntaxKind.UnaryExpression: return SyntaxKind.UnaryExpression;
                 default: return SyntaxKind.None;
             }
         }
@@ -459,50 +415,53 @@ namespace Shinobytes.XzaarScript.Ast
                 case SyntaxKind.BitOr: case SyntaxKind.Or: return SyntaxKind.BitOr;
                 case SyntaxKind.BitXor: case SyntaxKind.Caret: return SyntaxKind.BitXor;
                 case SyntaxKind.BitAnd: case SyntaxKind.And: return SyntaxKind.BitAnd;
-                case SyntaxKind.EqualityEquals: case SyntaxKind.EqualsEquals: return SyntaxKind.EqualityEquals;
-                case SyntaxKind.EqualityNotEquals: case SyntaxKind.NotEquals: return SyntaxKind.EqualityNotEquals;
+                case SyntaxKind.EqualsEquals: return SyntaxKind.EqualsEquals;
+                case SyntaxKind.NotEquals: return SyntaxKind.NotEquals;
                 case SyntaxKind.ConditionalLessThan: case SyntaxKind.Less: return SyntaxKind.ConditionalLessThan;
                 case SyntaxKind.ConditionalLessOrEquals: case SyntaxKind.LessEquals: return SyntaxKind.ConditionalLessOrEquals;
                 case SyntaxKind.ConditionalGreaterThan: case SyntaxKind.Greater: return SyntaxKind.ConditionalGreaterThan;
                 case SyntaxKind.ConditionalGreaterOrEquals: case SyntaxKind.GreaterEquals: return SyntaxKind.ConditionalGreaterOrEquals;
-                case SyntaxKind.ArithmeticLeftShift: case SyntaxKind.LessLess: return SyntaxKind.ArithmeticLeftShift;
-                case SyntaxKind.ArithmeticRightShift: case SyntaxKind.GreaterGreater: return SyntaxKind.ArithmeticRightShift;
-                case SyntaxKind.ArithmeticAdd: case SyntaxKind.Plus: return SyntaxKind.ArithmeticAdd;
-                case SyntaxKind.ArithmeticSubtract: case SyntaxKind.Minus: return SyntaxKind.ArithmeticSubtract;
-                case SyntaxKind.ArithmeticMultiply: case SyntaxKind.Multiply: return SyntaxKind.ArithmeticMultiply;
-                case SyntaxKind.ArithmeticDivide: case SyntaxKind.Divide: return SyntaxKind.ArithmeticDivide;
-                case SyntaxKind.ArithmeticModulo: case SyntaxKind.Modulo: return SyntaxKind.ArithmeticModulo;
+
+                case SyntaxKind.LessLess:
+                case SyntaxKind.GreaterGreater:
+                case SyntaxKind.Plus:
+                case SyntaxKind.Minus:
+                case SyntaxKind.Divide:
+                case SyntaxKind.Modulo:
+                case SyntaxKind.Multiply:
+                    return token;
+
                 case SyntaxKind.LogicalAnd: case SyntaxKind.AndAnd: return SyntaxKind.LogicalAnd;
                 case SyntaxKind.LogicalOr: case SyntaxKind.OrOr: return SyntaxKind.LogicalOr;
                 default: return SyntaxKind.None;
             }
         }
 
-        public static bool IsAssignmentExpression(SyntaxKind kind)
+        public static bool IsMath(SyntaxKind kind)
         {
             switch (kind)
             {
-                case SyntaxKind.AssignmentOperator:
-                case SyntaxKind.AssignOr:
-                case SyntaxKind.AssignAnd:
-                case SyntaxKind.AssignXor:
-                case SyntaxKind.AssignLeftShift:
-                case SyntaxKind.AssignRightShift:
-                case SyntaxKind.AssignPlus:
-                case SyntaxKind.AssignMinus:
-                case SyntaxKind.AssignMultiply:
-                case SyntaxKind.AssignDivide:
-                case SyntaxKind.AssignModulo:
-                case SyntaxKind.Assign:
+                case SyntaxKind.Plus:
+                case SyntaxKind.Minus:
+                case SyntaxKind.Divide:
+                case SyntaxKind.Modulo:
+                case SyntaxKind.And:
+                case SyntaxKind.BitAnd:
+                case SyntaxKind.Or:
+                case SyntaxKind.BitOr:
+                case SyntaxKind.BitXor:
+                case SyntaxKind.Tilde:
+                case SyntaxKind.GreaterGreater:
+                case SyntaxKind.LessLess:
+                case SyntaxKind.BinaryExpression:
                     return true;
-                default:
-                    return false;
+                default: return false;
             }
         }
 
-        public static bool IsAssignmentExpressionOperatorToken(SyntaxKind token)
+        public static bool IsAssignment(SyntaxKind kind)
         {
-            switch (token)
+            switch (kind)
             {
                 case SyntaxKind.OrEquals:
                 case SyntaxKind.AndEquals:
@@ -520,27 +479,6 @@ namespace Shinobytes.XzaarScript.Ast
                     return false;
             }
         }
-
-        public static SyntaxKind GetAssignmentExpression(SyntaxKind token)
-        {
-            switch (token)
-            {
-                case SyntaxKind.OrEquals: return SyntaxKind.AssignOr;
-                case SyntaxKind.AndEquals: return SyntaxKind.AssignAnd;
-                case SyntaxKind.CaretEquals: return SyntaxKind.AssignXor;
-                case SyntaxKind.LessLessEquals: return SyntaxKind.AssignLeftShift;
-                case SyntaxKind.GreaterGreaterEquals: return SyntaxKind.AssignRightShift;
-                case SyntaxKind.PlusEquals: return SyntaxKind.AssignPlus;
-                case SyntaxKind.MinusEquals: return SyntaxKind.AssignMinus;
-                case SyntaxKind.MultiplyEquals: return SyntaxKind.AssignMultiply;
-                case SyntaxKind.DivideEquals: return SyntaxKind.AssignDivide;
-                case SyntaxKind.ModuloEquals: return SyntaxKind.AssignModulo;
-                case SyntaxKind.Equals: return SyntaxKind.Assign;
-                default:
-                    return SyntaxKind.None;
-            }
-        }
-
 
         public static bool IsIncrementOrDecrementOperator(SyntaxKind token)
         {
@@ -571,5 +509,29 @@ namespace Shinobytes.XzaarScript.Ast
             }
         }
 
+        public static bool IsLiteral(SyntaxKind kind)
+        {
+            return kind == SyntaxKind.Number || kind == SyntaxKind.String || kind == SyntaxKind.LiteralExpression;
+        }
+
+        public static bool IsMemberAccess(SyntaxKind kind)
+        {
+            return kind == SyntaxKind.Dot || kind == SyntaxKind.MemberAccess ||
+                   kind == SyntaxKind.NullConditionalMemberAccess || kind == SyntaxKind.MinusGreater ||
+                   kind == SyntaxKind.StaticMemberAccess;
+        }
+
+
+        public static bool IsEquality(SyntaxKind kind)
+        {
+            return kind == SyntaxKind.EqualsEquals || kind == SyntaxKind.NotEquals || kind == SyntaxKind.LessEquals || kind == SyntaxKind.Less || kind == SyntaxKind.Greater || kind == SyntaxKind.Greater;
+        }
+
+        public static bool IsOpenStatement(SyntaxKind kind) => kind == SyntaxKind.OpenParan;
+        public static bool IsCloseStatement(SyntaxKind kind) => kind == SyntaxKind.CloseParan;
+        public static bool IsOpenIndexer(SyntaxKind kind) => kind == SyntaxKind.OpenBracket;
+        public static bool IsCloseIndexer(SyntaxKind kind) => kind == SyntaxKind.CloseBracket;
+        public static bool IsOpenBody(SyntaxKind kind) => kind == SyntaxKind.OpenCurly;
+        public static bool IsCloseBody(SyntaxKind kind) => kind == SyntaxKind.CloseCurly;
     }
 }

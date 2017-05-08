@@ -929,7 +929,7 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             var method = ctx.Assembly.GlobalMethods.FirstOrDefault(f => f.Name == function.Name);
             ctx.CurrentFunctioName = function.Name;
-            if (method == null) return Error("Function '" + function.Name + "' not found");
+            if (method == null) return Error("FunctionDefinitionExpression '" + function.Name + "' not found");
             if (method.IsExtern) return method;
             if (ctx.MethodInstructions.Count > 0 && ctx.IsInGlobalScope)
             {

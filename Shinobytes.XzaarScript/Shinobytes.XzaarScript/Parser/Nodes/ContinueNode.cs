@@ -1,9 +1,11 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class ContinueNode : ControlFlowNode
     {
         public ContinueNode(int nodeIndex)
-            : base(NodeTypes.CONTINUE, "CONTINUE", nodeIndex)
+            : base(SyntaxKind.KeywordContinue, "CONTINUE", nodeIndex)
         {
         }
 

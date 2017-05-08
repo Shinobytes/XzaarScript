@@ -1,9 +1,11 @@
-﻿namespace Shinobytes.XzaarScript.Parser.Nodes
+﻿using Shinobytes.XzaarScript.Ast;
+
+namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class AnyNode : AstNode
     {
-        public AnyNode(NodeTypes nodeType, string nodeName, object value, int nodeIndex)
-            : base(nodeType, nodeName, value, nodeIndex)
+        public AnyNode(SyntaxKind kind, string nodeName, object value, int nodeIndex)
+            : base(kind, nodeName, value, nodeIndex)
         {
         }
 

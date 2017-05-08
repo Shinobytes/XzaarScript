@@ -339,12 +339,12 @@
 //            var ast = parser.Parse(tokens);
 
 //            Assert.AreEqual(3, ast.Children.Count);
-//            Assert.AreEqual(NodeTypes.PROGRAM, ast.NodeType);
-//            Assert.AreEqual(NodeTypes.LITERAL, ast[0].NodeType);
-//            Assert.AreEqual(NodeTypes.EQUALITY_OPERATOR, ast[1].NodeType);
-//            if (ast[2].NodeType != NodeTypes.BODY && ast[2].NodeType != NodeTypes.EXPRESSION)
-//                Assert.Fail("Expected the last node type to be of type body or expression but was " + ast[2].NodeType);
-//            // Assert.AreEqual(XzaarNodeTypes.BODY, ast[2].NodeType);
+//            Assert.AreEqual(NodeTypes.PROGRAM, ast.Kind);
+//            Assert.AreEqual(NodeTypes.LITERAL, ast[0].Kind);
+//            Assert.AreEqual(NodeTypes.EQUALITY_OPERATOR, ast[1].Kind);
+//            if (ast[2].Kind != NodeTypes.BODY && ast[2].Kind != NodeTypes.EXPRESSION)
+//                Assert.Fail("Expected the last node type to be of type body or expression but was " + ast[2].Kind);
+//            // Assert.AreEqual(XzaarNodeTypes.BODY, ast[2].Kind);
 //        }
 
 //        [TestMethod]
@@ -363,8 +363,8 @@
 //            ast = transformer.Transform(ast);
 
 //            Assert.AreEqual(1, ast.Children.Count);
-//            Assert.AreEqual(NodeTypes.PROGRAM, ast.NodeType);
-//            Assert.AreEqual(NodeTypes.EQUALITY, ast[0].NodeType);
+//            Assert.AreEqual(NodeTypes.PROGRAM, ast.Kind);
+//            Assert.AreEqual(NodeTypes.EQUALITY, ast[0].Kind);
 //        }
 
 //        private bool ValidateTokens(IReadOnlyList<SyntaxToken> tokens, params string[] tokenValues)

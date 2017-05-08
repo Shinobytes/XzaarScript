@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class BinaryOperatorNode : AstNode
@@ -11,7 +13,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         }
 
         public BinaryOperatorNode(int operatingOrderWeight, AstNode left, string op, AstNode right, int nodeIndex)
-            : base(NodeTypes.MATH, null, null, nodeIndex)
+            : base(SyntaxKind.BinaryExpression, null, null, nodeIndex)
         {
             this.left = left;
             this.right = right;

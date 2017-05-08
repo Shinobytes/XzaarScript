@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class MemberAccessNode : AstNode
@@ -12,7 +14,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         public string MemberType { get; set; }
 
         public MemberAccessNode(AstNode member, AstNode arrayIndex, string declaringType, string memberType, int nodeIndex)
-            : base(NodeTypes.ACCESS, member.NodeName, member.Value, nodeIndex)
+            : base(SyntaxKind.MemberAccess, member.NodeName, member.Value, nodeIndex)
         {
             this.DeclaringType = declaringType;
             this.ArrayIndex = arrayIndex;

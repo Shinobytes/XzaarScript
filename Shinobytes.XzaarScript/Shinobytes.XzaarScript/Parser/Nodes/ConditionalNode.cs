@@ -1,3 +1,5 @@
+using Shinobytes.XzaarScript.Ast;
+
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
     public class ConditionalNode : AstNode
@@ -7,7 +9,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         private AstNode ifFalse;
 
         public ConditionalNode(AstNode condition, AstNode ifTrue, AstNode ifFalse, int nodeIndex)
-            : base(NodeTypes.BLOCK, "CONDITIONAL", null, nodeIndex)
+            : base(SyntaxKind.Block, "CONDITIONAL", null, nodeIndex)
         {
             if (condition != null) condition.Parent = this;
             if (ifFalse != null) ifFalse.Parent = this;
@@ -34,7 +36,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         public override string ToString()
         {
             var conditionString = condition.ToString();
-            if (condition.NodeType != NodeTypes.EXPRESSION)
+            if (condition.Kind != SyntaxKind.Expression)
                 conditionString = "(" + conditionString + ")";
             return $"if {conditionString} {{{ifTrue}}} else {{{ifFalse}}}";
         }

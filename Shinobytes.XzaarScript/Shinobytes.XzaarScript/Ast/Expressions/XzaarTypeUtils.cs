@@ -4,7 +4,7 @@
     {
         internal static bool IsNullableType(this XzaarType type)
         {
-            return type == XzaarBaseTypes.Char || type == XzaarBaseTypes.DateTime || type == XzaarBaseTypes.String || type == XzaarBaseTypes.Any;
+            return type == XzaarBaseTypes.Char || type == XzaarBaseTypes.Date || type == XzaarBaseTypes.String || type == XzaarBaseTypes.Any;
         }
 
         internal static bool IsBool(XzaarType type)

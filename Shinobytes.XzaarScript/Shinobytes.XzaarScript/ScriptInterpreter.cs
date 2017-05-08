@@ -44,15 +44,13 @@ namespace Shinobytes.XzaarScript
             errors = new InterpreterErrorCollection();
             IList<string> lexerErrors;
             IList<string> parserErrors;
-            IList<string> transformerErrors;
             List<string> compilerErrors;
 
-            var assembly = Compile(inputCode, out lexerErrors, out parserErrors, out transformerErrors, out compilerErrors);
+            var assembly = Compile(inputCode, out lexerErrors, out parserErrors, out compilerErrors);
             runtime = assembly.Load();
 
             errors.AddRange(lexerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Lexer, x)));
             errors.AddRange(parserErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Parser, x)));
-            errors.AddRange(transformerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Transformer, x)));
             errors.AddRange(compilerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Compiler, x)));
 
             return errors.Count == 0;
@@ -72,20 +70,15 @@ namespace Shinobytes.XzaarScript
             string inputCode,
             out IList<string> lexerErrors,
             out IList<string> parserErrors,
-            out IList<string> transformerErrors,
             out List<string> compilerErrors)
         {
             IList<string> transformerErrors2;
             var result = inputCode
                 .Tokenize(out lexerErrors)
                 .Parse(out parserErrors)
-                .Transform(out transformerErrors)
                 .AnalyzeExpression(out transformerErrors2)
                 .Compile(out compilerErrors);
-
-            foreach (var item in transformerErrors2)
-                transformerErrors.Add(item);
-
+            
             return result;
         }
 
@@ -94,7 +87,6 @@ namespace Shinobytes.XzaarScript
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .Compile();
         }

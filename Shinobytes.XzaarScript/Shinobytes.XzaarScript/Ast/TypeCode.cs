@@ -20,7 +20,7 @@ namespace Shinobytes.XzaarScript.Ast
         Single = 13,
         Double = 14,
         Decimal = 15,
-        DateTime = 16,
+        Date = 16,
         String = 18
     }
 }
