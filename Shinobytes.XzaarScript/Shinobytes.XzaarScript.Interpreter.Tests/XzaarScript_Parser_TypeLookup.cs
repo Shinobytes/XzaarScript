@@ -15,6 +15,16 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
 
 
         [TestMethod]
+        public void conditional_assign()
+        {
+            LanguageParser parser;
+            var code = TypeLookup("let i = 1 > 0 ? true : false", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
+            Assert.AreEqual(@"var i = 1 > 0 ? true : false", code);
+        }
+
+
+        [TestMethod]
         public void variable_assigned_struct()
         {
             LanguageParser parser;

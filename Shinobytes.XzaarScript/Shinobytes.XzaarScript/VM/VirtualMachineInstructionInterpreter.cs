@@ -137,7 +137,7 @@ namespace Shinobytes.XzaarScript.VM
         private void ArrayInsertElement(Runtime rt, Instruction instruction)
         {
             // i have a feeling that this wont work.
-            var instance = GetVariable(rt, instruction, 0);            
+            var instance = GetVariable(rt, instruction, 0);
             var index = GetValueOf(rt, instruction.OperandArguments[0]);
             var item = GetValueOf(rt, instruction.OperandArguments[1]);
             instance.InsertToArrray(index, item);
@@ -855,6 +855,19 @@ namespace Shinobytes.XzaarScript.VM
 
             if (targetVariableRef.MemberType == MemberTypes.Constant)
             {
+                if (targetVariableRef is Constant constant)
+                {
+                    // throw new NotImplementedException("Constant values cannot be accessed as a field or variable yet. This feature has not been implemented.");
+
+                    //if (constant.IsArray)
+                    //{
+
+                    //    var tempVariable = new RuntimeVariable(rt, constant, constant.Value);
+                    //    rt.CurrentScope.AddVariables(new[] { tempVariable });
+                    //    return tempVariable;
+                    //}
+                }
+
                 return null;
             }
             else

@@ -118,18 +118,18 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return XzaarExpression.LogicalNot(expression);
         }
 
-        public virtual XzaarExpression Visit(ConditionalNode conditional)
+        public virtual XzaarExpression Visit(IfElseNode ifElse)
         {
             XzaarExpression ifTrue, ifFalse;
 
-            var c = conditional.GetCondition();
+            var c = ifElse.GetCondition();
             var test = Visit(c);
             if (test == null)
             {
                 throw new ExpressionException("if statements cannot have empty conditions, did you mean to do 'if (true) { ...' ?");
             }
-            var t = conditional.GetTrue();
-            var f = conditional.GetFalse();
+            var t = ifElse.GetTrue();
+            var f = ifElse.GetFalse();
             ifTrue = t != null && !t.IsEmpty() ? Visit(t) : XzaarExpression.Empty();
             ifFalse = f != null && !f.IsEmpty() ? Visit(f) : XzaarExpression.Empty();
             return XzaarExpression.Condition(test, ifTrue, ifFalse);
@@ -889,7 +889,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             if (node is EqualityOperatorNode) return Visit(node as EqualityOperatorNode);
             if (node is BinaryOperatorNode) return Visit(node as BinaryOperatorNode);
             if (node is LogicalNotNode) return Visit(node as LogicalNotNode);
-            if (node is ConditionalNode) return Visit(node as ConditionalNode);
+            if (node is IfElseNode) return Visit(node as IfElseNode);
             if (node is FunctionParametersNode) return Visit(node as FunctionParametersNode);
             if (node is ReturnNode) return Visit(node as ReturnNode);
             if (node is ContinueNode) return Visit(node as ContinueNode);

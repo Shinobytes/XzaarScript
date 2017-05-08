@@ -764,7 +764,17 @@ namespace Shinobytes.XzaarScript.Ast
             AssertMinExpectedNodeCount(2);
             // |++|+|--|-|!| (expr)
 
-            return this.WalkSubExpression(Precedence.Expression);
+            var expr = this.WalkSubExpression(Precedence.Expression) as UnaryNode;
+            if (expr == null) return Error("Unable to parse unary expression. Unknown error");
+            if (expr.Item is UnaryNode unaryChild)
+            {
+                var unary1 = expr.IsPostUnary ? unaryChild.Item + expr.Operator : expr.Operator + unaryChild.Item;
+                var unary2 = !unaryChild.IsPostUnary ? CurrentToken.Value + unaryChild.Operator : unaryChild.Operator + CurrentToken.Value;
+                return Error("Invalid unary expression found. The operand of an increment or decrement operator must be a variable, property or indexer. " +
+                             "Did you forget to separate the expression using a semicolon? \r\nExample: '" + expr + "' could be '" + unary1 + "; " + unary2 + "'");
+            }
+
+            return expr;
         }
 
         private AstNode WalkEnum()
@@ -1941,14 +1951,14 @@ namespace Shinobytes.XzaarScript.Ast
             // Only take the ternary if we're at a precedence less than the null coalescing
             // expression.
 
-            //if (tk == SyntaxKind.Question && precedence <= Precedence.Ternary)
-            //{
-            //    var questionToken = this.Tokens.Next();
-            //    var colonLeft = this.ParseExpressionCore();
-            //    var colon = this.Tokens.Next(); // SyntaxKind.Colon
-            //    var colonRight = this.ParseExpressionCore();
-            //    leftOperand = AstNode.ConditionalExpression(leftOperand, questionToken, colonLeft, colon, colonRight);
-            //}
+            if (tk == SyntaxKind.Question && precedence <= Precedence.Ternary)
+            {
+                var questionToken = this.Tokens.ConsumeExpected(SyntaxKind.Question);
+                var colonLeft = this.WalkExpressionCore();
+                var colon = this.Tokens.ConsumeExpected(SyntaxKind.Colon); // SyntaxKind.Colon
+                var colonRight = this.WalkExpressionCore();
+                leftOperand = AstNode.Conditional(leftOperand, questionToken, colonLeft, colon, colonRight);
+            }
 
             return leftOperand;
         }
@@ -2048,18 +2058,16 @@ namespace Shinobytes.XzaarScript.Ast
             return errorNode;
         }
 
-        private AstNode Error(string message, SyntaxNode token = null)
+        private AstNode Error(string message)
         {
             var msg = "[Error] " + message;
+            var token = this.CurrentToken ?? this.Tokens.PeekPrevious();
             if (token != null)
             {
-                if (token.TrailingToken != null)
-                {
-                    msg += ". At line " + token.TrailingToken.SourceLine;
-                }
+                msg += ". At line " + token.SourceLine;
             }
-            var errorNode = AstNode.Error(message, token);
 
+            var errorNode = AstNode.Error(message);
             this.errors.Add(msg);
             this.Tokens.Interrupted = true;
             this.errorNodes.Add(errorNode);

@@ -41,10 +41,10 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return null;
         }
 
-        public override XzaarExpression Visit(ConditionalNode conditional)
+        public override XzaarExpression Visit(IfElseNode ifElse)
         {
-            var @false = conditional.GetFalse();
-            var @true = conditional.GetTrue();
+            var @false = ifElse.GetFalse();
+            var @true = ifElse.GetTrue();
             if (@false != null) Visit(@false);
             if (!FoundType && @true != null) Visit(@true);
             return null;

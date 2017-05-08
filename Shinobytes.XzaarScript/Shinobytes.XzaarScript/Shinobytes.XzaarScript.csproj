@@ -73,6 +73,7 @@
     <Compile Include="Assembly\XzaarAssembly.cs" />
     <Compile Include="Ast\Expressions\LogicalNotExpression.cs" />
     <Compile Include="Parser\INodeProcessor.cs" />
+    <Compile Include="Parser\Nodes\ConditionalExpressionNode.cs" />
     <Compile Include="Parser\Nodes\MemberAccessChainNode.cs" />
     <Compile Include="Parser\Nodes\LogicalNotNode.cs" />
     <Compile Include="Parser\Nodes\NegativeNode.cs" />
@@ -214,7 +215,7 @@
     <Compile Include="Parser\Nodes\BlockNode.cs" />
     <Compile Include="Parser\Nodes\BreakNode.cs" />
     <Compile Include="Parser\Nodes\CaseNode.cs" />
-    <Compile Include="Parser\Nodes\ConditionalNode.cs" />
+    <Compile Include="Parser\Nodes\IfElseNode.cs" />
     <Compile Include="Parser\Nodes\ConditionalOperatorNode.cs" />
     <Compile Include="Parser\Nodes\ContinueNode.cs" />
     <Compile Include="Parser\Nodes\ControlFlowNode.cs" />

@@ -12,8 +12,8 @@ namespace Shinobytes.XzaarScript.Ast
             //EqualityOperatorNode Visit(EqualityOperatorNode equalityOperator);
             if (node is BinaryOperatorNode) return Visit(node as BinaryOperatorNode);
             //BinaryOperatorNode Visit(BinaryOperatorNode bin);
-            if (node is ConditionalNode) return Visit(node as ConditionalNode);
-            //ConditionalNode Visit(ConditionalNode conditional);
+            if (node is IfElseNode) return Visit(node as IfElseNode);
+            //IfElseNode Visit(IfElseNode ifElse);
             if (node is FunctionParametersNode) return Visit(node as FunctionParametersNode);
             //FunctionParametersNode Visit(FunctionParametersNode parameters);
             if (node is ReturnNode) return Visit(node as ReturnNode);
@@ -95,9 +95,9 @@ namespace Shinobytes.XzaarScript.Ast
             return bin;
         }
 
-        public virtual ConditionalNode Visit(ConditionalNode conditional)
+        public virtual IfElseNode Visit(IfElseNode ifElse)
         {
-            return conditional;
+            return ifElse;
         }
 
         public virtual FunctionParametersNode Visit(FunctionParametersNode parameters)

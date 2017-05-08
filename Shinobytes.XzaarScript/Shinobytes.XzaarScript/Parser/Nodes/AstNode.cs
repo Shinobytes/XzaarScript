@@ -385,19 +385,24 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return new MemberAccessChainNode(lastAccessorNode, memberAccessNode, functionReturnType, _nodeIndex++);
         }
 
+        public static ConditionalExpressionNode Conditional(AstNode condition, SyntaxToken questionToken, AstNode whenTrue, SyntaxToken colonToken, AstNode whenFalse)
+        {
+            return new ConditionalExpressionNode(condition, whenTrue, whenFalse, _nodeIndex++);
+        }
+
         public static AssignNode Assign(AstNode left, AstNode right)
         {
             return new AssignNode(left, right, _nodeIndex++);
         }
 
-        public static ConditionalNode IfThen(AstNode condition, AstNode ifTrue)
+        public static IfElseNode IfThen(AstNode condition, AstNode ifTrue)
         {
-            return new ConditionalNode(condition, ifTrue, null, _nodeIndex++);
+            return new IfElseNode(condition, ifTrue, null, _nodeIndex++);
         }
 
-        public static ConditionalNode IfElseThen(AstNode condition, AstNode ifTrue, AstNode ifFalse)
+        public static IfElseNode IfElseThen(AstNode condition, AstNode ifTrue, AstNode ifFalse)
         {
-            return new ConditionalNode(condition, ifTrue, ifFalse, _nodeIndex++);
+            return new IfElseNode(condition, ifTrue, ifFalse, _nodeIndex++);
         }
 
         public static FunctionCallNode Call(AstNode function, ArgumentNode[] argumentNodes)

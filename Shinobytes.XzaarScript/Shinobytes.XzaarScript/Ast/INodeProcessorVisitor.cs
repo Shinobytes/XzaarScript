@@ -9,7 +9,7 @@ namespace Shinobytes.XzaarScript.Ast
         ConditionalOperatorNode Visit(ConditionalOperatorNode conditionalOperator);
         EqualityOperatorNode Visit(EqualityOperatorNode equalityOperator);
         BinaryOperatorNode Visit(BinaryOperatorNode bin);
-        ConditionalNode Visit(ConditionalNode conditional);
+        IfElseNode Visit(IfElseNode ifElse);
         FunctionParametersNode Visit(FunctionParametersNode parameters);
         ReturnNode Visit(ReturnNode returnNode);
         MemberAccessNode Visit(MemberAccessNode access);

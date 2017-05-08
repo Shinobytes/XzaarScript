@@ -141,7 +141,7 @@ namespace Shinobytes.XzaarScript.VM
         public RuntimeVariable(Runtime rt, VariableReference v, object value)
         {
             this.Runtime = rt;
-            this.Name = v.Name;
+            this.Name = v.Name ?? Guid.NewGuid().ToString();
             this.Type = v.Type;
             this.value = value;
             if (value is object[]) this.arrayValue = (object[])value;

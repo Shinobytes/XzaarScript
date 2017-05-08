@@ -9,7 +9,7 @@ namespace Shinobytes.XzaarScript.Parser
         XzaarExpression Visit(EqualityOperatorNode equalityOperator);
         XzaarExpression Visit(BinaryOperatorNode bin);
         XzaarExpression Visit(LogicalNotNode node);
-        XzaarExpression Visit(ConditionalNode conditional);
+        XzaarExpression Visit(IfElseNode ifElse);
         XzaarExpression Visit(FunctionParametersNode parameters);
         XzaarExpression Visit(ReturnNode returnNode);
         XzaarExpression Visit(ContinueNode continueNode);

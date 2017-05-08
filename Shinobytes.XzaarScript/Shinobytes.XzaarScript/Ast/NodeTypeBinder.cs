@@ -36,7 +36,7 @@ namespace Shinobytes.XzaarScript.Ast
                 if (syntaxTree is DefineVariableNode) return Process(syntaxTree as DefineVariableNode);
                 if (syntaxTree is FunctionNode) return Process(syntaxTree as FunctionNode);
                 if (syntaxTree is StructNode) return Process(syntaxTree as StructNode);
-                if (syntaxTree is ConditionalNode) return Process((syntaxTree as ConditionalNode));
+                if (syntaxTree is IfElseNode) return Process((syntaxTree as IfElseNode));
                 if (syntaxTree is LoopNode) Process((syntaxTree as LoopNode).Body);
                 if (syntaxTree is BinaryOperatorNode) return Process((syntaxTree as BinaryOperatorNode));
                 if (syntaxTree is AssignNode) return Process((syntaxTree as AssignNode));
@@ -127,7 +127,7 @@ namespace Shinobytes.XzaarScript.Ast
             return node;
         }
 
-        private ConditionalNode Process(ConditionalNode node)
+        private IfElseNode Process(IfElseNode node)
         {
             Process(node.GetCondition());
             Process(node.GetTrue());

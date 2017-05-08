@@ -77,14 +77,23 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
         }
 
         [TestMethod]
-        public void Walk_pre_increment_decrement_2()
+        public void Walk_pre_increment_decrement_no_separation_gives_error_1()
         {
             var transformer = Parser("++i --i");
             var ast = transformer.Parse();
-            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
-            Assert.AreEqual("++i --i", ast.ToString());
+            var message = string.Join(Environment.NewLine, transformer.Errors);
+            Assert.AreEqual(true, transformer.HasErrors, message);
+            Assert.AreEqual("[Error] Invalid unary expression found. The operand of an increment or decrement operator must be a variable, property or indexer. Did you forget to separate the expression using a semicolon? \r\nExample: \'++i--\' could be \'++i; --i\'. At line 1", message);
         }
-
+        [TestMethod]
+        public void Walk_pre_increment_decrement_no_separation_gives_error_2()
+        {
+            var transformer = Parser("++a --b");
+            var ast = transformer.Parse();
+            var message = string.Join(Environment.NewLine, transformer.Errors);
+            Assert.AreEqual(true, transformer.HasErrors, message);
+            Assert.AreEqual("[Error] Invalid unary expression found. The operand of an increment or decrement operator must be a variable, property or indexer. Did you forget to separate the expression using a semicolon? \r\nExample: \'++a--\' could be \'++a; --b\'. At line 1", message);
+        }
         //[TestMethod]
         //public void Console_log_constant_expr_3()
         //{

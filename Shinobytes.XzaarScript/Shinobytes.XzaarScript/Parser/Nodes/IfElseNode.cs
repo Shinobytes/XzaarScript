@@ -1,14 +1,15 @@
+using System;
 using Shinobytes.XzaarScript.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
-    public class ConditionalNode : AstNode
+    public class IfElseNode : AstNode
     {
         private readonly AstNode condition;
         private AstNode ifTrue;
         private AstNode ifFalse;
 
-        public ConditionalNode(AstNode condition, AstNode ifTrue, AstNode ifFalse, int nodeIndex)
+        public IfElseNode(AstNode condition, AstNode ifTrue, AstNode ifFalse, int nodeIndex)
             : base(SyntaxKind.Block, "CONDITIONAL", null, nodeIndex)
         {
             if (condition != null) condition.Parent = this;
