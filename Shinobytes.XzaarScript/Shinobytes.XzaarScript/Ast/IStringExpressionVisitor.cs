@@ -5,8 +5,9 @@ namespace Shinobytes.XzaarScript.Ast
     public interface IStringExpressionVisitor
     {
         string Visit(XzaarExpression expression);
+        string Visit(ConditionalExpression expr);
         string Visit(BinaryExpression binaryOp);
-        string Visit(ConditionalExpression conditional);
+        string Visit(IfElseExpression ifElse);
         string Visit(MemberExpression access);
         string Visit(ParameterExpression parameter);
         string Visit(GotoExpression @goto);

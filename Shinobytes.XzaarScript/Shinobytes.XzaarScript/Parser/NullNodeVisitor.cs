@@ -5,7 +5,7 @@ namespace Shinobytes.XzaarScript.Parser
 {
     public class NullNodeVisitor : INodeVisitor
     {
-        public virtual XzaarExpression Visit(ConditionalOperatorNode conditionalOperator)
+        public virtual XzaarExpression Visit(LogicalConditionalNode logicalConditional)
         {
             return null;
         }
@@ -115,6 +115,11 @@ namespace Shinobytes.XzaarScript.Parser
             return null;
         }
 
+        public ConditionalExpression Visit(ConditionalExpressionNode node)
+        {
+            return null;
+        }
+
         public virtual LoopExpression Visit(LoopNode loop)
         {
             return null;
@@ -203,7 +208,7 @@ namespace Shinobytes.XzaarScript.Parser
             // return Visit(n);
 
 
-            if (node is ConditionalOperatorNode) return Visit(node as ConditionalOperatorNode);
+            if (node is LogicalConditionalNode) return Visit(node as LogicalConditionalNode);
             if (node is EqualityOperatorNode) return Visit(node as EqualityOperatorNode);
             if (node is BinaryOperatorNode) return Visit(node as BinaryOperatorNode);
             if (node is LogicalNotNode) return Visit(node as LogicalNotNode);

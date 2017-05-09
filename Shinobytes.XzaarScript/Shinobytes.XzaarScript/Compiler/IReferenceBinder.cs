@@ -19,7 +19,8 @@ namespace Shinobytes.XzaarScript.Compiler
         object Visit(LoopExpression node);
         object Visit(SwitchExpression node);
         object Visit(CreateStructExpression node);
-        object Visit(ConditionalExpression node);
+        object Visit(IfElseExpression node);
+        VariableReference Visit(ConditionalExpression node);
         VariableReference Visit(ConstantExpression constant);
         VariableReference Visit(UnaryExpression unary);
         VariableReference Visit(FunctionCallExpression function);

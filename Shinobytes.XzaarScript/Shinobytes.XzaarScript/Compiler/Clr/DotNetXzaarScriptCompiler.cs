@@ -51,6 +51,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
 #if UNITY
             if (expression is BinaryExpression) return Visit(expression as BinaryExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
             if (expression is MemberAccessChainExpression) return Visit(expression as MemberAccessChainExpression);
@@ -79,6 +80,11 @@ namespace Shinobytes.XzaarScript.Compiler
 #else
             return Visit((dynamic)expression);
 #endif
+        }
+
+        public object Visit(ConditionalExpression expr)
+        {
+            throw new NotImplementedException();
         }
 
         public object Visit(LogicalNotExpression expr)
@@ -464,10 +470,10 @@ namespace Shinobytes.XzaarScript.Compiler
         }         
              */
 
-        public object Visit(ConditionalExpression conditional)
+        public object Visit(IfElseExpression ifElse)
         {
             var il = ctx.GetILGenerator();
-            var test = Visit(conditional.Test);
+            var test = Visit(ifElse.Test);
             TryLoadReference(test, il);
 
             // 1. create temp variable
@@ -486,11 +492,11 @@ namespace Shinobytes.XzaarScript.Compiler
             il.BranchIfFalse(endOfTrue);
 
             // 6. Visit IfTrue
-            if (conditional.IfTrue != null)
-                Visit(conditional.IfTrue);
+            if (ifElse.IfTrue != null)
+                Visit(ifElse.IfTrue);
 
             Label? endOfFalse = null;
-            if (conditional.IfFalse != null)
+            if (ifElse.IfFalse != null)
             {
                 // if we do have an 'else'
                 // then we want to branch out to end of conditional
@@ -504,9 +510,9 @@ namespace Shinobytes.XzaarScript.Compiler
 
 
             // 9. Visit IfFalse (if not null)
-            if (conditional.IfFalse != null)
+            if (ifElse.IfFalse != null)
             {
-                Visit(conditional.IfFalse);
+                Visit(ifElse.IfFalse);
 
                 // 10. mark the endOfFalse label
                 // ReSharper disable once PossibleInvalidOperationException

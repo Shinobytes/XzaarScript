@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Shinobytes.XzaarScript.Assembly;
 using Shinobytes.XzaarScript.Assembly.Models;
 using Shinobytes.XzaarScript.Ast.Expressions;
 
@@ -43,47 +42,28 @@ namespace Shinobytes.XzaarScript.Compiler
 
 #if UNITY
             if (expression is UnaryExpression) return Visit(expression as UnaryExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
             if (expression is GotoExpression) return Visit(expression as GotoExpression);
-            //object Visit(GotoExpression @goto);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
-            //object Visit(MemberExpression member);
             if (expression is BinaryExpression) return Visit(expression as BinaryExpression);
-            //object Visit(BinaryExpression binary);
             if (expression is MemberAccessChainExpression) return Visit(expression as MemberAccessChainExpression);
-            //object Visit(MemberAccessChainExpression chain);
             if (expression is ForExpression) return Visit(expression as ForExpression);
-            //object Visit(ForExpression node);
             if (expression is ForEachExpression) return Visit(expression as ForEachExpression);
-            //object Visit(ForEachExpression node);
             if (expression is SwitchCaseExpression) return Visit(expression as SwitchCaseExpression);
-            //object Visit(SwitchCaseExpression node);
             if (expression is DoWhileExpression) return Visit(expression as DoWhileExpression);
-            //object Visit(DoWhileExpression node);
             if (expression is LoopExpression) return Visit(expression as LoopExpression);
-            //object Visit(LoopExpression node);
             if (expression is SwitchExpression) return Visit(expression as SwitchExpression);
-            //object Visit(SwitchExpression node);
             if (expression is CreateStructExpression) return Visit(expression as CreateStructExpression);
-            //object Visit(CreateStructExpression node);
             if (expression is ConstantExpression) return Visit(expression as ConstantExpression);
-            //VariableReference Visit(ConstantExpression constant);
             if (expression is FunctionCallExpression) return Visit(expression as FunctionCallExpression);
-            //VariableReference Visit(FunctionCallExpression function);
             if (expression is VariableDefinitionExpression) return Visit(expression as VariableDefinitionExpression);
-            //VariableDefinition Visit(VariableDefinitionExpression definedVariable);
             if (expression is FieldExpression) return Visit(expression as FieldExpression);
-            //VariableDefinition Visit(FieldExpression field);
             if (expression is LabelExpression) return Visit(expression as LabelExpression);
-            //Label Visit(LabelExpression label);
             if (expression is ParameterExpression) return Visit(expression as ParameterExpression);
-            //ParameterDefinition Visit(ParameterDefinitionExpression parameter);
             if (expression is FunctionExpression) return Visit(expression as FunctionExpression);
-            //MethodDefinition Visit(FunctionExpression function);
             if (expression is StructExpression) return Visit(expression as StructExpression);
-            //TypeDefinition Visit(StructExpression node);
             return Visit(expression);
-            // return Visit((dynamic)expression);
 #else
             return Visit((dynamic)expression);
 #endif
@@ -159,9 +139,18 @@ namespace Shinobytes.XzaarScript.Compiler
             return null;
         }
 
-        public object Visit(ConditionalExpression node)
+        public object Visit(IfElseExpression node)
         {
             return null;
+        }
+
+        public VariableReference Visit(ConditionalExpression node)
+        {
+            return new VariableReference()
+            {
+                Name = null,
+                Type = TypeLookup(node.Type, null)
+            };
         }
 
         public VariableReference Visit(ConstantExpression constant)

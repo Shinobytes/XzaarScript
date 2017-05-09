@@ -507,7 +507,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public static AstNode ConditionalOperator(int order, AstNode node, string toString, AstNode rl)
         {
-            return new ConditionalOperatorNode(order, node, toString, rl, _nodeIndex++);
+            return new LogicalConditionalNode(order, node, toString, rl, _nodeIndex++);
         }
 
         public static AstNode Number(int i)

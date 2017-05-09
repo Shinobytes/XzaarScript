@@ -6,7 +6,7 @@ namespace Shinobytes.XzaarScript.Ast
     {
         public virtual AstNode Visit(AstNode node)
         {
-            if (node is ConditionalOperatorNode) return Visit(node as ConditionalOperatorNode);
+            if (node is LogicalConditionalNode) return Visit(node as LogicalConditionalNode);
             //ConditionalOperatorNode Visit(ConditionalOperatorNode conditionalOperator);
             if (node is EqualityOperatorNode) return Visit(node as EqualityOperatorNode);
             //EqualityOperatorNode Visit(EqualityOperatorNode equalityOperator);
@@ -80,9 +80,9 @@ namespace Shinobytes.XzaarScript.Ast
         }
 
 
-        public virtual ConditionalOperatorNode Visit(ConditionalOperatorNode conditionalOperator)
+        public virtual LogicalConditionalNode Visit(LogicalConditionalNode logicalConditional)
         {
-            return conditionalOperator;
+            return logicalConditional;
         }
 
         public virtual EqualityOperatorNode Visit(EqualityOperatorNode equalityOperator)

@@ -86,7 +86,9 @@ namespace Shinobytes.XzaarScript.Extensions
 
         public static XzaarAssembly Compile(this AnalyzedTree tree)
         {
-            return ScriptCompiler.Compile(tree);
+            var val = ScriptCompiler.Compile(tree, out var errors);
+            if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, errors.ToArray()));
+            return val;
         }
 
         public static XzaarAssembly Compile(this AnalyzedTree tree, out List<string> errors)

@@ -6,7 +6,7 @@ namespace Shinobytes.XzaarScript.Ast
     {
         AstNode Visit(AstNode node);
 
-        ConditionalOperatorNode Visit(ConditionalOperatorNode conditionalOperator);
+        LogicalConditionalNode Visit(LogicalConditionalNode logicalConditional);
         EqualityOperatorNode Visit(EqualityOperatorNode equalityOperator);
         BinaryOperatorNode Visit(BinaryOperatorNode bin);
         IfElseNode Visit(IfElseNode ifElse);

@@ -5,27 +5,53 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
     public class ConditionalExpression : XzaarExpression
     {
         private XzaarExpression test;
+        private XzaarExpression whenTrue;
+        private XzaarExpression whenFalse;
+        private readonly XzaarType type;
+
+        public ConditionalExpression(XzaarExpression test, XzaarExpression whenTrue, XzaarExpression whenFalse, XzaarType type)
+        {
+            this.test = test;
+            this.whenTrue = whenTrue;
+            this.whenFalse = whenFalse;
+            this.type = type;
+        }
+
+        public sealed override ExpressionType NodeType => ExpressionType.Conditional;
+
+        public override XzaarType Type => type ?? WhenTrue.Type;
+
+        public XzaarExpression WhenTrue => this.whenTrue;
+
+        public XzaarExpression Test => test;
+
+        public XzaarExpression WhenFalse => this.whenFalse;
+    }
+
+    public class IfElseExpression : XzaarExpression
+    {
+        private XzaarExpression test;
         private XzaarExpression ifTrue;
 
-        internal ConditionalExpression(XzaarExpression test, XzaarExpression ifTrue)
+        internal IfElseExpression(XzaarExpression test, XzaarExpression ifTrue)
         {
             this.test = test;
             this.ifTrue = ifTrue;
         }
 
-        internal static ConditionalExpression Make(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse, XzaarType type)
+        internal static IfElseExpression Make(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse, XzaarType type)
         {
             if (ifTrue.Type != type || ifFalse.Type != type)
             {
-                return new FullConditionalExpressionWithType(test, ifTrue, ifFalse, type);
+                return new FullIfElseExpressionWithType(test, ifTrue, ifFalse, type);
             }
             if (ifFalse is DefaultExpression && ifFalse.Type == XzaarBaseTypes.Void)
             {
-                return new ConditionalExpression(test, ifTrue);
+                return new IfElseExpression(test, ifTrue);
             }
             else
             {
-                return new FullConditionalExpression(test, ifTrue, ifFalse);
+                return new FullIfElseExpression(test, ifTrue, ifFalse);
             }
         }
 
@@ -44,21 +70,21 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return XzaarExpression.Empty();
         }
 
-        public ConditionalExpression Update(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
+        public IfElseExpression Update(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
         {
             if (test == Test && ifTrue == IfTrue && ifFalse == IfFalse)
             {
                 return this;
             }
-            return XzaarExpression.Condition(test, ifTrue, ifFalse, Type);
+            return XzaarExpression.IfElse(test, ifTrue, ifFalse, Type);
         }
     }
 
-    internal class FullConditionalExpression : ConditionalExpression
+    internal class FullIfElseExpression : IfElseExpression
     {
         private readonly XzaarExpression _false;
 
-        internal FullConditionalExpression(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
+        internal FullIfElseExpression(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
             : base(test, ifTrue)
         {
             _false = ifFalse;
@@ -69,11 +95,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return _false;
         }
     }
-    internal class FullConditionalExpressionWithType : FullConditionalExpression
+    internal class FullIfElseExpressionWithType : FullIfElseExpression
     {
         private readonly XzaarType _type;
 
-        internal FullConditionalExpressionWithType(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse, XzaarType type)
+        internal FullIfElseExpressionWithType(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse, XzaarType type)
             : base(test, ifTrue, ifFalse)
         {
             _type = type;
@@ -83,7 +109,17 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
     }
     public partial class XzaarExpression
     {
-        public static ConditionalExpression Condition(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
+        public static ConditionalExpression Conditional(XzaarExpression test, XzaarExpression whenTrue, XzaarExpression whenFalse)
+        {
+            return new ConditionalExpression(test, whenTrue, whenFalse, null);
+        }
+
+        public static ConditionalExpression Conditional(XzaarExpression test, XzaarExpression whenTrue, XzaarExpression whenFalse, XzaarType type)
+        {
+            return new ConditionalExpression(test, whenTrue, whenFalse, type);
+        }
+
+        public static IfElseExpression IfElse(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
         {
             RequiresCanRead(test, "test");
             RequiresCanRead(ifTrue, "ifTrue");
@@ -103,9 +139,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //    throw new InvalidOperationException("Argument types must match");
             //}
 
-            return ConditionalExpression.Make(test, ifTrue, ifFalse, ifTrue.Type);
+            return IfElseExpression.Make(test, ifTrue, ifFalse, ifTrue.Type);
         }
-        public static ConditionalExpression Condition(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse, XzaarType type)
+        public static IfElseExpression IfElse(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse, XzaarType type)
         {
             RequiresCanRead(test, "test");
             RequiresCanRead(ifTrue, "ifTrue");
@@ -126,17 +162,17 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 }
             }
 
-            return ConditionalExpression.Make(test, ifTrue, ifFalse, type);
+            return IfElseExpression.Make(test, ifTrue, ifFalse, type);
         }
 
-        public static ConditionalExpression IfThen(XzaarExpression test, XzaarExpression ifTrue)
+        public static IfElseExpression IfThen(XzaarExpression test, XzaarExpression ifTrue)
         {
-            return Condition(test, ifTrue, XzaarExpression.Empty(), XzaarBaseTypes.Void);
+            return IfElse(test, ifTrue, XzaarExpression.Empty(), XzaarBaseTypes.Void);
         }
 
-        public static ConditionalExpression IfThenElse(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
+        public static IfElseExpression IfThenElse(XzaarExpression test, XzaarExpression ifTrue, XzaarExpression ifFalse)
         {
-            return Condition(test, ifTrue, ifFalse, XzaarBaseTypes.Void);
+            return IfElse(test, ifTrue, ifFalse, XzaarBaseTypes.Void);
         }
     }
 }

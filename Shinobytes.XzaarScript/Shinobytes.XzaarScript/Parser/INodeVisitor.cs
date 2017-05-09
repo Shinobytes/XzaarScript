@@ -5,7 +5,7 @@ namespace Shinobytes.XzaarScript.Parser
 {
     public interface INodeVisitor
     {
-        XzaarExpression Visit(ConditionalOperatorNode conditionalOperator);
+        XzaarExpression Visit(LogicalConditionalNode logicalConditional);
         XzaarExpression Visit(EqualityOperatorNode equalityOperator);
         XzaarExpression Visit(BinaryOperatorNode bin);
         XzaarExpression Visit(LogicalNotNode node);
@@ -13,7 +13,7 @@ namespace Shinobytes.XzaarScript.Parser
         XzaarExpression Visit(FunctionParametersNode parameters);
         XzaarExpression Visit(ReturnNode returnNode);
         XzaarExpression Visit(ContinueNode continueNode);
-        XzaarExpression Visit(BreakNode breakNode);        
+        XzaarExpression Visit(BreakNode breakNode);
         LabelExpression Visit(LabelNode label);
         GotoExpression Visit(GotoNode @goto);
         MemberAccessChainExpression Visit(MemberAccessChainNode access);
@@ -27,6 +27,7 @@ namespace Shinobytes.XzaarScript.Parser
         WhileExpression Visit(WhileLoopNode loop);
         ForEachExpression Visit(ForeachLoopNode loop);
         ForExpression Visit(ForLoopNode loop);
+        ConditionalExpression Visit(ConditionalExpressionNode node);
         LoopExpression Visit(LoopNode loop);
         VariableDefinitionExpression Visit(DefineVariableNode definedVariable);
         ParameterExpression Visit(VariableNode variable);

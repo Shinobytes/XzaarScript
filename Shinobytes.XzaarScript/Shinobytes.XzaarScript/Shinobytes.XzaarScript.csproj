@@ -184,7 +184,7 @@
     <Compile Include="Ast\Expressions\LabelExpression.cs" />
     <Compile Include="Ast\Expressions\BinaryExpression.cs" />
     <Compile Include="Ast\Expressions\BlockExpression.cs" />
-    <Compile Include="Ast\Expressions\ConditionalExpression.cs" />
+    <Compile Include="Ast\Expressions\IfElseExpression.cs" />
     <Compile Include="Ast\Expressions\ConstantExpression.cs" />
     <Compile Include="Ast\Expressions\ListArgumentProvider.cs" />
     <Compile Include="Ast\Expressions\LogicalBinaryExpression.cs" />
@@ -216,7 +216,7 @@
     <Compile Include="Parser\Nodes\BreakNode.cs" />
     <Compile Include="Parser\Nodes\CaseNode.cs" />
     <Compile Include="Parser\Nodes\IfElseNode.cs" />
-    <Compile Include="Parser\Nodes\ConditionalOperatorNode.cs" />
+    <Compile Include="Parser\Nodes\LogicalConditionalNode.cs" />
     <Compile Include="Parser\Nodes\ContinueNode.cs" />
     <Compile Include="Parser\Nodes\ControlFlowNode.cs" />
     <Compile Include="Parser\Nodes\CreateStructNode.cs" />

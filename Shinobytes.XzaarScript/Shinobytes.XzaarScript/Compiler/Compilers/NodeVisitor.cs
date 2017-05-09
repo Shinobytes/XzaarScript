@@ -45,9 +45,9 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
 
         // public void RegisterExternFunction()
 
-        public virtual XzaarExpression Visit(ConditionalOperatorNode conditionalOperator)
+        public virtual XzaarExpression Visit(LogicalConditionalNode logicalConditional)
         {
-            var oper = conditionalOperator;
+            var oper = logicalConditional;
             var left = Visit(oper.Left);
             var right = Visit(oper.Right);
             switch (oper.Op)
@@ -132,7 +132,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             var f = ifElse.GetFalse();
             ifTrue = t != null && !t.IsEmpty() ? Visit(t) : XzaarExpression.Empty();
             ifFalse = f != null && !f.IsEmpty() ? Visit(f) : XzaarExpression.Empty();
-            return XzaarExpression.Condition(test, ifTrue, ifFalse);
+            return XzaarExpression.IfElse(test, ifTrue, ifFalse);
         }
 
         public virtual XzaarExpression Visit(FunctionParametersNode parameters)
@@ -400,6 +400,19 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
                     Visit(loop.Incrementor),
                     Visit(loop.Body)
                 );
+        }
+        void c() { }
+        string p()
+        {
+            return ";";
+        }
+        public virtual ConditionalExpression Visit(ConditionalExpressionNode node)
+        {
+            return XzaarExpression.Conditional(
+                Visit(node.GetCondition()),
+                Visit(node.GetTrue()),
+                Visit(node.GetFalse())
+            );
         }
 
         public virtual LoopExpression Visit(LoopNode loop)
@@ -802,10 +815,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             DiscoverStructsAndFunctions(node);
 
             var items = node.Children.Select(Visit).ToArray();
-            if (items.Length > 1)
-                return XzaarExpression.Block(
-                    items
-                );
+            if (items.Length > 1) return XzaarExpression.Block(items);
             return items.FirstOrDefault();
         }
 
@@ -885,7 +895,8 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             if (name.EndsWith("XzaarNode"))
                 return Error("Unknown node '" + name + "' found. Something really really bad happened here");
 
-            if (node is ConditionalOperatorNode) return Visit(node as ConditionalOperatorNode);
+            if (node is ConditionalExpressionNode) return Visit(node as ConditionalExpressionNode);
+            if (node is LogicalConditionalNode) return Visit(node as LogicalConditionalNode);
             if (node is EqualityOperatorNode) return Visit(node as EqualityOperatorNode);
             if (node is BinaryOperatorNode) return Visit(node as BinaryOperatorNode);
             if (node is LogicalNotNode) return Visit(node as LogicalNotNode);

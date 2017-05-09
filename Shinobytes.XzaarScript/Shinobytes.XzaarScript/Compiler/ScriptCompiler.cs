@@ -62,6 +62,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
 #if UNITY
             if (expression is BinaryExpression) return Visit(expression as BinaryExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
             if (expression is MemberAccessChainExpression) return Visit(expression as MemberAccessChainExpression);
@@ -146,6 +147,71 @@ namespace Shinobytes.XzaarScript.Compiler
             return cv; // return the temp variable we used to return the result of the comparison
         }
 
+        private VariableReference Assign(VariableReference vRef, VariableReference value, BinaryExpression binaryOp = null)
+        {
+            VariableReference returnValue = null;
+            if (vRef == null) return Error("Bad binary expression: Left side is missing!");
+            var fRef = vRef as FieldReference;
+            var fRefRight = value as FieldReference;
+            if (value is Constant)
+            {
+                var c = value as Constant;
+                var arrayInit = c.Value as XzaarExpression[];
+                if (arrayInit != null)
+                {
+                    ctx.AddInstruction(Instruction.Create(OpCode.ArrayClearElements, vRef));
+                    foreach (var item in arrayInit)
+                    {
+                        var val = Visit(item) as VariableReference;
+                        var inst = Instruction.Create(OpCode.ArrayAddElements, vRef);
+                        inst.OperandArguments.Add(val);
+                        ctx.AddInstruction(inst);
+                    }
+
+                    insideBinaryOperation = false;
+                    return vRef;
+                }
+            }
+
+            if (fRefRight != null)
+            {
+                value = TempVariable(vRef.Type);
+                ctx.AddInstruction(fRefRight.ArrayIndex != null
+                    ? Instruction.Create(OpCode.StructGet, value, fRefRight.Instance, fRefRight, fRefRight.ArrayIndex as VariableReference)
+                    : Instruction.Create(OpCode.StructGet, value, fRefRight.Instance, fRefRight));
+
+                // ctx.AddInstruction(Instruction.Create(OpCode.StructGet, value, fRefRight.Instance, fRefRight));
+            }
+
+            if (fRef == null && vRef.IsRef) fRef = vRef.Reference as FieldReference;
+            if (fRef != null)
+            {
+                ctx.AddInstruction(vRef.ArrayIndex != null
+                    ? Instruction.Create(OpCode.StructSet, fRef.Instance, fRef, vRef.ArrayIndex as VariableReference, value)
+                    : Instruction.Create(OpCode.StructSet, fRef.Instance, fRef, value));
+                returnValue = fRef;
+            }
+            else
+            {
+                if (binaryOp != null && binaryOp.Left is MemberAccessChainExpression)
+                {
+                    ctx.AddInstruction(vRef.ArrayIndex != null
+                        ? Instruction.Create(OpCode.StructSet, vRef, vRef.Reference, vRef.ArrayIndex as VariableReference, value)
+                        : Instruction.Create(OpCode.StructSet, vRef, vRef.Reference, value));
+                }
+                else
+                {
+                    ctx.AddInstruction(vRef.ArrayIndex != null
+                        ? Instruction.Create(OpCode.ArraySetElement, vRef, vRef.ArrayIndex as VariableReference, value)
+                        : Instruction.Create(OpCode.Assign, vRef, value));
+                }
+                returnValue = vRef;
+            }
+            insideBinaryOperation = false;
+
+            return returnValue;
+        }
+
         public object Visit(BinaryExpression binaryOp)
         {
             lastBinaryOperationType = binaryOp.NodeType;
@@ -153,70 +219,11 @@ namespace Shinobytes.XzaarScript.Compiler
             switch (binaryOp.NodeType)
             {
                 case ExpressionType.Assign:
-                    object returnValue;
-                    {
-                        var vRef = Visit(binaryOp.Left) as VariableReference;
-                        if (vRef == null) return Error("Bad binary expression: Left side is missing!");
-                        var value = Visit(binaryOp.Right) as VariableReference;
-                        var fRef = vRef as FieldReference;
-                        var fRefRight = value as FieldReference;
-                        if (value is Constant)
-                        {
-                            var c = value as Constant;
-                            var arrayInit = c.Value as XzaarExpression[];
-                            if (arrayInit != null)
-                            {
-                                ctx.AddInstruction(Instruction.Create(OpCode.ArrayClearElements, vRef));
-                                foreach (var item in arrayInit)
-                                {
-                                    var val = Visit(item) as VariableReference;
-                                    var inst = Instruction.Create(OpCode.ArrayAddElements, vRef);
-                                    inst.OperandArguments.Add(val);
-                                    ctx.AddInstruction(inst);
-                                }
 
-                                insideBinaryOperation = false;
-                                return vRef;
-                            }
-                        }
-
-                        if (fRefRight != null)
-                        {
-                            value = TempVariable(vRef.Type);
-                            ctx.AddInstruction(fRefRight.ArrayIndex != null
-                                ? Instruction.Create(OpCode.StructGet, value, fRefRight.Instance, fRefRight, fRefRight.ArrayIndex as VariableReference)
-                                : Instruction.Create(OpCode.StructGet, value, fRefRight.Instance, fRefRight));
-
-                            // ctx.AddInstruction(Instruction.Create(OpCode.StructGet, value, fRefRight.Instance, fRefRight));
-                        }
-
-                        if (fRef == null && vRef.IsRef) fRef = vRef.Reference as FieldReference;
-                        if (fRef != null)
-                        {
-                            ctx.AddInstruction(vRef.ArrayIndex != null
-                                ? Instruction.Create(OpCode.StructSet, fRef.Instance, fRef, vRef.ArrayIndex as VariableReference, value)
-                                : Instruction.Create(OpCode.StructSet, fRef.Instance, fRef, value));
-                            returnValue = fRef;
-                        }
-                        else
-                        {
-                            if (binaryOp.Left is MemberAccessChainExpression)
-                            {
-                                ctx.AddInstruction(vRef.ArrayIndex != null
-                                    ? Instruction.Create(OpCode.StructSet, vRef, vRef.Reference, vRef.ArrayIndex as VariableReference, value)
-                                    : Instruction.Create(OpCode.StructSet, vRef, vRef.Reference, value));
-                            }
-                            else
-                            {
-                                ctx.AddInstruction(vRef.ArrayIndex != null
-                                    ? Instruction.Create(OpCode.ArraySetElement, vRef, vRef.ArrayIndex as VariableReference, value)
-                                    : Instruction.Create(OpCode.Assign, vRef, value));
-                            }
-                            returnValue = vRef;
-                        }
-                        insideBinaryOperation = false;
-                    }
-                    return returnValue;
+                    var vRef = Visit(binaryOp.Left) as VariableReference;
+                    if (vRef == null) return Error("Bad binary expression: Left side is missing!");
+                    var value = Visit(binaryOp.Right) as VariableReference;
+                    return Assign(vRef, value, binaryOp);
                 case ExpressionType.LessThan:
                     return BinaryOp(binaryOp, OpCode.CmpLt, XzaarBaseTypes.Boolean);
                 case ExpressionType.LessThanOrEqual:
@@ -243,14 +250,61 @@ namespace Shinobytes.XzaarScript.Compiler
             return Error(binaryOp.NodeType + " has not been implemented.");
         }
 
-        public object Visit(ConditionalExpression conditional)
+
+        public object Visit(ConditionalExpression expr)
+        {
+            if (expr.Type.IsEquivalentTo(XzaarBaseTypes.Void))
+            {
+                return Error("Type of the conditional expression cannot be a void");
+            }
+
+            // if test is true, assign result of 'WhenTrue' to temp and return temp variable
+            // if test is false, assign result of 'WhenFalse' to temp and return temp variable
+
+            var endLabel = Instruction.Label();
+            var ifTrueLabel = Instruction.Label();
+            var ifFalseLabel = Instruction.Label();
+            var test = Visit(expr.Test) as VariableReference;
+            var t = expr.WhenTrue;
+            var f = expr.WhenFalse;
+
+            var result = TempVariable(expr.Type);
+
+            ctx.AddInstruction(Instruction.Create(OpCode.Jmpt, test, ifTrueLabel));
+            ctx.AddInstruction(Instruction.Create(OpCode.Jmpf, test, ifFalseLabel));
+            ctx.AddInstruction(Instruction.Create(OpCode.Jmp, endLabel));
+            var startIndex = ctx.InstructionCount;
+
+
+            Assign(result, Visit(t) as VariableReference);
+
+
+            ctx.AddInstruction(Instruction.Create(OpCode.Jmp, endLabel));
+            ctx.InsertInstruction(startIndex, ifTrueLabel);
+
+
+            startIndex = ctx.InstructionCount; // ctx.MethodInstructions.Count;
+
+            if (f != null && !f.IsEmpty())
+            {
+                Assign(result, Visit(f) as VariableReference);
+                ctx.AddInstruction(Instruction.Create(OpCode.Jmp, endLabel));
+                ctx.InsertInstruction(startIndex, ifFalseLabel);
+            }
+
+            ctx.AddInstruction(endLabel);
+
+            return result;
+        }
+
+        public object Visit(IfElseExpression ifElse)
         {
             var endLabel = Instruction.Label();
             var ifTrueLabel = Instruction.Label();
             var ifFalseLabel = Instruction.Label();
-            var test = Visit(conditional.Test) as VariableReference;
-            var t = conditional.IfTrue;
-            var f = conditional.IfFalse;
+            var test = Visit(ifElse.Test) as VariableReference;
+            var t = ifElse.IfTrue;
+            var f = ifElse.IfFalse;
             if (t != null && !t.IsEmpty()) ctx.AddInstruction(Instruction.Create(OpCode.Jmpt, test, ifTrueLabel));
             if (f != null && !f.IsEmpty()) ctx.AddInstruction(Instruction.Create(OpCode.Jmpf, test, ifFalseLabel));
             ctx.AddInstruction(Instruction.Create(OpCode.Jmp, endLabel));

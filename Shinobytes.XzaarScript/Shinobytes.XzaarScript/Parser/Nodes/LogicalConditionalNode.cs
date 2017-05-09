@@ -2,12 +2,12 @@ using Shinobytes.XzaarScript.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
-    public class ConditionalOperatorNode : AstNode
+    public class LogicalConditionalNode : AstNode
     {
         private AstNode left;
         private AstNode right;
 
-        public ConditionalOperatorNode(int operatingOrderWeight, AstNode left, string op, AstNode right, int nodeIndex)
+        public LogicalConditionalNode(int operatingOrderWeight, AstNode left, string op, AstNode right, int nodeIndex)
             : base(SyntaxKind.ConditionalExpression, null, null, nodeIndex)
         {
             this.left = left;

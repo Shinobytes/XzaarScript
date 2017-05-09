@@ -40,6 +40,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
 
             if (expression is UnaryExpression) return Visit(expression as UnaryExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
             if (expression is GotoExpression) return Visit(expression as GotoExpression);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
@@ -66,6 +67,7 @@ namespace Shinobytes.XzaarScript.Compiler
 #endif
 
         }
+
 
         private void AssertPossibleStackOverflow(XzaarExpression expression)
         {
@@ -137,7 +139,7 @@ namespace Shinobytes.XzaarScript.Compiler
             return null;
         }
 
-        public object Visit(ConditionalExpression node)
+        public object Visit(IfElseExpression node)
         {
             return null;
         }
@@ -175,6 +177,12 @@ namespace Shinobytes.XzaarScript.Compiler
         public object Visit(ParameterExpression parameter)
         {
             return new XsParameter(parameter.Name, ctx.GetClrType(parameter.Type));
+        }
+
+
+        public object Visit(ConditionalExpression expr)
+        {
+            return null;
         }
 
         public object Visit(FunctionExpression function)

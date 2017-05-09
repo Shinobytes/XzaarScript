@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shinobytes.XzaarScript.Ast;
 using Shinobytes.XzaarScript.Compiler.Compilers;
@@ -20,7 +21,18 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             LanguageParser parser;
             var code = TypeLookup("let i = 1 > 0 ? true : false", out parser);
             Assert.AreEqual(false, parser.HasErrors);
-            Assert.AreEqual(@"var i = 1 > 0 ? true : false", code);
+            Assert.AreEqual(@"var i = 1 > 0 ? True : False", code);
+        }
+
+        [TestMethod]
+        public void invoke_function_with_conditional()
+        {
+            LanguageParser parser;
+            var code = TypeLookup("fn test(a:bool) -> void { } test(1 > 0 ? true : false)", out parser);
+            Assert.AreEqual(false, parser.HasErrors);
+            Assert.AreEqual(@"fn test(a:bool) {
+}
+test(1 > 0 ? True : False)", code);
         }
 
 
@@ -539,7 +551,9 @@ console.log(x + "" "" + y + "" "" + z)", code);
         {
             var ast = new NodeTypeBinder().Process(Reduce(code, out parser));
             var analyzer = new ExpressionAnalyzer();
-            var analyzed = analyzer.AnalyzeExpression(ast as EntryNode);
+            IList<string> errors;
+            var analyzed = analyzer.AnalyzeExpression(ast as EntryNode, out errors);
+            if (errors.Count > 0) throw new Exception(string.Join(" ", errors));
             var codeGenerator = new CodeGeneratorVisitor();
             return codeGenerator.Visit(analyzed.GetExpression()).TrimEnd('\r', '\n');
         }

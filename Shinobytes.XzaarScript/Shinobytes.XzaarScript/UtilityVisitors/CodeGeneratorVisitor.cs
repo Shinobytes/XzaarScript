@@ -27,6 +27,7 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
 #if UNITY
             if (expression is BinaryExpression) return Visit(expression as BinaryExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
             if (expression is MemberAccessChainExpression) return Visit(expression as MemberAccessChainExpression);
             if (expression is GotoExpression) return Visit(expression as GotoExpression);
@@ -57,6 +58,7 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
 #endif
         }
 
+
         public string Visit(BinaryExpression binaryOp)
         {
             var codeWriter = new XzaarCodeWriter();
@@ -80,19 +82,44 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
             return codeWriter.ToString();
         }
 
-        public string Visit(ConditionalExpression conditional)
+        public string Visit(ConditionalExpression expr)
+        {
+            var codeWriter = new XzaarCodeWriter();
+            insideExpressionCount++;
+            codeWriter.Write(Visit(expr.Test));
+            insideExpressionCount--;
+            codeWriter.Write(" ? ");
+            if (expr.WhenTrue != null)
+            {
+                currentIndent++;
+                codeWriter.Write(Visit(expr.WhenTrue));
+                currentIndent--;
+
+            }
+            codeWriter.Write(" : ");
+
+            if (expr.WhenFalse != null)
+            {                
+                currentIndent++;
+                codeWriter.Write(Visit(expr.WhenFalse));
+                currentIndent--;                
+            }
+            return codeWriter.ToString();
+        }
+
+        public string Visit(IfElseExpression ifElse)
         {
             var codeWriter = new XzaarCodeWriter();
             codeWriter.Write("if (", currentIndent);
             insideExpressionCount++;
-            codeWriter.Write(Visit(conditional.Test));
+            codeWriter.Write(Visit(ifElse.Test));
             insideExpressionCount--;
             codeWriter.Write(") { ");
             codeWriter.NewLine();
-            if (conditional.IfTrue != null)
+            if (ifElse.IfTrue != null)
             {
                 currentIndent++;
-                codeWriter.Write(Visit(conditional.IfTrue));
+                codeWriter.Write(Visit(ifElse.IfTrue));
                 currentIndent--;
 
             }
@@ -100,13 +127,13 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
             codeWriter.Write("}", currentIndent);
             codeWriter.NewLine();
 
-            if (conditional.IfFalse != null && !conditional.IfFalse.IsEmpty())
+            if (ifElse.IfFalse != null && !ifElse.IfFalse.IsEmpty())
             {
                 codeWriter.Write("else {", currentIndent);
                 codeWriter.NewLine();
 
                 currentIndent++;
-                codeWriter.Write(Visit(conditional.IfFalse));
+                codeWriter.Write(Visit(ifElse.IfFalse));
                 currentIndent--;
 
                 codeWriter.Write("}", currentIndent);

@@ -12,6 +12,15 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
     {
 
         [TestMethod]
+        public void assign_conditional()
+        {
+            // Assert.Inconclusive("Array initializers has not been implemented yet");
+            var code = FormatCode(@"let a = 1 > 0 ? true : false;");
+
+            Assert.AreEqual(@"var a = 1 > 0 ? True : False", code);
+        }
+
+        [TestMethod]
         public void Bang_not_equal()
         {
             var code = FormatCode(@"let a = true let b = false let c = a != b");
