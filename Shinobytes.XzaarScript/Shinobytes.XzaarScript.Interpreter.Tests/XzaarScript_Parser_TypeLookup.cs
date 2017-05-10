@@ -535,7 +535,6 @@ console.log(x + "" "" + y + "" "" + z)", code);
 }", code);
         }
 
-
         private LanguageParser Parser(string code)
         {
             return new LanguageParser(new Lexer(code, false).Tokenize());

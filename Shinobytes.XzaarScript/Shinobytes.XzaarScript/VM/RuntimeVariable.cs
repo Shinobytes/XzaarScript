@@ -138,6 +138,15 @@ namespace Shinobytes.XzaarScript.VM
         {
         }
 
+        public RuntimeVariable(Runtime rt, Constant constantValue)
+        {
+            this.Runtime = rt;
+            this.Name = Guid.NewGuid().ToString();
+            this.Type = constantValue.Type;
+            this.value = constantValue.Value;
+            if (value is object[]) this.arrayValue = (object[])value;
+        }
+
         public RuntimeVariable(Runtime rt, VariableReference v, object value)
         {
             this.Runtime = rt;
@@ -150,7 +159,7 @@ namespace Shinobytes.XzaarScript.VM
         public RuntimeVariable(Runtime rt, ParameterDefinition p, object value)
         {
             this.Runtime = rt;
-            this.Name = p.Name;
+            this.Name = p.Name ?? Guid.NewGuid().ToString(); ;
             this.Type = p.Type;
             this.value = value;
             if (value is object[]) this.arrayValue = (object[])value;

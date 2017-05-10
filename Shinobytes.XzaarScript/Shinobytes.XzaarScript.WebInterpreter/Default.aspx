@@ -2,6 +2,7 @@
 
 <%@ Import Namespace="System.Diagnostics" %>
 <%@ Import Namespace="Shinobytes.XzaarScript.VM" %>
+<%@ Import Namespace="Shinobytes.XzaarScript.Assembly.Models" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -65,10 +66,13 @@ print_hello_world()";
 
         public void log(object text)
         {
-            var rtVar = text as RuntimeVariable;
-            if (rtVar != null)
+            if (text is RuntimeVariable)
             {
-                Output += rtVar.Value + "<br/>";
+                Output += ((RuntimeVariable)text).Value + "<br/>";
+            }
+            else if (text is Constant)
+            {
+                Output += ((Constant)text).Value + "<br/>";
             }
             else
             {

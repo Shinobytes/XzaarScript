@@ -859,13 +859,12 @@ namespace Shinobytes.XzaarScript.VM
                 {
                     // throw new NotImplementedException("Constant values cannot be accessed as a field or variable yet. This feature has not been implemented.");
 
-                    //if (constant.IsArray)
-                    //{
-
-                    //    var tempVariable = new RuntimeVariable(rt, constant, constant.Value);
-                    //    rt.CurrentScope.AddVariables(new[] { tempVariable });
-                    //    return tempVariable;
-                    //}
+                    if (constant.IsArray)
+                    {
+                        var tempVariable = new RuntimeVariable(rt, constant);
+                        rt.CurrentScope.AddVariables(new[] { tempVariable });
+                        return tempVariable;
+                    }
                 }
 
                 return null;

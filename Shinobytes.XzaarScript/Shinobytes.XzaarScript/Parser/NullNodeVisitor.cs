@@ -50,22 +50,22 @@ namespace Shinobytes.XzaarScript.Parser
             return null;
         }
 
-        public virtual LabelExpression Visit(LabelNode label)
+        public virtual XzaarExpression Visit(LabelNode label)
         {
             return null;
         }
 
-        public virtual GotoExpression Visit(GotoNode @goto)
+        public virtual XzaarExpression Visit(GotoNode @goto)
         {
             return null;
         }
 
-        public virtual MemberAccessChainExpression Visit(MemberAccessChainNode access)
+        public virtual XzaarExpression Visit(MemberAccessChainNode access)
         {
             return null;
         }
 
-        public virtual CreateStructExpression Visit(CreateStructNode createStruct)
+        public virtual XzaarExpression Visit(CreateStructNode createStruct)
         {
             return null;
         }
@@ -75,7 +75,7 @@ namespace Shinobytes.XzaarScript.Parser
             return null;
         }
 
-        public virtual BinaryExpression Visit(AssignNode assign)
+        public virtual XzaarExpression Visit(AssignNode assign)
         {
             return null;
         }
@@ -85,57 +85,57 @@ namespace Shinobytes.XzaarScript.Parser
             return null;
         }
 
-        public virtual SwitchCaseExpression Visit(CaseNode @case)
+        public virtual XzaarExpression Visit(CaseNode @case)
         {
             return null;
         }
 
-        public virtual SwitchExpression Visit(MatchNode match)
+        public virtual XzaarExpression Visit(MatchNode match)
         {
             return null;
         }
 
-        public virtual DoWhileExpression Visit(DoWhileLoopNode loop)
+        public virtual XzaarExpression Visit(DoWhileLoopNode loop)
         {
             return null;
         }
 
-        public virtual WhileExpression Visit(WhileLoopNode loop)
+        public virtual XzaarExpression Visit(WhileLoopNode loop)
         {
             return null;
         }
 
-        public virtual ForEachExpression Visit(ForeachLoopNode loop)
+        public virtual XzaarExpression Visit(ForeachLoopNode loop)
         {
             return null;
         }
 
-        public virtual ForExpression Visit(ForLoopNode loop)
+        public virtual XzaarExpression Visit(ForLoopNode loop)
         {
             return null;
         }
 
-        public ConditionalExpression Visit(ConditionalExpressionNode node)
+        public virtual XzaarExpression Visit(ConditionalExpressionNode node)
         {
             return null;
         }
 
-        public virtual LoopExpression Visit(LoopNode loop)
+        public virtual XzaarExpression Visit(LoopNode loop)
         {
             return null;
         }
 
-        public virtual VariableDefinitionExpression Visit(DefineVariableNode definedVariable)
+        public virtual XzaarExpression Visit(DefineVariableNode definedVariable)
         {
             return null;
         }
 
-        public virtual ParameterExpression Visit(VariableNode variable)
+        public virtual XzaarExpression Visit(VariableNode variable)
         {
             return null;
         }
 
-        public virtual ParameterExpression Visit(ParameterNode parameter)
+        public virtual XzaarExpression Visit(ParameterNode parameter)
         {
             return null;
         }
@@ -160,17 +160,17 @@ namespace Shinobytes.XzaarScript.Parser
             return null;
         }
 
-        public virtual StructExpression Visit(StructNode node)
+        public virtual XzaarExpression Visit(StructNode node)
         {
             return null;
         }
 
-        public virtual FieldExpression Visit(FieldNode node)
+        public virtual XzaarExpression Visit(FieldNode node)
         {
             return null;
         }
 
-        public virtual ConstantExpression Visit(NumberNode number)
+        public virtual XzaarExpression Visit(NumberNode number)
         {
             return null;
         }

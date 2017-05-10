@@ -26,7 +26,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return null;
         }
 
-        public override VariableDefinitionExpression Visit(DefineVariableNode variable)
+        public override XzaarExpression Visit(DefineVariableNode variable)
         {
             var t = XzaarType.GetType(variable.Type);
             if (currentFunctionVariables.ContainsKey(variable.Name))
@@ -50,31 +50,42 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return null;
         }
 
-        public override ForExpression Visit(ForLoopNode loop)
+        public override XzaarExpression Visit(ConditionalExpressionNode node)
+        {
+            var @false = node.GetFalse();
+            var @true = node.GetTrue();
+            if (@false != null) Visit(@false);
+            if (!FoundType && @true != null) Visit(@true);
+            return null;
+        }
+
+        public override XzaarExpression Visit(ForLoopNode loop)
         {
             if (loop.Body != null) Visit(loop.Body);
             return null;
         }
 
-
-        public override ForEachExpression Visit(ForeachLoopNode loop)
+        public override XzaarExpression Visit(ForeachLoopNode loop)
         {
             if (loop.Body != null) Visit(loop.Body);
             return null;
         }
 
-        public override SwitchCaseExpression Visit(CaseNode @case)
+        public override XzaarExpression Visit(CaseNode @case)
         {
             if (@case.Body != null) Visit(@case.Body);
             return null;
         }
 
-        public override SwitchExpression Visit(MatchNode loop)
+        public override XzaarExpression Visit(MatchNode loop)
         {
-            if (loop.Cases != null)
-                foreach (var @case in loop.Cases)
-                    if (@case != null)
-                        Visit(@case);
+            if (loop.Cases == null)
+                return null;
+
+            foreach (var @case in loop.Cases)
+            {
+                if (@case != null) Visit(@case);
+            }
 
             return null;
         }
@@ -132,7 +143,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             {
                 return XzaarBaseTypes.Void;
             }
-            
+
             if (SyntaxFacts.IsMath(expr.Kind))
             {
                 var m = expr as BinaryOperatorNode;

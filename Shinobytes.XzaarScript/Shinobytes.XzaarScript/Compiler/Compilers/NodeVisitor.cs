@@ -164,27 +164,27 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return Error("Unknown member declaration");
         }
 
-        public virtual LabelExpression Visit(LabelNode label)
+        public virtual XzaarExpression Visit(LabelNode label)
         {
             var xzaarLabelTarget = XzaarExpression.Label(label.Name);
             definedLabels.Add(xzaarLabelTarget);
             return XzaarExpression.Label(xzaarLabelTarget);
         }
 
-        public virtual GotoExpression Visit(GotoNode @goto)
+        public virtual XzaarExpression Visit(GotoNode @goto)
         {
             var label = definedLabels.FirstOrDefault(l => l.Name == @goto.LabelName);
             return XzaarExpression.Goto(label);
         }
 
-        public MemberAccessChainExpression Visit(MemberAccessChainNode access)
+        public virtual XzaarExpression Visit(MemberAccessChainNode access)
         {
             var last = Visit(access.LastAccessor);
             var now = Visit(access.Accessor);
             return XzaarExpression.AccessChain(last, now);
         }
 
-        public CreateStructExpression Visit(CreateStructNode createStruct)
+        public virtual XzaarExpression Visit(CreateStructNode createStruct)
         {
             if (createStruct.FieldInitializers != null)
             {
@@ -269,14 +269,14 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return null;
         }
 
-        public virtual BinaryExpression Visit(AssignNode assign)
+        public virtual XzaarExpression Visit(AssignNode assign)
         {
             var left = Visit(assign.Left);
             var right = Visit(assign.Right);
             return XzaarExpression.Assign(left, right);
         }
 
-        public XzaarExpression Visit(UnaryNode unary)
+        public virtual XzaarExpression Visit(UnaryNode unary)
         {
             var item = Visit(unary.Item);
             if (unary.Operator == "++" && unary.IsPostUnary)
@@ -327,7 +327,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return Error("'" + item + "' cannot be negated");
         }
 
-        public SwitchCaseExpression Visit(CaseNode @case)
+        public virtual XzaarExpression Visit(CaseNode @case)
         {
             var body = Visit(@case.Body);
             if (@case.IsDefaultCase)
@@ -339,19 +339,19 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return XzaarExpression.Case(test, body);
         }
 
-        public virtual SwitchExpression Visit(MatchNode match)
+        public virtual XzaarExpression Visit(MatchNode match)
         {
             var valueExpr = Visit(match.ValueExpression);
             var cases = match.Cases.Select(Visit).ToArray();
             return XzaarExpression.Switch(valueExpr, cases);
         }
 
-        public virtual DoWhileExpression Visit(DoWhileLoopNode loop)
+        public virtual XzaarExpression Visit(DoWhileLoopNode loop)
         {
             return XzaarExpression.DoWhile(Visit(loop.Test), Visit(loop.Body));
         }
 
-        public virtual WhileExpression Visit(WhileLoopNode loop)
+        public virtual XzaarExpression Visit(WhileLoopNode loop)
         {
             return XzaarExpression.While(Visit(loop.Test), Visit(loop.Body));
 
@@ -384,7 +384,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             //return XzaarExpression.Block(XzaarExpression.Loop(body), label);
         }
 
-        public virtual ForEachExpression Visit(ForeachLoopNode loop)
+        public virtual XzaarExpression Visit(ForeachLoopNode loop)
         {
             return XzaarExpression.ForEach(
                     Visit(loop.Variable),
@@ -392,7 +392,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
                     Visit(loop.Body));
         }
 
-        public virtual ForExpression Visit(ForLoopNode loop)
+        public virtual XzaarExpression Visit(ForLoopNode loop)
         {
             return XzaarExpression.For(
                     Visit(loop.Initiator),
@@ -401,13 +401,12 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
                     Visit(loop.Body)
                 );
         }
-        void c() { }
-        string p()
+
+        public virtual XzaarExpression Visit(ConditionalExpressionNode node)
         {
-            return ";";
-        }
-        public virtual ConditionalExpression Visit(ConditionalExpressionNode node)
-        {
+            //if (node.Type?.ToLower() == "void")
+            //    return Error($"Invalid conditional operator return type '{node.Type}'");
+
             return XzaarExpression.Conditional(
                 Visit(node.GetCondition()),
                 Visit(node.GetTrue()),
@@ -415,12 +414,12 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             );
         }
 
-        public virtual LoopExpression Visit(LoopNode loop)
+        public virtual XzaarExpression Visit(LoopNode loop)
         {
             return XzaarExpression.Loop(Visit(loop.Body));
         }
 
-        public virtual VariableDefinitionExpression Visit(DefineVariableNode definedVariable)
+        public virtual XzaarExpression Visit(DefineVariableNode definedVariable)
         {
             VariableDefinitionExpression variable = null;
             if (definedVariable.AssignmentExpression != null)
@@ -448,7 +447,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return variable;
         }
 
-        public ParameterExpression Visit(VariableNode variable)
+        public XzaarExpression Visit(VariableNode variable)
         {
             var @type = GetOrCreateType(variable.Type);
             if (@type == null) throw new InvalidOperationException(variable.Type + " is an unknown type.");
@@ -465,7 +464,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return v;
         }
 
-        public virtual ParameterExpression Visit(ParameterNode parameter)
+        public virtual XzaarExpression Visit(ParameterNode parameter)
         {
             var @type = GetOrCreateType(parameter.Type);
             if (@type == null) throw new InvalidOperationException(parameter.Type + " is an unknown type.");
@@ -631,7 +630,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
 
             var f = XzaarExpression.Function(
                 function.Name,
-                function.Parameters.Parameters.Select(Visit).ToArray(),
+                function.Parameters.Parameters.Select(Visit).Cast<ParameterExpression>().ToArray(),
                 function.ReturnType,
                 null,
                 function.IsExtern
@@ -649,7 +648,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return f;
         }
 
-        public virtual StructExpression Visit(StructNode node)
+        public virtual XzaarExpression Visit(StructNode node)
         {
             var structFields = node.Fields.Select(Visit).ToArray();
             return XzaarExpression.Struct(
@@ -658,7 +657,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             );
         }
 
-        public virtual FieldExpression Visit(FieldNode node)
+        public virtual XzaarExpression Visit(FieldNode node)
         {
             var declaringType = GetOrCreateType(node.DeclaringType);
             var a = this.structs.FirstOrDefault(s => s.Name == node.Type);
@@ -673,7 +672,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
             return XzaarExpression.Field(XzaarType.GetType(node.Type), node.Name, declaringType);
         }
 
-        public virtual ConstantExpression Visit(NumberNode number)
+        public virtual XzaarExpression Visit(NumberNode number)
         {
             return XzaarExpression.Constant(number.Value, XzaarBaseTypes.Number);
         }
@@ -852,7 +851,7 @@ namespace Shinobytes.XzaarScript.Compiler.Compilers
 
                     var f = XzaarExpression.Function(
                         function.Name,
-                        function.Parameters.Parameters.Select(Visit).ToArray(),
+                        function.Parameters.Parameters.Select(Visit).Cast<ParameterExpression>().ToArray(),
                         function.ReturnType,
                         null,
                         function.IsExtern
