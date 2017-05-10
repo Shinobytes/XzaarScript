@@ -22,9 +22,9 @@ namespace Shinobytes.XzaarScript.VM
         public bool IsDebugging => isDebugging;
 
 
-        public static Runtime Load(XzaarAssembly asm)
+        public static Runtime Load(XzaarAssembly asm, RuntimeSettings settings)
         {
-            return new VirtualMachine(asm).CreateRuntimeInstance();
+            return new VirtualMachine(asm).CreateRuntimeInstance(settings);
         }
 
         public static Runtime Run(XzaarAssembly asm)
@@ -32,9 +32,18 @@ namespace Shinobytes.XzaarScript.VM
             return new VirtualMachine(asm).RunNow(RuntimeStepType.Complete);
         }
 
+        public static Runtime Run(XzaarAssembly asm, RuntimeSettings settings)
+        {
+            return new VirtualMachine(asm).RunNow(RuntimeStepType.Complete, settings);
+        }
+
         public static Runtime Debug(XzaarAssembly asm)
         {
             return new VirtualMachine(asm).RunNow(RuntimeStepType.StepByStep);
+        }
+        public static Runtime Debug(XzaarAssembly asm, RuntimeSettings settings)
+        {
+            return new VirtualMachine(asm).RunNow(RuntimeStepType.StepByStep, settings);
         }
 
         internal void SetRunningState(bool state)
@@ -52,22 +61,22 @@ namespace Shinobytes.XzaarScript.VM
         {
             // run all global instructions first.            
             rt.Run(RuntimeStepType.Complete);
-            
+
             // then invoke our target
             return interpreter.Invoke(rt, functionName, args);
         }
 
-        private Runtime RunNow(RuntimeStepType stepType)
+        private Runtime RunNow(RuntimeStepType stepType, RuntimeSettings settings = null)
         {
-            var r = CreateRuntimeInstance();
+            var r = CreateRuntimeInstance(settings);
             isRunning = true;
             isDebugging = stepType == RuntimeStepType.StepByStep;
             return r.Run(stepType);
         }
 
-        private Runtime CreateRuntimeInstance()
+        private Runtime CreateRuntimeInstance(RuntimeSettings settings = null)
         {
-            return new Runtime(this, asm);
+            return new Runtime(this, asm, settings);
         }
 
     }

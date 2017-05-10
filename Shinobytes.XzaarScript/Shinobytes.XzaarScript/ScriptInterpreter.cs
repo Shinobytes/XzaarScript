@@ -8,12 +8,14 @@ namespace Shinobytes.XzaarScript
 {
     public class ScriptInterpreter
     {
+        private readonly RuntimeSettings settings;
         private readonly Runtime runtime;
         private readonly InterpreterErrorCollection errors;
 
-        public ScriptInterpreter(string scriptCode)
+        public ScriptInterpreter(string scriptCode, RuntimeSettings settings = null)
         {
-            TryLoad(scriptCode, out this.runtime, out errors);
+            this.settings = settings ?? RuntimeSettings.Default;
+            TryLoad(scriptCode, settings, out this.runtime, out errors);
         }
 
         public Runtime Runtime => runtime;
@@ -39,15 +41,13 @@ namespace Shinobytes.XzaarScript
 
         #region Quick access functions
 
-        public static bool TryLoad(string inputCode, out Runtime runtime, out InterpreterErrorCollection errors)
+        public static bool TryLoad(string inputCode, RuntimeSettings runtimeSettings, out Runtime runtime, out InterpreterErrorCollection errors)
         {
             errors = new InterpreterErrorCollection();
-            IList<string> lexerErrors;
-            IList<string> parserErrors;
-            List<string> compilerErrors;
 
-            var assembly = Compile(inputCode, out lexerErrors, out parserErrors, out compilerErrors);
-            runtime = assembly.Load();
+            var assembly = Compile(inputCode, out var lexerErrors, out var parserErrors, out var compilerErrors);
+
+            runtime = assembly.Load(runtimeSettings);
 
             errors.AddRange(lexerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Lexer, x)));
             errors.AddRange(parserErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Parser, x)));
@@ -70,7 +70,8 @@ namespace Shinobytes.XzaarScript
             string inputCode,
             out IList<string> lexerErrors,
             out IList<string> parserErrors,
-            out List<string> compilerErrors)
+
+            out IList<string> compilerErrors)
         {
             IList<string> transformerErrors2;
             var result = inputCode
@@ -78,7 +79,7 @@ namespace Shinobytes.XzaarScript
                 .Parse(out parserErrors)
                 .AnalyzeExpression(out transformerErrors2)
                 .Compile(out compilerErrors);
-            
+
             return result;
         }
 

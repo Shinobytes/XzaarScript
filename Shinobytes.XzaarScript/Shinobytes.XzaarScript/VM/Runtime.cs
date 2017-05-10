@@ -9,6 +9,7 @@ namespace Shinobytes.XzaarScript.VM
     public class Runtime
     {
         private readonly XzaarAssembly asm;
+        private readonly RuntimeSettings settings;
         private readonly VirtualMachine vm;
         private readonly List<RuntimeVariable> globalVariables = new List<RuntimeVariable>();
         
@@ -16,10 +17,11 @@ namespace Shinobytes.XzaarScript.VM
         private RuntimeScope globalScope;
         private RuntimeScope lastScope;
 
-        internal Runtime(VirtualMachine vm, XzaarAssembly asm)
+        internal Runtime(VirtualMachine vm, XzaarAssembly asm, RuntimeSettings settings)
         {
             this.vm = vm;
             this.asm = asm;
+            this.settings = settings;
             this.Init();
         }
 

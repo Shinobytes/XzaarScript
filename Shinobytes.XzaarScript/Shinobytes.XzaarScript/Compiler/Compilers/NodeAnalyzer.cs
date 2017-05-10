@@ -3,15 +3,15 @@ using Shinobytes.XzaarScript.Parser.Nodes;
 
 namespace Shinobytes.XzaarScript.Compiler.Compilers
 {
-    public class ExpressionAnalyzer : IExpressionAnalyzer
+    public class NodeAnalyzer : INodeAnalyzer
     {
-        public AnalyzedTree AnalyzeExpression(EntryNode entry)
+        public AnalyzedTree Analyze(EntryNode entry)
         {
             IList<string> errors;
-            return AnalyzeExpression(entry, out errors);
+            return Analyze(entry, out errors);
         }
 
-        public AnalyzedTree AnalyzeExpression(EntryNode entry, out IList<string> errors)
+        public AnalyzedTree Analyze(EntryNode entry, out IList<string> errors)
         {
             // 1. do analyzing steps on the entry node..
             // 2. Bind any variable references

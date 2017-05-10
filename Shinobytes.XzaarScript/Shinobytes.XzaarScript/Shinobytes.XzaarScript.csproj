@@ -145,6 +145,7 @@
     <Compile Include="Compiler\Clr\Types\XsTypedObject.cs" />
     <Compile Include="Compiler\Clr\Types\XsVariable.cs" />
     <Compile Include="Extensions\ScriptVmExtensions.cs" />
+    <Compile Include="RuntimeSettings.cs" />
     <Compile Include="TypeSystem\XzaarFieldBuilder.cs" />
     <Compile Include="Utilities\ArrayHelper.cs" />
     <Compile Include="Compiler\FlowControlScope.cs" />
@@ -159,11 +160,11 @@
     <Compile Include="TypeSystem\IXzaarFieldInfo.cs" />
     <Compile Include="TypeSystem\IXzaarMemberInfo.cs" />
     <Compile Include="TypeSystem\IXzaarPropertyInfo.cs" />
-    <Compile Include="Compiler\Compilers\IExpressionAnalyzer.cs" />
+    <Compile Include="Compiler\Compilers\INodeAnalyzer.cs" />
     <Compile Include="Compiler\Compilers\IVariableBinder.cs" />
     <Compile Include="Compiler\Compilers\AnalyzedTree.cs" />
     <Compile Include="Compiler\Compilers\BoundConstants.cs" />
-    <Compile Include="Compiler\Compilers\ExpressionAnalyzer.cs" />
+    <Compile Include="Compiler\Compilers\NodeAnalyzer.cs" />
     <Compile Include="Compiler\Compilers\NodeVisitor.cs" />
     <Compile Include="Compiler\Compilers\VariableBinder.cs" />
     <Compile Include="Ast\Expressions\CreateStructExpression.cs" />

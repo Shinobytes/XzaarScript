@@ -2137,8 +2137,8 @@ var result = looper()", code);
         {
             LanguageParser parser;
             var ast = new NodeTypeBinder().Process(Reduce(code, out parser));
-            var analyzer = new ExpressionAnalyzer();
-            var analyzed = analyzer.AnalyzeExpression(ast as EntryNode);
+            var analyzer = new NodeAnalyzer();
+            var analyzed = analyzer.Analyze(ast as EntryNode);
             var codeGenerator = new CodeGeneratorVisitor();
             return codeGenerator.Visit(analyzed.GetExpression()).TrimEnd('\r', '\n');
         }

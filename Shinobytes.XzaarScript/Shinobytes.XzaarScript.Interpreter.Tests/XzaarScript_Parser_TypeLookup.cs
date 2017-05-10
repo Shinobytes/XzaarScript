@@ -549,9 +549,9 @@ console.log(x + "" "" + y + "" "" + z)", code);
         private string TypeLookup(string code, out LanguageParser parser)
         {
             var ast = new NodeTypeBinder().Process(Reduce(code, out parser));
-            var analyzer = new ExpressionAnalyzer();
+            var analyzer = new NodeAnalyzer();
             IList<string> errors;
-            var analyzed = analyzer.AnalyzeExpression(ast as EntryNode, out errors);
+            var analyzed = analyzer.Analyze(ast as EntryNode, out errors);
             if (errors.Count > 0) throw new Exception(string.Join(" ", errors));
             var codeGenerator = new CodeGeneratorVisitor();
             return codeGenerator.Visit(analyzed.GetExpression()).TrimEnd('\r', '\n');

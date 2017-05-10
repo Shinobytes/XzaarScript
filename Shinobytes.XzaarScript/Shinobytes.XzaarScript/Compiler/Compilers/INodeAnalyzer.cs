@@ -3,8 +3,8 @@ using Shinobytes.XzaarScript.Parser.Nodes;
 
 namespace Shinobytes.XzaarScript.Compiler.Compilers
 {
-    public interface IExpressionAnalyzer
+    public interface INodeAnalyzer
     {
-        AnalyzedTree AnalyzeExpression(EntryNode entry, out IList<string> errors);
+        AnalyzedTree Analyze(EntryNode entry, out IList<string> errors);
     }
 }

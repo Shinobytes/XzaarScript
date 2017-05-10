@@ -28,11 +28,11 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public static XzaarAssembly Compile(AnalyzedTree analyzedTree)
         {
-            List<string> errors;
+            IList<string> errors;
             return Compile(analyzedTree, out errors);
         }
 
-        public static XzaarAssembly Compile(AnalyzedTree analyzedTree, out List<string> errors)
+        public static XzaarAssembly Compile(AnalyzedTree analyzedTree, out IList<string> errors)
         {
             var compilerContext = new ScriptCompilerContext(Guid.NewGuid().ToString(), analyzedTree);
             var compiler = new ScriptCompiler(compilerContext);

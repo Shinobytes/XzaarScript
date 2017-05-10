@@ -15,7 +15,7 @@ namespace Shinobytes.XzaarScript.Extensions
     {
         public static IList<SyntaxToken> Tokenize(this string code)
         {
-            var lexer = new Lexer(code, false);
+            var lexer = new Lexer(code);
             var result = lexer.Tokenize();
             if (lexer.Errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, lexer.Errors.ToArray()));
             return result;
@@ -23,7 +23,7 @@ namespace Shinobytes.XzaarScript.Extensions
 
         public static IList<SyntaxToken> Tokenize(this string code, out IList<string> errors)
         {
-            var lexer = new Lexer(code, false);
+            var lexer = new Lexer(code);
             var result = lexer.Tokenize();
             errors = lexer.Errors;
             if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, lexer.Errors.ToArray()));
@@ -70,14 +70,12 @@ namespace Shinobytes.XzaarScript.Extensions
             return AnalyzeExpression(node, out errors);
         }
 
-
         public static AnalyzedTree AnalyzeExpression(this EntryNode node, out IList<string> errors)
         {
-            var analyzeExpression = new ExpressionAnalyzer().AnalyzeExpression(node, out errors);
+            var analyzeExpression = new NodeAnalyzer().Analyze(node, out errors);
             if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, errors.ToArray()));
             return analyzeExpression;
         }
-
 
         public static Delegate CompileToDotNet(this AnalyzedTree tree)
         {
@@ -91,19 +89,29 @@ namespace Shinobytes.XzaarScript.Extensions
             return val;
         }
 
-        public static XzaarAssembly Compile(this AnalyzedTree tree, out List<string> errors)
+        public static XzaarAssembly Compile(this AnalyzedTree tree, out IList<string> errors)
         {
             return ScriptCompiler.Compile(tree, out errors);
         }
-
 
         public static Runtime Run(this XzaarAssembly asm)
         {
             return VirtualMachine.Run(asm);
         }
+
+        public static Runtime Run(this XzaarAssembly asm, RuntimeSettings settings)
+        {
+            return VirtualMachine.Run(asm, settings);
+        }
+
         public static Runtime Load(this XzaarAssembly asm)
         {
-            return VirtualMachine.Load(asm);
+            return VirtualMachine.Load(asm, RuntimeSettings.Default);
+        }
+
+        public static Runtime Load(this XzaarAssembly asm, RuntimeSettings settings)
+        {
+            return VirtualMachine.Load(asm, settings);
         }
 
         public static string AssemblyCode(this XzaarAssembly tree)

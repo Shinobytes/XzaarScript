@@ -79,7 +79,10 @@ print_hello_world()";
                 Output += text + "<br/>";
             }
         }
-
+        private string SecretMethod2()
+        {
+            return "wtf!";
+        }
         public string SecretMethod()
         {
             return "Shh! It was a secret!";
