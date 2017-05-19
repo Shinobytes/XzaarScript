@@ -156,6 +156,26 @@ bruteforce_pin_code();");
             Assert.AreEqual(true, transformer.HasErrors);
         }
 
+
+        [TestMethod]
+        public void bad_struct_initializer()
+        {
+            var transformer = Parser(@"let door = $door
+
+struct secret {
+    string password;
+}
+
+let j = secret {
+
+fn bruteforce_pin_code() {}
+
+bruteforce_pin_code();");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+
         [TestMethod]
         public void bad_puzzle()
         {

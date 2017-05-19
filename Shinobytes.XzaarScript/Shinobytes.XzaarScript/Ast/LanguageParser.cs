@@ -649,6 +649,15 @@ namespace Shinobytes.XzaarScript.Ast
 
         private AstNode WalkAssignmentOperator()
         {
+            if (CurrentToken.Kind != SyntaxKind.Identifier && !SyntaxFacts.IsAssignment(CurrentToken.Kind))
+            {
+                var previous = Tokens.PeekPrevious();
+                if (previous == null || !SyntaxFacts.IsAssignment(previous.Kind))
+                {
+                    return Error("Invalid assignment expression, unexpected token found: " + CurrentToken);
+                }
+            }
+
             var assign = Tokens.Consume(n => SyntaxFacts.IsAssignment(n.Kind));
             // go back once if we are currently on the assignment
             // if (SyntaxFacts.IsAssignment(Tokens.CurrentToken.Kind) || SyntaxFacts.IsExpectedAssignmentOperator(Tokens.CurrentToken.Kind)) Tokens.Previous();
@@ -2054,9 +2063,9 @@ namespace Shinobytes.XzaarScript.Ast
         private AstNode Error(string message, SyntaxToken token)
         {
             var msg = "[Error] " + message;
-            if (token != null)
+            if (token != null && token.SourceLine >= 1 && token.SourceColumn > 1)
             {
-                msg += ". At line " + token.SourceLine;
+                msg += ". At line " + token.SourceLine + ", column: " + token.SourceColumn;
             }
 
             var errorNode = AstNode.Error(message);
@@ -2072,7 +2081,7 @@ namespace Shinobytes.XzaarScript.Ast
             var token = this.CurrentToken ?? this.Tokens.PeekPrevious();
             if (token != null && token.SourceLine >= 1 && token.SourceColumn > 1)
             {
-                msg += ". At line " + token.SourceLine;
+                msg += ". At line " + token.SourceLine + ", column: " + token.SourceColumn;
             }
 
             var errorNode = AstNode.Error(message);
