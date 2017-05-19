@@ -38,7 +38,7 @@ namespace Shinobytes.XzaarScript.Parser
                 {
                     if (IsOperationToken(token))
                     {
-                        tokens.Add(SyntaxTokenProvider.Get(token.Value));
+                        tokens.Add(SyntaxTokenProvider.Get(token));
                         currentChar = buffer.Next();
                         continue;
                     }
@@ -129,7 +129,7 @@ namespace Shinobytes.XzaarScript.Parser
         {
             var lowered = char.ToLower(symbol);
             return lowered >= 'a' && lowered <= 'z' || lowered == '_' || lowered == '@' || lowered == '$';
-                // || !invalidIdentifierChars.Contains(lowered);
+            // || !invalidIdentifierChars.Contains(lowered);
         }
 
         private SyntaxToken WalkNumber()

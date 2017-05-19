@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Shinobytes.XzaarScript.Parser.Nodes;
 
 namespace Shinobytes.XzaarScript.Ast
@@ -96,15 +97,30 @@ namespace Shinobytes.XzaarScript.Ast
                 new SyntaxToken(SyntaxKind.KeywordBreak, "BREAK", "break"),
             };
 
-            var assertNoDuplicateSyntaxKinds = new HashSet<SyntaxKind>(AvailableTokens.Select(x => x.Kind));            
+            var assertNoDuplicateSyntaxKinds = new HashSet<SyntaxKind>(AvailableTokens.Select(x => x.Kind));
         }
 
         public static SyntaxToken Get(char value) => Get(value.ToString());
+
+        public static SyntaxToken Get(SyntaxToken tokenSource)
+        {
+            var token = AvailableTokens.FirstOrDefault(t => t.Value == tokenSource.Value);
+            return token != null
+                ? new SyntaxToken(
+                    token.Kind,
+                    token.TypeName,
+                    token.Value,
+                    tokenSource.IsSingleQuouteString,
+                    tokenSource.TokenIndex,
+                    tokenSource.SourceIndex,
+                    tokenSource.SourceLine,
+                    tokenSource.SourceColumn)
+                : new SyntaxToken(SyntaxKind.Identifier, "NAME", tokenSource.Value);
+        }
+
         public static SyntaxToken Get(string value)
         {
-            var token = AvailableTokens.FirstOrDefault(t => t.Value == value);
-            if (token != null) return token;
-            return new SyntaxToken(SyntaxKind.Identifier, "NAME", value);
+            return AvailableTokens.FirstOrDefault(t => t.Value == value) ?? new SyntaxToken(SyntaxKind.Identifier, "NAME", value);
         }
     }
 }

@@ -2070,7 +2070,7 @@ namespace Shinobytes.XzaarScript.Ast
         {
             var msg = "[Error] " + message;
             var token = this.CurrentToken ?? this.Tokens.PeekPrevious();
-            if (token != null)
+            if (token != null && token.SourceLine >= 1 && token.SourceColumn > 1)
             {
                 msg += ". At line " + token.SourceLine;
             }
