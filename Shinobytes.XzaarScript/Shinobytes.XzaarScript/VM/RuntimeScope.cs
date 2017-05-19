@@ -24,7 +24,7 @@ namespace Shinobytes.XzaarScript.VM
             operations = new List<XzaarBinaryCode>();
         }
 
-        internal int Offset { get; set; }
+        internal int Position { get; set; }
 
         internal object Result { get; set; }
 
@@ -46,6 +46,11 @@ namespace Shinobytes.XzaarScript.VM
                 var v = vars[index];
                 this.variables.Add(v.Name, v);
             }
+        }
+
+        internal void Next()
+        {
+            Position++;
         }
 
         //internal IReadOnlyList<RuntimeVariable> GetVariables(bool refresh)

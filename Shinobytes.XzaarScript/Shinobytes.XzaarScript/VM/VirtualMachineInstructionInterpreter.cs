@@ -13,7 +13,7 @@ namespace Shinobytes.XzaarScript.VM
         public VirtualMachineInstructionInterpreter(VirtualMachine vm)
         {
             this.vm = vm;
-            this.reflectionCache = new ReflectionCache(this, vm);
+            this.reflectionCache = new ReflectionCache(this, vm);            
         }
 
         internal bool Execute(Runtime rt, XzaarBinaryCode op)
@@ -125,9 +125,9 @@ namespace Shinobytes.XzaarScript.VM
                 if (label == null) throw new NullReferenceException(nameof(label));
             }
 
-            rt.CurrentScope.Offset++;
+            rt.CurrentScope.Next();
 
-            if (rt.CurrentScope.Offset < rt.CurrentScope.GetOperations().Count)
+            if (rt.CurrentScope.Position < rt.CurrentScope.GetOperations().Count)
                 return true;
 
             rt.EndScope();
@@ -283,7 +283,7 @@ namespace Shinobytes.XzaarScript.VM
                 }
                 // result = instruction.Arguments[0];
             }
-            rt.CurrentScope.Offset++;
+            rt.CurrentScope.Next();
             rt.EndScope(result);
         }
 
@@ -362,63 +362,60 @@ namespace Shinobytes.XzaarScript.VM
                 }
                 else
                 {
-                    var mref = p as MemberReference;
-                    if (mref != null)
+                    var fieldRef = p as FieldReference;
+                    if (fieldRef != null)
                     {
-                        var fieldRef = mref as FieldReference;
-                        if (fieldRef != null)
+                        var val = GetVariable(rt, fieldRef);
+                        if (val == null)
                         {
-                            var val = GetVariable(rt, fieldRef);
-                            if (val == null)
+                            object outVal;
+                            if (TryGetClrObject(rt, fieldRef.Instance, fieldRef, out outVal))
                             {
-                                object outVal;
-                                if (TryGetClrObject(rt, fieldRef.Instance, fieldRef, out outVal))
-                                {
-                                    funcArgs.Add(outVal);
-                                }
-                                else
-                                {
-                                    var v2 = rt.FindVariable(fieldRef.Instance.Name);
-                                    if (v2 != null)
-                                    {
-                                        // what was I thinking here?
-                                    }
-
-                                    throw new RuntimeException("Failed to grab the argument reference :(");
-                                }
-
+                                funcArgs.Add(outVal);
                             }
                             else
                             {
-                                funcArgs.Add(val);
-                            }
-                        }
-                        else
-                        {
-                            var v = rt.FindVariable(mref.Name);
-                            var varRef = p as VariableReference;
-                            object arrayIndex = null;
-                            if (varRef != null) arrayIndex = varRef.ArrayIndex;
-                            if (v != null)
-                            {
-
-                                var varRefRaw = mref as VariableReference;
-                                if (varRefRaw != null && varRefRaw.ArrayIndex != null)
+                                var v2 = rt.FindVariable(fieldRef.Instance.Name);
+                                if (v2 != null)
                                 {
                                     // what was I thinking here?
                                 }
 
-                                if (arrayIndex != null)
-                                    funcArgs.Add(GetValueOf(v, arrayIndex));
-                                else
-                                    funcArgs.Add(v);
+                                throw new RuntimeException("Failed to grab the argument reference :(");
                             }
-                            else
-                            {
-                                throw new RuntimeException();
-                            }
+
+                        }
+                        else
+                        {
+                            funcArgs.Add(val);
                         }
                     }
+                    else
+                    {
+                        var v = rt.FindVariable(p.Name);
+                        var varRef = p as VariableReference;
+                        object arrayIndex = null;
+                        if (varRef != null) arrayIndex = varRef.ArrayIndex;
+                        if (v != null)
+                        {
+
+                            var varRefRaw = p as VariableReference;
+                            if (varRefRaw != null && varRefRaw.ArrayIndex != null)
+                            {
+                                // what was I thinking here?
+                            }
+
+                            if (arrayIndex != null)
+                                funcArgs.Add(GetValueOf(v, arrayIndex));
+                            else
+                                funcArgs.Add(v);
+                        }
+                        else
+                        {
+                            throw new RuntimeException();
+                        }
+                    }
+
                 }
             }
 
@@ -471,7 +468,7 @@ namespace Shinobytes.XzaarScript.VM
 
             if (ops.Count > 0)
             {
-                while (Execute(rt, ops[rt.CurrentScope.Offset])) { }
+                while (Execute(rt, ops[rt.CurrentScope.Position])) { }
             }
             if (rt.LastScope == null)
             {
@@ -513,15 +510,18 @@ namespace Shinobytes.XzaarScript.VM
             var booleanValue = GetArgumentValue(rt, instruction, 0);
             if (booleanValue is bool)
             {
-                if ((bool)booleanValue) Jump(rt, instruction);
+                if ((bool)booleanValue)
+                {
+                    Jump(rt, instruction);
+                }
                 else
                 {
-                    rt.CurrentScope.Offset++;
+                    rt.CurrentScope.Next();
                 }
             }
             else
             {
-                rt.CurrentScope.Offset++;
+                rt.CurrentScope.Next();
             }
         }
 
@@ -533,18 +533,18 @@ namespace Shinobytes.XzaarScript.VM
                 if (!(bool)booleanValue) Jump(rt, instruction);
                 else
                 {
-                    rt.CurrentScope.Offset++;
+                    rt.CurrentScope.Next();
                 }
             }
             else
             {
-                rt.CurrentScope.Offset++;
+                rt.CurrentScope.Next();
             }
         }
 
         private void Jump(Runtime rt, Instruction instruction)
         {
-            rt.CurrentScope.Offset = instruction.TargetLabel.Offset;
+            rt.CurrentScope.Position = instruction.TargetLabel.Offset;
         }
 
 

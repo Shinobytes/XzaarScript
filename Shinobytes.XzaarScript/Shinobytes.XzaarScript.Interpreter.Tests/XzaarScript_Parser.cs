@@ -6,8 +6,365 @@ using Shinobytes.XzaarScript.Parser;
 namespace Shinobytes.XzaarScript.Interpreter.Tests
 {
     [TestClass]
+    public class HighlighterTests
+    {
+        [TestMethod]
+        public void test_default_script_text()
+        {
+            var puzzle = new Shinobytes.Bytecode.Puzzles.CabinDoorPuzzle("1234", null);
+            var hl = new XzaarScriptSyntaxHighlighter();
+
+            var code = hl.HighlightCode(puzzle.StartingCode);
+
+            Assert.Equals(code, @"<color=#569cd6ff>let</color> door = $door
+
+<color=#569cd6ff>fn</color> puzzle() {
+   <color=#909090ff>// perhaps a for loop?
+</color>
+   door.Unlock(<color=#9abb68ff>0000</color>)
+}
+
+puzzle()");
+        }
+
+        [TestMethod]
+        public void test_default_script_text_2_bad_text()
+        {
+            var hl = new XzaarScriptSyntaxHighlighter();
+
+            var code = hl.HighlightCode(@"let door = $door
+
+fn puzzle() {
+   / perhaps a for loop?
+   door.Unlock(0000)
+}
+
+puzzle()");
+
+
+            Assert.Equals(code, @"<color=#569cd6ff>let</color> door = $door
+
+<color=#569cd6ff>fn</color> puzzle() {
+   / perhaps a <color=#569cd6ff>for</color> <color=#569cd6ff>loop</color>?
+   door.Unlock(<color=#9abb68ff>0000</color>)
+}
+
+puzzle()");
+        }
+    }
+
+    public class XzaarScriptSyntaxHighlighter
+    {
+        public string Lines { get; set; }
+        public string HighlightCode(string input)
+        {
+            Lines = "1";
+
+            var lexer = new Shinobytes.XzaarScript.Parser.Lexer(input, true);
+            var tokens = lexer.Tokenize();
+            var lineCount = lexer.line;
+
+            for (var i = 2; i < (lexer.line + 1); i++)
+            {
+                Lines += "\r\n" + i;
+            }
+
+
+            var highligted = "";
+            foreach (var token in tokens)
+            {
+                if (token.Kind == SyntaxKind.CommentMultiLine || token.Kind == SyntaxKind.CommentSingleLine)
+                {
+                    highligted += "<color=#909090ff>" + token.Value + "</color>";
+                }
+                else if (token.Kind == SyntaxKind.String)
+                {
+                    var strType = token.IsSingleQuouteString ? "'" : "\"";
+                    highligted += "<color=#c48b59ff>" +
+                        strType + token.Value + strType + "</color>";
+                }
+                else if (token.Kind == SyntaxKind.Number)
+                {
+                    highligted += "<color=#9abb68ff>" + token.Value + "</color>";
+                }
+                else if (IsKeyword(token.Value)) // token.Kind == SyntaxKind.Identifier &&
+                {
+                    highligted += "<color=#569cd6ff>" + token.Value + "</color>";
+                }
+                else
+                {
+                    highligted += token.Value;
+                }
+            }
+
+            return highligted;
+        }
+
+        private string[] knownKeywords =
+           {
+            "if", "do", "while", "for", "foreach", "loop", "switch",
+            "case","break", "new", "continue", "return", "fn", "var",
+            "let", "struct", "class", "number", "string", "bool",
+            "date", "any", "else", "goto", "in", "default"
+        };
+
+        private string[] knownConstants =
+        {
+            "null", "true", "false"
+        };
+
+
+        public bool IsKeyword(string s)
+        {
+            return Array.IndexOf(knownKeywords, s.ToLower()) >= 0 || IsKnownConstant(s);
+        }
+
+        public bool IsKnownConstant(string s)
+        {
+            return Array.IndexOf(knownConstants, s.ToLower()) >= 0;
+        }
+    }
+
+
+    [TestClass]
+    public class XzaarScript_Parser_Errors
+    {
+        [TestMethod]
+        public void bad_puzzle()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+   door.Unlock(0000
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+
+        [TestMethod]
+        public void bad_puzzle_2()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+   door.Unlock0000
+}
+
+puzzle;()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void bad_puzzle_3()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+   door.Unlock)0000
+}
+
+puzzle()");
+
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void empty_expression()
+        {
+            var transformer = Parser(@"()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+       [TestMethod]
+        public void Empty_struct()
+        {
+            var transformer = Parser("struct test { ");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void Empty_struct_2()
+        {
+            var transformer = Parser("struct test } ");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void unclosed_if()
+        {
+            var transformer = Parser("if (true) } ");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_if_2()
+        {
+            var transformer = Parser("if (true) { ");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void unclosed_if_3()
+        {
+            var transformer = Parser("if (true) [ ");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void unclosed_if_4()
+        {
+            var transformer = Parser("if (true {");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_if_5()
+        {
+            var transformer = Parser("if (true }");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_if_6()
+        {
+            var transformer = Parser("if (true");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void unclosed_function_call()
+        {
+            var transformer = Parser("test(");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_call_2()
+        {
+            var transformer = Parser("test)");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_definition()
+        {
+            var transformer = Parser("fn test)");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_definition_2()
+        {
+            var transformer = Parser("fn test(");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_definition_3()
+        {
+            var transformer = Parser("fn test {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void unclosed_function_definition_4()
+        {
+            var transformer = Parser("fn test( {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_definition_5()
+        {
+            var transformer = Parser("fn test) {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_definition_6()
+        {
+            var transformer = Parser("fn test( {");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_definition_7()
+        {
+            var transformer = Parser("fn test) {");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void unclosed_function_definition_8()
+        {
+            var transformer = Parser("fn test( }");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void jibberish()
+        {
+            var transformer = Parser("/ what if that happened? yeah!");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void jibberish_2()
+        {
+            var transformer = Parser("this isnt in my contract");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        private LanguageParser Parser(string code)
+        {
+            return new LanguageParser(new Lexer(code).Tokenize());
+        }
+    }
+
+    [TestClass]
     public class XzaarScript_Parser
     {
+        [TestMethod]
+        public void unicode_chars()
+        {
+            var transformer = Parser("צהואב");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+        }
+
         [TestMethod]
         public void Empty_struct()
         {

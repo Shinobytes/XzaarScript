@@ -12,7 +12,7 @@ namespace Shinobytes.XzaarScript.VM
         private readonly RuntimeSettings settings;
         private readonly VirtualMachine vm;
         private readonly List<RuntimeVariable> globalVariables = new List<RuntimeVariable>();
-        
+
         private RuntimeScope currentScope;
         private RuntimeScope globalScope;
         private RuntimeScope lastScope;
@@ -54,7 +54,7 @@ namespace Shinobytes.XzaarScript.VM
             return this;
         }
 
-      // public IReadOnlyList<RuntimeVariable> Variables { get { return CurrentScope.GetVariables(); } }
+        // public IReadOnlyList<RuntimeVariable> Variables { get { return CurrentScope.GetVariables(); } }
 
         public void Invoke(params object[] args)
         {
@@ -111,6 +111,8 @@ namespace Shinobytes.XzaarScript.VM
 
         internal RuntimeScope LastScope => lastScope;
 
+        public RuntimeSettings Settings => settings;
+
         public RuntimeVariable FindVariable(string name)
         {
             return CurrentScope.FindVariable(name);
@@ -159,7 +161,7 @@ namespace Shinobytes.XzaarScript.VM
             while (RunNextStep()) { }
 
             this.currentScope = null;
-            this.globalScope.Offset = 0;
+            this.globalScope.Position = 0;
 
             vm.SetRunningState(false);
         }

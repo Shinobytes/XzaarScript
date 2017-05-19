@@ -17,12 +17,12 @@
             {
                 return @"let door = $door
 
-fn puzzle() {
+fn bruteforce_pin_code() {
    // perhaps a for loop?
-   door.Unlock(0000)
+   door.Unlock(0000);
 }
 
-puzzle()";
+bruteforce_pin_code();";
             }
         }
     }

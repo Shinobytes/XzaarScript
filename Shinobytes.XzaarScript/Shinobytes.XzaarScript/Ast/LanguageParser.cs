@@ -2097,9 +2097,13 @@ namespace Shinobytes.XzaarScript.Ast
         {
             this.currentScope = currentScope.EndScope();
 
+            if (tokens.Current == null)
+            {
+                throw new ParserException("Unexpected end of scope");
+            }
             if (Tokens.Current != null)
             {
-                Tokens.Consume(n => n.Kind == endType);
+                Tokens.ConsumeExpected(n => n.Kind == endType);
             }
 
             // Debug.Assert(node != null);

@@ -120,8 +120,9 @@ namespace Shinobytes.XzaarScript.Ast
         {
             if (currentIndex >= items.Count)
             {
-                currentIndex++;
-                return default(T);
+                throw new ParserException($"Unexpected token found '{items[currentIndex]}'");
+                // currentIndex++;
+                // return default(T);
             }
 
             if (predicate(items[currentIndex]))

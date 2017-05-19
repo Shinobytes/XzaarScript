@@ -24,7 +24,7 @@ namespace Shinobytes.XzaarScript.Ast
 
         public SyntaxToken ConsumeExpected(SyntaxKind kind)
         {
-            return this.Consume(x => x.Kind == kind);
+            return this.ConsumeExpected(x => x.Kind == kind);
         }
     }
 

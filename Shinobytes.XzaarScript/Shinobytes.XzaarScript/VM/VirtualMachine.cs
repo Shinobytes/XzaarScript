@@ -6,8 +6,9 @@ namespace Shinobytes.XzaarScript.VM
 {
     public class VirtualMachine
     {
-        private VirtualMachineInstructionInterpreter interpreter;
+        private readonly VirtualMachineInstructionInterpreter interpreter;
         private readonly XzaarAssembly asm;
+        private Runtime currentRuntime;
         private bool isRunning;
         private bool isDebugging;
 
@@ -21,6 +22,7 @@ namespace Shinobytes.XzaarScript.VM
 
         public bool IsDebugging => isDebugging;
 
+        public Runtime Runtime => currentRuntime;
 
         public static Runtime Load(XzaarAssembly asm, RuntimeSettings settings)
         {
@@ -29,21 +31,21 @@ namespace Shinobytes.XzaarScript.VM
 
         public static Runtime Run(XzaarAssembly asm)
         {
-            return new VirtualMachine(asm).RunNow(RuntimeStepType.Complete);
+            return new VirtualMachine(asm).RunImpl(RuntimeStepType.Complete);
         }
 
         public static Runtime Run(XzaarAssembly asm, RuntimeSettings settings)
         {
-            return new VirtualMachine(asm).RunNow(RuntimeStepType.Complete, settings);
+            return new VirtualMachine(asm).RunImpl(RuntimeStepType.Complete, settings);
         }
 
         public static Runtime Debug(XzaarAssembly asm)
         {
-            return new VirtualMachine(asm).RunNow(RuntimeStepType.StepByStep);
+            return new VirtualMachine(asm).RunImpl(RuntimeStepType.StepByStep);
         }
         public static Runtime Debug(XzaarAssembly asm, RuntimeSettings settings)
         {
-            return new VirtualMachine(asm).RunNow(RuntimeStepType.StepByStep, settings);
+            return new VirtualMachine(asm).RunImpl(RuntimeStepType.StepByStep, settings);
         }
 
         internal void SetRunningState(bool state)
@@ -54,8 +56,8 @@ namespace Shinobytes.XzaarScript.VM
 
         internal bool Execute(Runtime rt, IList<XzaarBinaryCode> op)
         {
-            if (op == null || rt.CurrentScope.Offset >= op.Count) return false;
-            return interpreter.Execute(rt, op[rt.CurrentScope.Offset]);
+            if (op == null || rt.CurrentScope.Position >= op.Count) return false;
+            return interpreter.Execute(rt, op[rt.CurrentScope.Position]);
         }
         internal object Invoke(string functionName, Runtime rt, object[] args)
         {
@@ -66,12 +68,12 @@ namespace Shinobytes.XzaarScript.VM
             return interpreter.Invoke(rt, functionName, args);
         }
 
-        private Runtime RunNow(RuntimeStepType stepType, RuntimeSettings settings = null)
+        private Runtime RunImpl(RuntimeStepType stepType, RuntimeSettings settings = null)
         {
-            var r = CreateRuntimeInstance(settings);
+            currentRuntime = CreateRuntimeInstance(settings);
             isRunning = true;
             isDebugging = stepType == RuntimeStepType.StepByStep;
-            return r.Run(stepType);
+            return currentRuntime.Run(stepType);
         }
 
         private Runtime CreateRuntimeInstance(RuntimeSettings settings = null)

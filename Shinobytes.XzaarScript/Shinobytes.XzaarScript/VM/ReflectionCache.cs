@@ -18,13 +18,25 @@ namespace Shinobytes.XzaarScript.VM
         private readonly Dictionary<string, MethodInfo> fullNameMethodInfoCache = new Dictionary<string, MethodInfo>();
         private readonly Dictionary<string, FieldInfo> fullNameFieldInfoCache = new Dictionary<string, FieldInfo>();
         private readonly Dictionary<string, PropertyInfo> fullNamePropertyInfoCache = new Dictionary<string, PropertyInfo>();
-        private readonly VirtualMachineInstructionInterpreter ii;
-        private readonly VirtualMachine vm;
+        private readonly VirtualMachineInstructionInterpreter instructionInterpreter;
+        private readonly VirtualMachine virtualMachine;
 
-        public ReflectionCache(VirtualMachineInstructionInterpreter ii, VirtualMachine vm)
+        public ReflectionCache(VirtualMachineInstructionInterpreter instructionInterpreter, VirtualMachine virtualMachine)
         {
-            this.ii = ii;
-            this.vm = vm;
+            this.instructionInterpreter = instructionInterpreter;
+            this.virtualMachine = virtualMachine;
+        }
+
+        private BindingFlags GetAccessibilityBindingFlags()
+        {
+            if (virtualMachine.Runtime != null)
+            {
+                if (virtualMachine.Runtime.Settings.CanAccessPrivateMembers)
+                {
+                    return BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
+                }
+            }
+            return BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
         }
 
         public MethodInfo[] GetMethods(Type type)
@@ -32,22 +44,18 @@ namespace Shinobytes.XzaarScript.VM
             if (!typeMethodInfoArrayCache.ContainsKey(type))
             {
                 typeMethodInfoArrayCache.Add(type,
-                    type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
-                                    BindingFlags.Instance));
+                    type.GetMethods(GetAccessibilityBindingFlags()));
             }
 
             return typeMethodInfoArrayCache[type];
         }
-
-
 
         public FieldInfo[] GetFields(Type type)
         {
             if (!typeFieldInfoArrayCache.ContainsKey(type))
             {
                 typeFieldInfoArrayCache.Add(type,
-                    type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-                                   BindingFlags.Static));
+                    type.GetFields(GetAccessibilityBindingFlags()));
             }
             return typeFieldInfoArrayCache[type];
         }
@@ -57,8 +65,7 @@ namespace Shinobytes.XzaarScript.VM
             if (!typePropertyInfoArrayCache.ContainsKey(type))
             {
                 typePropertyInfoArrayCache.Add(type,
-                    type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-                                       BindingFlags.Static));
+                    type.GetProperties(GetAccessibilityBindingFlags()));
             }
             return typePropertyInfoArrayCache[type];
         }

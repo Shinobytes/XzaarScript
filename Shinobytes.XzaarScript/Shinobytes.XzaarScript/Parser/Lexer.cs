@@ -11,6 +11,7 @@ namespace Shinobytes.XzaarScript.Parser
         private readonly List<string> errors = new List<string>();
         private readonly char[] validHexChars = "0123456789abcdef".ToCharArray();
         private readonly char[] validBinChars = "01".ToCharArray();
+        private readonly char[] invalidIdentifierChars = " <>|:;{[]}()$/\\@£#!%+-.,*^~¨´`?'\"".ToCharArray();
 
         public int line = 1;
         public int column = 1;
@@ -35,7 +36,7 @@ namespace Shinobytes.XzaarScript.Parser
                 var token = Tokenize(currentChar);
                 if (token != null)
                 {
-                    if (token.Kind != SyntaxKind.String && token.Kind != SyntaxKind.Number)
+                    if (IsOperationToken(token))
                     {
                         tokens.Add(SyntaxTokenProvider.Get(token.Value));
                         currentChar = buffer.Next();
@@ -46,6 +47,11 @@ namespace Shinobytes.XzaarScript.Parser
                 currentChar = buffer.Next();
             }
             return tokens;
+        }
+
+        private static bool IsOperationToken(SyntaxToken token)
+        {
+            return token.Kind != SyntaxKind.String && token.Kind != SyntaxKind.Number && token.Kind != SyntaxKind.Whitespace && token.Kind != SyntaxKind.CommentSingleLine && token.Kind != SyntaxKind.CommentMultiLine;
         }
 
         private SyntaxToken Tokenize(char symbol)
@@ -123,6 +129,7 @@ namespace Shinobytes.XzaarScript.Parser
         {
             var lowered = char.ToLower(symbol);
             return lowered >= 'a' && lowered <= 'z' || lowered == '_' || lowered == '@' || lowered == '$';
+                // || !invalidIdentifierChars.Contains(lowered);
         }
 
         private SyntaxToken WalkNumber()
