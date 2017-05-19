@@ -21,7 +21,7 @@ namespace Shinobytes.XzaarScript.VM
         {
             this.vm = vm;
             this.asm = asm;
-            this.settings = settings;
+            this.settings = settings ?? RuntimeSettings.Default;
             this.Init();
         }
 

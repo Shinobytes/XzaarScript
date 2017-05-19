@@ -159,7 +159,165 @@ puzzle()");
             var ast = transformer.Parse();
             Assert.AreEqual(true, transformer.HasErrors);
         }
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_2()
+        {
+            var transformer = Parser(@"let door = $door
 
+fn puzzle() {
+   // perhaps a for loop?
+for(let
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_3()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i =
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_4()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_5()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0;
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_6()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0; i 
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_7()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0; i <
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_8()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0; i < 9999
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_9()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0; i < 9999;
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
+
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_10()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0; i < 9999; i
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_11()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(let i = 0; i < 9999; i++
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
 
         [TestMethod]
         public void bad_puzzle_2()
@@ -175,6 +333,7 @@ puzzle;()");
             var ast = transformer.Parse();
             Assert.AreEqual(true, transformer.HasErrors);
         }
+
 
         [TestMethod]
         public void bad_puzzle_3()

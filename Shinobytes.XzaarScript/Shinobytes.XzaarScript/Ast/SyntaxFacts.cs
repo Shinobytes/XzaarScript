@@ -255,9 +255,6 @@ namespace Shinobytes.XzaarScript.Ast
         {
             switch (kind)
             {
-                case SyntaxKind.CloseCurly:
-                case SyntaxKind.CloseBracket:
-                case SyntaxKind.CloseParan:
                 case SyntaxKind.KeywordBreak:
                 case SyntaxKind.KeywordCase:
                 case SyntaxKind.KeywordContinue:

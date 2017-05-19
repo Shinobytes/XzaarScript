@@ -1130,8 +1130,13 @@ namespace Shinobytes.XzaarScript.Ast
 
                     if (CurrentToken.Kind != separator)
                     {
+                        var tokenBefore = CurrentToken;
                         var expr2 = this.WalkExpressionCore();
                         if (expr2 != null) exprList.Add(expr2);
+                        if (CurrentToken == tokenBefore)
+                        {
+                            return Error("Invalid expression", tokenBefore);
+                        }
                     }
 
                     Tokens.Consume(separator);
