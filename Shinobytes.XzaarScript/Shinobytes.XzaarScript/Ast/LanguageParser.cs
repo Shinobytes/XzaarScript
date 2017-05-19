@@ -732,6 +732,9 @@ namespace Shinobytes.XzaarScript.Ast
 
         private AstNode WalkArithmeticOperator()
         {
+
+            return Error("Unexpected arithmetic operator found.", CurrentToken);
+
             AssertMinExpectedNodeCount(1);
             // get previous
             // op

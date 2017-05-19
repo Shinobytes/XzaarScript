@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Shinobytes.XzaarScript.Assembly;
 using Shinobytes.XzaarScript.Extensions;
@@ -44,16 +45,24 @@ namespace Shinobytes.XzaarScript
         public static bool TryLoad(string inputCode, RuntimeSettings runtimeSettings, out Runtime runtime, out InterpreterErrorCollection errors)
         {
             errors = new InterpreterErrorCollection();
+            try
+            {
+                var assembly = Compile(inputCode, out var lexerErrors, out var parserErrors, out var compilerErrors);
 
-            var assembly = Compile(inputCode, out var lexerErrors, out var parserErrors, out var compilerErrors);
+                runtime = assembly.Load(runtimeSettings);
 
-            runtime = assembly.Load(runtimeSettings);
+                errors.AddRange(lexerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Lexer, x)));
+                errors.AddRange(parserErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Parser, x)));
+                errors.AddRange(compilerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Compiler, x)));
 
-            errors.AddRange(lexerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Lexer, x)));
-            errors.AddRange(parserErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Parser, x)));
-            errors.AddRange(compilerErrors.Select(x => new InterpreterError(InterpreterErrorLocation.Compiler, x)));
-
-            return errors.Count == 0;
+                return errors.Count == 0;
+            }
+            catch (Exception exc)
+            {
+                runtime = null;
+                errors.Add(new InterpreterError(InterpreterErrorLocation.Compiler, exc.Message));
+                return false;
+            }
         }
 
         public static Runtime Run(string inputCode)
@@ -70,7 +79,6 @@ namespace Shinobytes.XzaarScript
             string inputCode,
             out IList<string> lexerErrors,
             out IList<string> parserErrors,
-
             out IList<string> compilerErrors)
         {
             IList<string> transformerErrors2;

@@ -6,6 +6,19 @@ using Shinobytes.XzaarScript.Parser;
 namespace Shinobytes.XzaarScript.Interpreter.Tests
 {
     [TestClass]
+    public class ScriptInterpreterTests
+    {
+        [TestMethod]
+        public void ScriptInterpreter_bleh()
+        {
+            ScriptInterpreter.TryLoad("fn test() foreach(var j in ['hello']) {}", RuntimeSettings.Default, out var rt,
+                out var errors);
+
+            Assert.AreEqual(true, errors.Count > 0);
+        }
+    }
+
+    [TestClass]
     public class HighlighterTests
     {
         [TestMethod]
@@ -16,15 +29,15 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
 
             var code = hl.HighlightCode(puzzle.StartingCode);
 
-            Assert.Equals(code, @"<color=#569cd6ff>let</color> door = $door
+            Assert.AreEqual(code, @"<color=#569cd6ff>let</color> door = $door
 
-<color=#569cd6ff>fn</color> puzzle() {
+<color=#569cd6ff>fn</color> bruteforce_pin_code() {
    <color=#909090ff>// perhaps a for loop?
 </color>
-   door.Unlock(<color=#9abb68ff>0000</color>)
+   door.Unlock(<color=#9abb68ff>0000</color>);
 }
 
-puzzle()");
+bruteforce_pin_code();");
         }
 
         [TestMethod]
@@ -42,7 +55,7 @@ fn puzzle() {
 puzzle()");
 
 
-            Assert.Equals(code, @"<color=#569cd6ff>let</color> door = $door
+            Assert.AreEqual(code, @"<color=#569cd6ff>let</color> door = $door
 
 <color=#569cd6ff>fn</color> puzzle() {
    / perhaps a <color=#569cd6ff>for</color> <color=#569cd6ff>loop</color>?
@@ -129,6 +142,20 @@ puzzle()");
     [TestClass]
     public class XzaarScript_Parser_Errors
     {
+
+        [TestMethod]
+        public void bad_fn()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn bruteforce_pin_code()
+for(let j = 0; j < 9999;j++)   door.Unlock(j);
+
+bruteforce_pin_code();");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+
         [TestMethod]
         public void bad_puzzle()
         {
@@ -289,6 +316,21 @@ puzzle()");
 
 
         [TestMethod]
+        public void bad_puzzle_incomplete_for_loop_12()
+        {
+            var transformer = Parser(@"let door = $door
+
+fn puzzle() {
+   // perhaps a for loop?
+for(/
+   door.Unlock(0000);
+}
+
+puzzle()");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors);
+        }
+        [TestMethod]
         public void bad_puzzle_incomplete_for_loop_10()
         {
             var transformer = Parser(@"let door = $door
@@ -359,7 +401,7 @@ puzzle()");
             Assert.AreEqual(true, transformer.HasErrors);
         }
 
-       [TestMethod]
+        [TestMethod]
         public void Empty_struct()
         {
             var transformer = Parser("struct test { ");
