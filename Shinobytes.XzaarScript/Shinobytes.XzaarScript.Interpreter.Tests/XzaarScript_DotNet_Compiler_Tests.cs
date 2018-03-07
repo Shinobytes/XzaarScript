@@ -9,8 +9,18 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
     public class XzaarScript_DotNet_Compiler_Tests
     {
 
+
         [TestMethod]
         public void for_loop_simple()
+        {
+            var del = Compile("let x = 0; for(let i = 0; i < 10; i++) { x = 1; }");
+            dynamic app = del.DynamicInvoke();
+            // var result = app.test();
+            Assert.AreEqual(3.0, app.math);
+        }
+
+        [TestMethod]
+        public void for_loop_simple_2()
         {
             var del = Compile("let j = 0; for(let i = 0; i < 10; i++) { j++; }");
             dynamic app = del.DynamicInvoke();
@@ -527,7 +537,6 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .CompileToDotNet();
         }

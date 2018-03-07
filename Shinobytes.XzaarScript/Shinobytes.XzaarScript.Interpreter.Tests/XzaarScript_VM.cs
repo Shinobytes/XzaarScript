@@ -1329,13 +1329,71 @@ print_hello_world()");
         {
             var rt = Load("let j = ['test','test2'] j.insert(0,'blah') $console.log(j[0])");
             var console = new ConsoleWrapperTest(rt);
-            rt.RegisterGlobalVariable("console", console);            
+            rt.RegisterGlobalVariable("console", console);
             rt.Invoke();
             // our console wrapper will return a newline, so meh
             // but awesome! it worked :D! just added 'insert' for arrays.
             Assert.AreEqual("blah\r\n", console.Output);
         }
 
+
+        [TestMethod]
+        public void assign_conditional()
+        {
+            var rt = Run(@"let a = 1 > 0 ? true : false; fn test() -> bool { return a; }");
+            var result = rt.Invoke<bool>("test");
+            Assert.AreEqual(true, result);
+        }
+
+        [TestMethod]
+        public void assign_conditional_2()
+        {
+            var rt = Run(@"let a = 1 > 0 ? 2 > 0 ? false : false : false; fn test() -> bool { return a; }");
+            var result = rt.Invoke<bool>("test");
+            Assert.AreEqual(false, result);
+        }
+
+        [TestMethod]
+        public void assign_conditional_3()
+        {
+            var rt = Run(@"let a = 1 > 0 ? 2 > 0 ? true : false : false; fn test() -> bool { return a; }");
+            var result = rt.Invoke<bool>("test");
+            Assert.AreEqual(true, result);
+        }
+
+        [TestMethod]
+        public void assign_conditional_4()
+        {
+            var rt = Run(@"fn test() -> string { return 1>0?a():'bleh'; } fn a() -> string { return 'hello'; }");
+            var result = rt.Invoke<string>("test");
+            Assert.AreEqual("hello", result);
+        }
+
+        [TestMethod]
+        public void assign_conditional_5()
+        {
+            var rt = Run(@"fn test() -> string { return 0>1?a():'bleh'; } fn a() -> string { return 'hello'; }");
+            var result = rt.Invoke<string>("test");
+            Assert.AreEqual("bleh", result);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void assign_conditional_bad()
+        {
+            var rt = Run(@"fn test() -> string { return 0>1?a():'bleh'; } fn a() -> void { }");
+            var result = rt.Invoke<string>("test");
+            Assert.AreEqual("bleh", result);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void assign_conditional_bad_2()
+        {
+            var rt = Run(@"fn test() -> string { return 1>0?a():'bleh'; } fn a() -> void { }");
+            var result = rt.Invoke<string>("test");
+            Assert.AreEqual("bleh", result);
+        }
 
         [TestMethod]
         public void Invoke_function_using_a_complex_clr_class_value_change_is_kept()
@@ -1345,7 +1403,7 @@ print_hello_world()");
             Assert.AreEqual("HEHEHE", result);
         }
 
-        [TestMethod]        
+        [TestMethod]
         [ExpectedException(typeof(Exception))]
         public void dot_in_array_index_throws()
         {
@@ -1373,7 +1431,7 @@ print_hello_world()");
             Assert.AreEqual("H\r\n", console.Output);
         }
 
-        [TestMethod, ExpectedException(typeof(XzaarRuntimeException))]
+        [TestMethod, ExpectedException(typeof(RuntimeException))]
         public void Use_non_existing_constant_property_throws()
         {
             var rt = Load("fn test(any console) { console.log(\"Hello World\".bleh) }");
@@ -1508,31 +1566,29 @@ console.log('success')
             rt.RegisterGlobalVariable("woot", bi);
             rt.RegisterGlobalVariable("console", console);
             rt.Invoke();
-            
+
             Assert.AreEqual(@"1
 success
 ", console.Output);
         }
 
 
-        private XzaarRuntime Run(string inputCode)
+        private Runtime Run(string inputCode)
         {
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .Compile()
                 .Run();
         }
 
 
-        private XzaarRuntime Load(string inputCode)
+        private Runtime Load(string inputCode)
         {
             return inputCode
                 .Tokenize()
                 .Parse()
-                .Transform()
                 .AnalyzeExpression()
                 .Compile()
                 .Load();
@@ -1554,10 +1610,10 @@ success
 
     public class ConsoleWrapperTest
     {
-        private readonly XzaarRuntime rt;
+        private readonly Runtime rt;
         public string Output;
 
-        public ConsoleWrapperTest(XzaarRuntime rt)
+        public ConsoleWrapperTest(Runtime rt)
         {
             this.rt = rt;
         }

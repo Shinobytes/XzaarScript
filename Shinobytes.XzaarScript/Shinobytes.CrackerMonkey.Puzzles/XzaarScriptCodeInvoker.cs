@@ -4,9 +4,9 @@ namespace Shinobytes.Bytecode.Puzzles
 {
     public class XzaarScriptCodeInvoker : ICodeInvoker
     {
-        private readonly XzaarRuntime runtime;
+        private readonly Runtime runtime;
 
-        protected XzaarScriptCodeInvoker(XzaarRuntime runtime)
+        protected XzaarScriptCodeInvoker(Runtime runtime)
         {
             this.runtime = runtime;
         }

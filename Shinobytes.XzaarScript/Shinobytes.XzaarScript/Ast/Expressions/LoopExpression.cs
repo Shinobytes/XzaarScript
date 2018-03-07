@@ -2,7 +2,7 @@
 
 namespace Shinobytes.XzaarScript.Ast.Expressions
 {
-    public enum XzaarLoopTypes
+    public enum LoopTypes
     {
         Loop,
         For,
@@ -14,11 +14,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
     public class LoopExpression : XzaarExpression
     {
         private readonly XzaarExpression body;
-        private readonly XzaarLabelTarget @break;
-        private readonly XzaarLabelTarget @continue;
-        private readonly XzaarLoopTypes loopType;
+        private readonly LabelTarget @break;
+        private readonly LabelTarget @continue;
+        private readonly LoopTypes loopType;
 
-        internal LoopExpression(XzaarExpression body, XzaarLabelTarget @break, XzaarLabelTarget @continue, XzaarLoopTypes loopType)
+        internal LoopExpression(XzaarExpression body, LabelTarget @break, LabelTarget @continue, LoopTypes loopType)
         {
             this.body = body;
             this.@break = @break;
@@ -26,37 +26,19 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             this.loopType = loopType;
         }
 
-        public XzaarLoopTypes LoopType
-        {
-            get { return loopType; }
-        }
+        public LoopTypes LoopType => loopType;
 
-        public sealed override XzaarType Type
-        {
-            get { return @break == null ? XzaarBaseTypes.Void : @break.Type; }
-        }
+        public sealed override XzaarType Type => @break == null ? XzaarBaseTypes.Void : @break.Type;
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Loop; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Loop;
 
-        public XzaarExpression Body
-        {
-            get { return body; }
-        }
+        public XzaarExpression Body => body;
 
-        public XzaarLabelTarget BreakLabel
-        {
-            get { return @break; }
-        }
+        public LabelTarget BreakLabel => @break;
 
-        public XzaarLabelTarget ContinueLabel
-        {
-            get { return @continue; }
-        }
+        public LabelTarget ContinueLabel => @continue;
 
-        public LoopExpression Update(XzaarLabelTarget breakLabel, XzaarLabelTarget continueLabel, XzaarExpression body)
+        public LoopExpression Update(LabelTarget breakLabel, LabelTarget continueLabel, XzaarExpression body)
         {
             if (breakLabel == BreakLabel && continueLabel == ContinueLabel && body == Body)
             {
@@ -73,15 +55,15 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return Loop(body, null);
         }
 
-        public static LoopExpression Loop(XzaarExpression body, XzaarLabelTarget @break)
+        public static LoopExpression Loop(XzaarExpression body, LabelTarget @break)
         {
             return Loop(body, @break, null);
         }
 
-        public static LoopExpression Loop(XzaarExpression body, XzaarLabelTarget @break, XzaarLabelTarget @continue)
+        public static LoopExpression Loop(XzaarExpression body, LabelTarget @break, LabelTarget @continue)
         {
             if (@continue != null && @continue.Type != XzaarBaseTypes.Void) throw new InvalidOperationException("Label type must be void");
-            return new LoopExpression(body, @break, @continue, XzaarLoopTypes.Loop);
+            return new LoopExpression(body, @break, @continue, LoopTypes.Loop);
         }
     }
 }

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Remoting.Channels;
-using Shinobytes.XzaarScript.Ast.Compilers;
 using Shinobytes.XzaarScript.Ast.Expressions;
+using Shinobytes.XzaarScript.Compiler.Compilers;
 using Shinobytes.XzaarScript.Compiler.Extensions;
 using Shinobytes.XzaarScript.Compiler.Types;
 
@@ -20,7 +20,7 @@ namespace Shinobytes.XzaarScript.Compiler
             this.ctx = ctx;
         }
 
-        public static Delegate Compile(XzaarAnalyzedTree tree)
+        public static Delegate Compile(AnalyzedTree tree)
         {
             var ctx = new DotNetXzaarScriptCompilerContext(tree);
             var discovery = new DotNetXzaarScriptDiscoveryVisitor(ctx);
@@ -37,7 +37,7 @@ namespace Shinobytes.XzaarScript.Compiler
             if (expression == null || expression is ErrorExpression)
                 return null;
 
-            if (expression.NodeType == XzaarExpressionType.Block)
+            if (expression.NodeType == ExpressionType.Block)
             {
                 var block = expression as BlockExpression;
                 object finalItem = null;
@@ -51,6 +51,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
 #if UNITY
             if (expression is BinaryExpression) return Visit(expression as BinaryExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
             if (expression is MemberAccessChainExpression) return Visit(expression as MemberAccessChainExpression);
@@ -81,6 +82,11 @@ namespace Shinobytes.XzaarScript.Compiler
 #endif
         }
 
+        public object Visit(ConditionalExpression expr)
+        {
+            throw new NotImplementedException();
+        }
+
         public object Visit(LogicalNotExpression expr)
         {
             throw new System.NotImplementedException();
@@ -92,7 +98,7 @@ namespace Shinobytes.XzaarScript.Compiler
             ctx.InsideBinaryOperation = true;
             switch (binaryOp.NodeType)
             {
-                case XzaarExpressionType.Assign:
+                case ExpressionType.Assign:
                     object returnValue = null;
                     {
                         // if (vRef == null) return Error("Bad binary expression: Left side is missing!");
@@ -185,33 +191,33 @@ namespace Shinobytes.XzaarScript.Compiler
                     }
                     return returnValue;
 
-                case XzaarExpressionType.AndAlso:
+                case ExpressionType.AndAlso:
                     return LogicalAndAlso(binaryOp);
-                case XzaarExpressionType.OrElse:
+                case ExpressionType.OrElse:
                     return LogicalOrElse(binaryOp);
 
-                case XzaarExpressionType.LessThan:
+                case ExpressionType.LessThan:
                     return CompareLessThan(binaryOp);
-                case XzaarExpressionType.LessThanOrEqual:
+                case ExpressionType.LessThanOrEqual:
                     return CompareLessThanOrEquals(binaryOp);
-                case XzaarExpressionType.GreaterThan:
+                case ExpressionType.GreaterThan:
                     return CompareGreaterThan(binaryOp);
-                case XzaarExpressionType.GreaterThanOrEqual:
+                case ExpressionType.GreaterThanOrEqual:
                     return CompareGreaterThanOrEquals(binaryOp);
-                case XzaarExpressionType.Equal:
+                case ExpressionType.Equal:
                     return CompareEquals(binaryOp);
-                case XzaarExpressionType.NotEqual:
+                case ExpressionType.NotEqual:
                     return CompareNotEquals(binaryOp);
 
-                case XzaarExpressionType.Subtract:
+                case ExpressionType.Subtract:
                     return ArithmethicOperation(binaryOp, OpCodes.Sub);
-                case XzaarExpressionType.Add:
+                case ExpressionType.Add:
                     return ArithmethicOperation(binaryOp, OpCodes.Add, binaryOp.Type); // XzaarBaseTypes.Number                    
-                case XzaarExpressionType.Multiply:
+                case ExpressionType.Multiply:
                     return ArithmethicOperation(binaryOp, OpCodes.Mul);
-                case XzaarExpressionType.Divide:
+                case ExpressionType.Divide:
                     return ArithmethicOperation(binaryOp, OpCodes.Div);
-                case XzaarExpressionType.Modulo:
+                case ExpressionType.Modulo:
                     return ArithmethicOperation(binaryOp, OpCodes.Rem);
             }
             return Error(binaryOp.NodeType + " has not been implemented.");
@@ -464,10 +470,10 @@ namespace Shinobytes.XzaarScript.Compiler
         }         
              */
 
-        public object Visit(ConditionalExpression conditional)
+        public object Visit(IfElseExpression ifElse)
         {
             var il = ctx.GetILGenerator();
-            var test = Visit(conditional.Test);
+            var test = Visit(ifElse.Test);
             TryLoadReference(test, il);
 
             // 1. create temp variable
@@ -486,11 +492,11 @@ namespace Shinobytes.XzaarScript.Compiler
             il.BranchIfFalse(endOfTrue);
 
             // 6. Visit IfTrue
-            if (conditional.IfTrue != null)
-                Visit(conditional.IfTrue);
+            if (ifElse.IfTrue != null)
+                Visit(ifElse.IfTrue);
 
             Label? endOfFalse = null;
-            if (conditional.IfFalse != null)
+            if (ifElse.IfFalse != null)
             {
                 // if we do have an 'else'
                 // then we want to branch out to end of conditional
@@ -504,9 +510,9 @@ namespace Shinobytes.XzaarScript.Compiler
 
 
             // 9. Visit IfFalse (if not null)
-            if (conditional.IfFalse != null)
+            if (ifElse.IfFalse != null)
             {
-                Visit(conditional.IfFalse);
+                Visit(ifElse.IfFalse);
 
                 // 10. mark the endOfFalse label
                 // ReSharper disable once PossibleInvalidOperationException
@@ -530,7 +536,7 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             switch (@goto.Kind)
             {
-                case XzaarGotoExpressionKind.Return:
+                case GotoExpressionKind.Return:
                     {
                         var returnValue = Visit(@goto.Value);
 
@@ -547,16 +553,16 @@ namespace Shinobytes.XzaarScript.Compiler
                         return null;
                     }
                     break;
-                case XzaarGotoExpressionKind.Goto:
+                case GotoExpressionKind.Goto:
                     throw new System.NotImplementedException();
                     break;
-                case XzaarGotoExpressionKind.Break:
+                case GotoExpressionKind.Break:
                     {
                         var il = ctx.GetILGenerator();
                         il.BranchToShortForm(ctx.CurrentScope.CurrentEndLabel);
                         return null;
                     }
-                case XzaarGotoExpressionKind.Continue:
+                case GotoExpressionKind.Continue:
                     {
                         var il = ctx.GetILGenerator();
                         il.BranchToShortForm(ctx.CurrentScope.CurrentStartLabel);
@@ -581,12 +587,12 @@ namespace Shinobytes.XzaarScript.Compiler
             switch (unary.NodeType)
             {
 
-                case XzaarExpressionType.PostDecrementAssign: return PostDecrementAssign(unary);
-                case XzaarExpressionType.Decrement:
-                case XzaarExpressionType.PreDecrementAssign: return PreDecrementAssign(unary);
-                case XzaarExpressionType.PostIncrementAssign: return PostIncrementAssign(unary);
-                case XzaarExpressionType.Increment:
-                case XzaarExpressionType.PreIncrementAssign: return PreIncrementAssign(unary);
+                case ExpressionType.PostDecrementAssign: return PostDecrementAssign(unary);
+                case ExpressionType.Decrement:
+                case ExpressionType.PreDecrementAssign: return PreDecrementAssign(unary);
+                case ExpressionType.PostIncrementAssign: return PostIncrementAssign(unary);
+                case ExpressionType.Increment:
+                case ExpressionType.PreIncrementAssign: return PreIncrementAssign(unary);
                 default:
                     throw new System.NotImplementedException(unary.NodeType + " has not been implemented as a valid UnaryExpression");
             }
@@ -983,7 +989,7 @@ namespace Shinobytes.XzaarScript.Compiler
             var msg = "[Error] " + message;
             ctx.Errors.Add(msg);
             return null;
-            // return XzaarAstNode.Error(msg);
+            // return AstNode.Error(msg);
         }
     }
 }

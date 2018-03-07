@@ -19,14 +19,8 @@
             this.type = type;
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return type; ; }
-        }
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Default; }
-        }
+        public sealed override XzaarType Type => type;
+        public sealed override ExpressionType NodeType => ExpressionType.Default;
     }
 
     public partial class XzaarExpression

@@ -18,15 +18,9 @@
         public MethodInstructionCollection MethodInstructions { get; }
         public MethodVariableCollection MethodVariables { get; }
 
-        public bool IsEmpty
-        {
-            get { return MethodInstructions.Count == 0; }
-        }
+        public bool IsEmpty => MethodInstructions.Count == 0;
 
-        public bool HasVariables
-        {
-            get { return MethodVariables.Count > 0; }
-        }
+        public bool HasVariables => MethodVariables.Count > 0;
 
         public MethodDefinition GetMethod()
         {

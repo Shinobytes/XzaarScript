@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
-using Shinobytes.XzaarScript.Assembly;
 using Shinobytes.XzaarScript.Assembly.Models;
 
 namespace Shinobytes.XzaarScript.Compiler
 {
- 
     public class FlowControlScope
     {
         public Label CurrentStartLabel;

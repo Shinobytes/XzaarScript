@@ -8,14 +8,10 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         private XzaarExpression _expression;
         private readonly XzaarExpression arrayIndex;
 
-        public XzaarMemberInfo Member
-        {
-            get { return GetMember(); }
-        }
-        public XzaarExpression Expression
-        {
-            get { return _expression; }
-        }
+        public XzaarMemberInfo Member => GetMember();
+
+        public XzaarExpression Expression => _expression;
+
         internal MemberExpression(XzaarExpression expression, XzaarExpression arrayIndex, XzaarType memberType)
         {
             MemberType = memberType;
@@ -39,15 +35,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 
         public XzaarType MemberType { get; set; }
 
-        public XzaarExpression ArrayIndex
-        {
-            get { return arrayIndex; }
-        }
+        public XzaarExpression ArrayIndex => arrayIndex;
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.MemberAccess; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.MemberAccess;
 
         internal virtual XzaarMemberInfo GetMember()
         {
@@ -62,10 +52,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         //    }
         //    return XzaarExpression.MakeMemberAccess(expression, Member);
         //}
-        public override XzaarType Type
-        {
-            get { return TryGetType(Expression); }
-        }
+        public override XzaarType Type => TryGetType(Expression);
 
         private XzaarType TryGetType(XzaarExpression expression)
         {

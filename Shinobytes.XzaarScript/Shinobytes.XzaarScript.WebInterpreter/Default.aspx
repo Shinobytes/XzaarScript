@@ -2,12 +2,13 @@
 
 <%@ Import Namespace="System.Diagnostics" %>
 <%@ Import Namespace="Shinobytes.XzaarScript.VM" %>
+<%@ Import Namespace="Shinobytes.XzaarScript.Assembly.Models" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <script runat="server">
     public string ConsoleOutput;
-    public string CurrentSourceCode = @"// variable names starting with $ 
+    public string CurrentSourceCode = @"// variable localNames starting with $ 
 // are variables grabbed from an external source
 let console = $console
 
@@ -25,7 +26,7 @@ print_hello_world()";
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var rt = new Shinobytes.XzaarScript.XzaarScriptInterpreter(CurrentSourceCode);
+            var rt = new Shinobytes.XzaarScript.ScriptInterpreter(CurrentSourceCode);
             rt.RegisterVariable("$console", console);
             sw.Stop();
 
@@ -65,17 +66,23 @@ print_hello_world()";
 
         public void log(object text)
         {
-            var rtVar = text as XzaarRuntimeVariable;
-            if (rtVar != null)
+            if (text is RuntimeVariable)
             {
-                Output += rtVar.Value + "<br/>";
+                Output += ((RuntimeVariable)text).Value + "<br/>";
+            }
+            else if (text is Constant)
+            {
+                Output += ((Constant)text).Value + "<br/>";
             }
             else
             {
                 Output += text + "<br/>";
             }
         }
-
+        private string SecretMethod2()
+        {
+            return "wtf!";
+        }
         public string SecretMethod()
         {
             return "Shh! It was a secret!";

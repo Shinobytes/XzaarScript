@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Shinobytes.XzaarScript.Ast;
 using Shinobytes.XzaarScript.Ast.Expressions;
+using TypeCode = Shinobytes.XzaarScript.Ast.TypeCode;
 
 namespace Shinobytes.XzaarScript
 {
@@ -12,10 +13,7 @@ namespace Shinobytes.XzaarScript
     {
         public static readonly char Delimiter = '.';
 
-        public virtual XzaarMethodBase DeclaringMethod
-        {
-            get { return null; }
-        }
+        public virtual XzaarMethodBase DeclaringMethod => null;
 
         public abstract XzaarMethodInfo[] GetMethods();
         public abstract XzaarFieldInfo[] GetFields();
@@ -83,37 +81,37 @@ namespace Shinobytes.XzaarScript
             return null;
         }
 
-        public static XzaarTypeCode GetTypeCode(XzaarType type)
+        public static TypeCode GetTypeCode(XzaarType type)
         {
-            if (type == null) return XzaarTypeCode.Empty;
+            if (type == null) return TypeCode.Empty;
             return type.GetTypeCodeImpl();
         }
 
-        private XzaarTypeCode GetTypeCodeImpl()
+        private TypeCode GetTypeCodeImpl()
         {
             switch (this.Name)
             {
                 case "bool":
-                case "boolean": return XzaarTypeCode.Boolean;
-                case "number": return XzaarTypeCode.Double;
+                case "boolean": return TypeCode.Boolean;
+                case "number": return TypeCode.Double;
 
-                case "i8": return XzaarTypeCode.SByte;
-                case "i16": return XzaarTypeCode.Int16;
-                case "i32": return XzaarTypeCode.Int32;
-                case "i64": return XzaarTypeCode.Int64;
-                case "u8": return XzaarTypeCode.Byte;
-                case "u16": return XzaarTypeCode.UInt16;
-                case "u32": return XzaarTypeCode.UInt32;
-                case "u64": return XzaarTypeCode.UInt64;
-                case "f32": return XzaarTypeCode.Single;
-                case "f64": return XzaarTypeCode.Double;
-                case "string": return XzaarTypeCode.String;
-                case "object": case "any": return XzaarTypeCode.Any;
-                case "datetime": return XzaarTypeCode.DateTime;
+                case "i8": return TypeCode.SByte;
+                case "i16": return TypeCode.Int16;
+                case "i32": return TypeCode.Int32;
+                case "i64": return TypeCode.Int64;
+                case "u8": return TypeCode.Byte;
+                case "u16": return TypeCode.UInt16;
+                case "u32": return TypeCode.UInt32;
+                case "u64": return TypeCode.UInt64;
+                case "f32": return TypeCode.Single;
+                case "f64": return TypeCode.Double;
+                case "string": return TypeCode.String;
+                case "object": case "any": return TypeCode.Any;
+                case "datetime": return TypeCode.Date;
             }
             if (this != UnderlyingSystemType && UnderlyingSystemType != null)
                 return XzaarType.GetTypeCode(UnderlyingSystemType);
-            return XzaarTypeCode.Any;
+            return TypeCode.Any;
         }
 
         public bool IsEquivalentTo(XzaarType other)
@@ -150,25 +148,13 @@ namespace Shinobytes.XzaarScript
             return (o.IsAny && IsAny) || ((object.ReferenceEquals(this.UnderlyingSystemType, o.UnderlyingSystemType)) && !o.UnderlyingSystemType.IsAny);
         }
 
-        public bool IsArray
-        {
-            get { return IsArrayImpl(); }
-        }
+        public bool IsArray => IsArrayImpl();
 
-        public bool IsByRef
-        {
-            get { return IsByRefImpl(); }
-        }
+        public bool IsByRef => IsByRefImpl();
 
-        public bool IsAny
-        {
-            get { return this.Name.ToLower() == "any"; }
-        }
+        public bool IsAny => this.Name.ToLower() == "any";
 
-        public bool IsNumeric
-        {
-            get { return this.BaseType?.Name.ToLower() == "number" || this.Name.ToLower() == "number"; }
-        }
+        public bool IsNumeric => this.BaseType?.Name.ToLower() == "number" || this.Name.ToLower() == "number";
 
         protected abstract bool IsByRefImpl();
 

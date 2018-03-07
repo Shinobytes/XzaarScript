@@ -4,10 +4,7 @@
     {
         private MethodReference method;
 
-        public override MemberTypes MemberType
-        {
-            get { return MemberTypes.Parameter; }
-        }
+        public override MemberTypes MemberType => MemberTypes.Parameter;
 
         public MethodReference Method
         {

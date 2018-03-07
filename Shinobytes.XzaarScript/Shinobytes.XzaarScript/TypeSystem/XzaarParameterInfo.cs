@@ -10,8 +10,8 @@ namespace Shinobytes.XzaarScript
         private XzaarType parameterType;
 
         public virtual object DefautlValue { get; }
-        public virtual string Name { get { return name; } }
-        public virtual XzaarType ParameterType { get { return parameterType; } }
-        public virtual int Position { get { return position; } }
+        public virtual string Name => name;
+        public virtual XzaarType ParameterType => parameterType;
+        public virtual int Position => position;
     }
 }

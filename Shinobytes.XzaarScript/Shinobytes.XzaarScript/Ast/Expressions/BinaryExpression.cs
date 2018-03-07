@@ -15,90 +15,75 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             this.right = right;
         }
 
-        private static bool IsOpAssignment(XzaarExpressionType op)
+        private static bool IsOpAssignment(ExpressionType op)
         {
             switch (op)
             {
-                case XzaarExpressionType.AddAssign:
-                case XzaarExpressionType.SubtractAssign:
-                case XzaarExpressionType.MultiplyAssign:
-                case XzaarExpressionType.AddAssignChecked:
-                case XzaarExpressionType.SubtractAssignChecked:
-                case XzaarExpressionType.MultiplyAssignChecked:
-                case XzaarExpressionType.DivideAssign:
-                case XzaarExpressionType.ModuloAssign:
-                case XzaarExpressionType.PowerAssign:
-                case XzaarExpressionType.AndAssign:
-                case XzaarExpressionType.OrAssign:
-                case XzaarExpressionType.RightShiftAssign:
-                case XzaarExpressionType.LeftShiftAssign:
-                case XzaarExpressionType.ExclusiveOrAssign:
+                case ExpressionType.AddAssign:
+                case ExpressionType.SubtractAssign:
+                case ExpressionType.MultiplyAssign:
+                case ExpressionType.AddAssignChecked:
+                case ExpressionType.SubtractAssignChecked:
+                case ExpressionType.MultiplyAssignChecked:
+                case ExpressionType.DivideAssign:
+                case ExpressionType.ModuloAssign:
+                case ExpressionType.PowerAssign:
+                case ExpressionType.AndAssign:
+                case ExpressionType.OrAssign:
+                case ExpressionType.RightShiftAssign:
+                case ExpressionType.LeftShiftAssign:
+                case ExpressionType.ExclusiveOrAssign:
                     return true;
             }
             return false;
         }
 
-        public override XzaarType Type
-        {
-            get
-            {
-                return (this.NodeType == XzaarExpressionType.GreaterThan || this.NodeType == XzaarExpressionType.GreaterThanOrEqual || this.NodeType == XzaarExpressionType.Equal || this.NodeType == XzaarExpressionType.NotEqual || this.NodeType == XzaarExpressionType.LessThan || this.NodeType == XzaarExpressionType.LessThanOrEqual)
-                  ? XzaarBaseTypes.Boolean : XzaarBaseTypes.Any;
-            }
-        }
+        public override XzaarType Type => (this.NodeType == ExpressionType.GreaterThan || this.NodeType == ExpressionType.GreaterThanOrEqual || this.NodeType == ExpressionType.Equal || this.NodeType == ExpressionType.NotEqual || this.NodeType == ExpressionType.LessThan || this.NodeType == ExpressionType.LessThanOrEqual)
+            ? XzaarBaseTypes.Boolean : XzaarBaseTypes.Any;
 
-        private static XzaarExpressionType GetBinaryOpFromAssignmentOp(XzaarExpressionType op)
+        private static ExpressionType GetBinaryOpFromAssignmentOp(ExpressionType op)
         {
             switch (op)
             {
-                case XzaarExpressionType.AddAssign:
-                    return XzaarExpressionType.Add;
-                case XzaarExpressionType.AddAssignChecked:
-                    return XzaarExpressionType.AddChecked;
-                case XzaarExpressionType.SubtractAssign:
-                    return XzaarExpressionType.Subtract;
-                case XzaarExpressionType.SubtractAssignChecked:
-                    return XzaarExpressionType.SubtractChecked;
-                case XzaarExpressionType.MultiplyAssign:
-                    return XzaarExpressionType.Multiply;
-                case XzaarExpressionType.MultiplyAssignChecked:
-                    return XzaarExpressionType.MultiplyChecked;
-                case XzaarExpressionType.DivideAssign:
-                    return XzaarExpressionType.Divide;
-                case XzaarExpressionType.ModuloAssign:
-                    return XzaarExpressionType.Modulo;
-                case XzaarExpressionType.PowerAssign:
-                    return XzaarExpressionType.Power;
-                case XzaarExpressionType.AndAssign:
-                    return XzaarExpressionType.And;
-                case XzaarExpressionType.OrAssign:
-                    return XzaarExpressionType.Or;
-                case XzaarExpressionType.RightShiftAssign:
-                    return XzaarExpressionType.RightShift;
-                case XzaarExpressionType.LeftShiftAssign:
-                    return XzaarExpressionType.LeftShift;
-                case XzaarExpressionType.ExclusiveOrAssign:
-                    return XzaarExpressionType.ExclusiveOr;
+                case ExpressionType.AddAssign:
+                    return ExpressionType.Add;
+                case ExpressionType.AddAssignChecked:
+                    return ExpressionType.AddChecked;
+                case ExpressionType.SubtractAssign:
+                    return ExpressionType.Subtract;
+                case ExpressionType.SubtractAssignChecked:
+                    return ExpressionType.SubtractChecked;
+                case ExpressionType.MultiplyAssign:
+                    return ExpressionType.Multiply;
+                case ExpressionType.MultiplyAssignChecked:
+                    return ExpressionType.MultiplyChecked;
+                case ExpressionType.DivideAssign:
+                    return ExpressionType.Divide;
+                case ExpressionType.ModuloAssign:
+                    return ExpressionType.Modulo;
+                case ExpressionType.PowerAssign:
+                    return ExpressionType.Power;
+                case ExpressionType.AndAssign:
+                    return ExpressionType.And;
+                case ExpressionType.OrAssign:
+                    return ExpressionType.Or;
+                case ExpressionType.RightShiftAssign:
+                    return ExpressionType.RightShift;
+                case ExpressionType.LeftShiftAssign:
+                    return ExpressionType.LeftShift;
+                case ExpressionType.ExclusiveOrAssign:
+                    return ExpressionType.ExclusiveOr;
                 default:
                     throw new InvalidOperationException("op");
             }
 
         }
 
-        public XzaarExpression Left
-        {
-            get { return left; }
-        }
+        public XzaarExpression Left => left;
 
-        public XzaarExpression Right
-        {
-            get { return right; }
-        }
+        public XzaarExpression Right => right;
 
-        public XzaarMethodInfo Method
-        {
-            get { return GetMethod(); }
-        }
+        public XzaarMethodInfo Method => GetMethod();
 
         internal virtual XzaarMethodInfo GetMethod()
         {
@@ -113,7 +98,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
             if (IsReferenceComparison)
             {
-                if (NodeType == XzaarExpressionType.Equal)
+                if (NodeType == ExpressionType.Equal)
                 {
                     return XzaarExpression.ReferenceEqual(left, right);
                 }
@@ -129,7 +114,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         {
             get
             {
-                if (NodeType == XzaarExpressionType.Coalesce || NodeType == XzaarExpressionType.Assign)
+                if (NodeType == ExpressionType.Coalesce || NodeType == ExpressionType.Assign)
                 {
                     return false;
                 }
@@ -142,28 +127,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 return false;
             }
         }
-        public bool IsLiftedToNull
-        {
-            get
-            {
-                return IsLifted && XzaarTypeUtils.IsNullableType(Type);
-            }
-        }
+        public bool IsLiftedToNull => IsLifted && XzaarTypeUtils.IsNullableType(Type);
 
-        internal bool IsReferenceComparison
-        {
-            get
-            {
-                //XzaarType left = _left.Type;
-                //XzaarType right = _right.Type;
-                //XzaarMethodInfo method = GetMethod();
-                //XzaarExpressionType kind = NodeType;
-
-                return false;
-                //return (kind == XzaarExpressionType.Equal || kind == XzaarExpressionType.NotEqual) &&
-                //    method == null && !left.IsValueType && !right.IsValueType;
-            }
-        }
+        internal bool IsReferenceComparison => false;
     }
 
     public partial class XzaarExpression
@@ -174,7 +140,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (XzaarTypeUtils.HasReferenceEquality(left.Type, right.Type))
             {
-                return new LogicalBinaryExpression(XzaarExpressionType.NotEqual, left, right);
+                return new LogicalBinaryExpression(ExpressionType.NotEqual, left, right);
             }
             // throw Error.ReferenceEqualityNotDefined(left.Type, right.Type);
             throw new InvalidOperationException("Reference equality not defined");
@@ -187,7 +153,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (XzaarTypeUtils.HasReferenceEquality(left.Type, right.Type))
             {
-                return new LogicalBinaryExpression(XzaarExpressionType.Equal, left, right);
+                return new LogicalBinaryExpression(ExpressionType.Equal, left, right);
             }
             // throw Error.ReferenceEqualityNotDefined(left.Type, right.Type);
             throw new InvalidOperationException("Reference equality not defined");
@@ -198,54 +164,54 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return new AssignBinaryExpression(left, right);
         }
 
-        public static BinaryExpression MakeBinary(XzaarExpressionType binaryType, XzaarExpression left, XzaarExpression right)
+        public static BinaryExpression MakeBinary(ExpressionType binaryType, XzaarExpression left, XzaarExpression right)
         {
             return MakeBinary(binaryType, left, right, false, null);
         }
 
-        public static BinaryExpression MakeBinary(XzaarExpressionType binaryType, XzaarExpression left, XzaarExpression right, bool liftToNull, XzaarMethodInfo method)
+        public static BinaryExpression MakeBinary(ExpressionType binaryType, XzaarExpression left, XzaarExpression right, bool liftToNull, XzaarMethodInfo method)
         {
             switch (binaryType)
             {
-                case XzaarExpressionType.Add: return Add(left, right, method);
-                case XzaarExpressionType.AddChecked: return AddChecked(left, right, method);
-                case XzaarExpressionType.Subtract: return Subtract(left, right, method);
-                case XzaarExpressionType.SubtractChecked: return SubtractChecked(left, right, method);
-                case XzaarExpressionType.Multiply: return Multiply(left, right, method);
-                case XzaarExpressionType.MultiplyChecked: return MultiplyChecked(left, right, method);
-                case XzaarExpressionType.Divide: return Divide(left, right, method);
-                case XzaarExpressionType.Modulo: return Modulo(left, right, method);
-                case XzaarExpressionType.Power: return Power(left, right, method);
-                case XzaarExpressionType.And: return And(left, right, method);
-                case XzaarExpressionType.AndAlso: return AndAlso(left, right, method);
-                case XzaarExpressionType.Or: return Or(left, right, method);
-                case XzaarExpressionType.OrElse: return OrElse(left, right, method);
-                case XzaarExpressionType.LessThan: return LessThan(left, right, liftToNull, method);
-                case XzaarExpressionType.LessThanOrEqual: return LessThanOrEqual(left, right, liftToNull, method);
-                case XzaarExpressionType.GreaterThan: return GreaterThan(left, right, liftToNull, method);
-                case XzaarExpressionType.GreaterThanOrEqual: return GreaterThanOrEqual(left, right, liftToNull, method);
-                case XzaarExpressionType.Equal: return Equal(left, right, liftToNull, method);
-                case XzaarExpressionType.NotEqual: return NotEqual(left, right, liftToNull, method);
-                case XzaarExpressionType.ExclusiveOr: return ExclusiveOr(left, right, method);
-                case XzaarExpressionType.Coalesce: return Coalesce(left, right);
-                case XzaarExpressionType.ArrayIndex: return ArrayIndex(left, right);
-                case XzaarExpressionType.RightShift: return RightShift(left, right, method);
-                case XzaarExpressionType.LeftShift: return LeftShift(left, right, method);
-                case XzaarExpressionType.Assign: return Assign(left, right);
-                case XzaarExpressionType.AddAssign: return AddAssign(left, right, method);
-                case XzaarExpressionType.AndAssign: return AndAssign(left, right, method);
-                case XzaarExpressionType.DivideAssign: return DivideAssign(left, right, method);
-                case XzaarExpressionType.ExclusiveOrAssign: return ExclusiveOrAssign(left, right, method);
-                case XzaarExpressionType.LeftShiftAssign: return LeftShiftAssign(left, right, method);
-                case XzaarExpressionType.ModuloAssign: return ModuloAssign(left, right, method);
-                case XzaarExpressionType.MultiplyAssign: return MultiplyAssign(left, right, method);
-                case XzaarExpressionType.OrAssign: return OrAssign(left, right, method);
-                case XzaarExpressionType.PowerAssign: return PowerAssign(left, right, method);
-                case XzaarExpressionType.RightShiftAssign: return RightShiftAssign(left, right, method);
-                case XzaarExpressionType.SubtractAssign: return SubtractAssign(left, right, method);
-                case XzaarExpressionType.AddAssignChecked: return AddAssignChecked(left, right, method);
-                case XzaarExpressionType.SubtractAssignChecked: return SubtractAssignChecked(left, right, method);
-                case XzaarExpressionType.MultiplyAssignChecked: return MultiplyAssignChecked(left, right, method);
+                case ExpressionType.Add: return Add(left, right, method);
+                case ExpressionType.AddChecked: return AddChecked(left, right, method);
+                case ExpressionType.Subtract: return Subtract(left, right, method);
+                case ExpressionType.SubtractChecked: return SubtractChecked(left, right, method);
+                case ExpressionType.Multiply: return Multiply(left, right, method);
+                case ExpressionType.MultiplyChecked: return MultiplyChecked(left, right, method);
+                case ExpressionType.Divide: return Divide(left, right, method);
+                case ExpressionType.Modulo: return Modulo(left, right, method);
+                case ExpressionType.Power: return Power(left, right, method);
+                case ExpressionType.And: return And(left, right, method);
+                case ExpressionType.AndAlso: return AndAlso(left, right, method);
+                case ExpressionType.Or: return Or(left, right, method);
+                case ExpressionType.OrElse: return OrElse(left, right, method);
+                case ExpressionType.LessThan: return LessThan(left, right, liftToNull, method);
+                case ExpressionType.LessThanOrEqual: return LessThanOrEqual(left, right, liftToNull, method);
+                case ExpressionType.GreaterThan: return GreaterThan(left, right, liftToNull, method);
+                case ExpressionType.GreaterThanOrEqual: return GreaterThanOrEqual(left, right, liftToNull, method);
+                case ExpressionType.Equal: return Equal(left, right, liftToNull, method);
+                case ExpressionType.NotEqual: return NotEqual(left, right, liftToNull, method);
+                case ExpressionType.ExclusiveOr: return ExclusiveOr(left, right, method);
+                case ExpressionType.Coalesce: return Coalesce(left, right);
+                case ExpressionType.ArrayIndex: return ArrayIndex(left, right);
+                case ExpressionType.RightShift: return RightShift(left, right, method);
+                case ExpressionType.LeftShift: return LeftShift(left, right, method);
+                case ExpressionType.Assign: return Assign(left, right);
+                case ExpressionType.AddAssign: return AddAssign(left, right, method);
+                case ExpressionType.AndAssign: return AndAssign(left, right, method);
+                case ExpressionType.DivideAssign: return DivideAssign(left, right, method);
+                case ExpressionType.ExclusiveOrAssign: return ExclusiveOrAssign(left, right, method);
+                case ExpressionType.LeftShiftAssign: return LeftShiftAssign(left, right, method);
+                case ExpressionType.ModuloAssign: return ModuloAssign(left, right, method);
+                case ExpressionType.MultiplyAssign: return MultiplyAssign(left, right, method);
+                case ExpressionType.OrAssign: return OrAssign(left, right, method);
+                case ExpressionType.PowerAssign: return PowerAssign(left, right, method);
+                case ExpressionType.RightShiftAssign: return RightShiftAssign(left, right, method);
+                case ExpressionType.SubtractAssign: return SubtractAssign(left, right, method);
+                case ExpressionType.AddAssignChecked: return AddAssignChecked(left, right, method);
+                case ExpressionType.SubtractAssignChecked: return SubtractAssignChecked(left, right, method);
+                case ExpressionType.MultiplyAssignChecked: return MultiplyAssignChecked(left, right, method);
                 default: throw new NotSupportedException(binaryType + " is not supported."); // throw Error.UnhandledBinary(binaryType);
             }
         }
@@ -259,11 +225,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 if (IsSimpleShift(left.Type, right.Type))
                 {
                     XzaarType resultType = GetResultTypeOfShift(left.Type, right.Type);
-                    return new SimpleBinaryExpression(XzaarExpressionType.RightShiftAssign, left, right, resultType);
+                    return new SimpleBinaryExpression(ExpressionType.RightShiftAssign, left, right, resultType);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.RightShiftAssign, "op_RightShift", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.RightShiftAssign, "op_RightShift", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.RightShiftAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.RightShiftAssign, left, right, method, true);
         }
         public static BinaryExpression AddAssignChecked(XzaarExpression left, XzaarExpression right, XzaarMethodInfo method)
         {
@@ -276,11 +242,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type))
                 {
                     // conversion is not supported for binary ops on arithmetic types without operator overloading                   
-                    return new SimpleBinaryExpression(XzaarExpressionType.AddAssignChecked, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.AddAssignChecked, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.AddAssignChecked, "op_Addition", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.AddAssignChecked, "op_Addition", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.AddAssignChecked, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.AddAssignChecked, left, right, method, true);
         }
         public static BinaryExpression ExclusiveOrAssign(XzaarExpression left, XzaarExpression right)
         {
@@ -295,11 +261,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsIntegerOrBool(left.Type))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.ExclusiveOrAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.ExclusiveOrAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.ExclusiveOrAssign, "op_ExclusiveOr", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.ExclusiveOrAssign, "op_ExclusiveOr", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.ExclusiveOrAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.ExclusiveOrAssign, left, right, method, true);
         }
         public static BinaryExpression LeftShiftAssign(XzaarExpression left, XzaarExpression right, XzaarMethodInfo method)
         {
@@ -311,11 +277,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 if (IsSimpleShift(left.Type, right.Type))
                 {
                     XzaarType resultType = GetResultTypeOfShift(left.Type, right.Type);
-                    return new SimpleBinaryExpression(XzaarExpressionType.LeftShiftAssign, left, right, resultType);
+                    return new SimpleBinaryExpression(ExpressionType.LeftShiftAssign, left, right, resultType);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.LeftShiftAssign, "op_LeftShift", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.LeftShiftAssign, "op_LeftShift", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.LeftShiftAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.LeftShiftAssign, left, right, method, true);
         }
 
         public static BinaryExpression RightShift(XzaarExpression left, XzaarExpression right)
@@ -331,11 +297,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 if (IsSimpleShift(left.Type, right.Type))
                 {
                     XzaarType resultType = GetResultTypeOfShift(left.Type, right.Type);
-                    return new SimpleBinaryExpression(XzaarExpressionType.RightShift, left, right, resultType);
+                    return new SimpleBinaryExpression(ExpressionType.RightShift, left, right, resultType);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.RightShift, "op_RightShift", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.RightShift, "op_RightShift", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.RightShift, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.RightShift, left, right, method, true);
         }
         public static BinaryExpression LeftShift(XzaarExpression left, XzaarExpression right, XzaarMethodInfo method)
         {
@@ -346,11 +312,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 if (IsSimpleShift(left.Type, right.Type))
                 {
                     XzaarType resultType = GetResultTypeOfShift(left.Type, right.Type);
-                    return new SimpleBinaryExpression(XzaarExpressionType.LeftShift, left, right, resultType);
+                    return new SimpleBinaryExpression(ExpressionType.LeftShift, left, right, resultType);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.LeftShift, "op_LeftShift", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.LeftShift, "op_LeftShift", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.LeftShift, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.LeftShift, left, right, method, true);
         }
         private static XzaarType ValidateCoalesceArgTypes(XzaarType left, XzaarType right)
         {
@@ -364,7 +330,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //if (conversion == null)
             //{
             XzaarType resultType = ValidateCoalesceArgTypes(left.Type, right.Type);
-            return new SimpleBinaryExpression(XzaarExpressionType.Coalesce, left, right, resultType);
+            return new SimpleBinaryExpression(ExpressionType.Coalesce, left, right, resultType);
             // }
 
             //if (left.Type.IsValueType && !XzaarTypeUtils.IsNullableType(left.Type))
@@ -420,11 +386,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsIntegerOrBool(left.Type))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.ExclusiveOr, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.ExclusiveOr, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.ExclusiveOr, "op_ExclusiveOr", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.ExclusiveOr, "op_ExclusiveOr", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.ExclusiveOr, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.ExclusiveOr, left, right, method, true);
         }
 
 
@@ -439,9 +405,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (method == null)
             {
-                return GetEqualityComparisonOperator(XzaarExpressionType.NotEqual, "op_Inequality", left, right, liftToNull);
+                return GetEqualityComparisonOperator(ExpressionType.NotEqual, "op_Inequality", left, right, liftToNull);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.NotEqual, left, right, method, liftToNull);
+            return GetMethodBasedBinaryOperator(ExpressionType.NotEqual, left, right, method, liftToNull);
         }
 
         public static BinaryExpression LessThanOrEqual(XzaarExpression left, XzaarExpression right, bool liftToNull, XzaarMethodInfo method)
@@ -450,9 +416,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (method == null)
             {
-                return GetComparisonOperator(XzaarExpressionType.LessThanOrEqual, "op_LessThanOrEqual", left, right, liftToNull);
+                return GetComparisonOperator(ExpressionType.LessThanOrEqual, "op_LessThanOrEqual", left, right, liftToNull);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.LessThanOrEqual, left, right, method, liftToNull);
+            return GetMethodBasedBinaryOperator(ExpressionType.LessThanOrEqual, left, right, method, liftToNull);
         }
 
         public static BinaryExpression GreaterThan(XzaarExpression left, XzaarExpression right)
@@ -466,9 +432,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (method == null)
             {
-                return GetComparisonOperator(XzaarExpressionType.GreaterThan, "op_GreaterThan", left, right, liftToNull);
+                return GetComparisonOperator(ExpressionType.GreaterThan, "op_GreaterThan", left, right, liftToNull);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.GreaterThan, left, right, method, liftToNull);
+            return GetMethodBasedBinaryOperator(ExpressionType.GreaterThan, left, right, method, liftToNull);
         }
 
         public static BinaryExpression GreaterThanOrEqual(XzaarExpression left, XzaarExpression right)
@@ -481,9 +447,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (method == null)
             {
-                return GetComparisonOperator(XzaarExpressionType.GreaterThanOrEqual, "op_GreaterThanOrEqual", left, right, liftToNull);
+                return GetComparisonOperator(ExpressionType.GreaterThanOrEqual, "op_GreaterThanOrEqual", left, right, liftToNull);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.GreaterThanOrEqual, left, right, method, liftToNull);
+            return GetMethodBasedBinaryOperator(ExpressionType.GreaterThanOrEqual, left, right, method, liftToNull);
         }
 
         public static BinaryExpression OrElse(XzaarExpression left, XzaarExpression right)
@@ -502,26 +468,26 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 {
                     if (left.Type == XzaarBaseTypes.Boolean)
                     {
-                        return new LogicalBinaryExpression(XzaarExpressionType.OrElse, left, right);
+                        return new LogicalBinaryExpression(ExpressionType.OrElse, left, right);
                     }
                     else // if (left.Type == typeof(bool?))
                     {
-                        return new SimpleBinaryExpression(XzaarExpressionType.OrElse, left, right, left.Type);
+                        return new SimpleBinaryExpression(ExpressionType.OrElse, left, right, left.Type);
                     }
                 }
-                method = GetUserDefinedBinaryOperator(XzaarExpressionType.OrElse, left.Type, right.Type, "op_BitwiseOr");
+                method = GetUserDefinedBinaryOperator(ExpressionType.OrElse, left.Type, right.Type, "op_BitwiseOr");
                 if (method != null)
                 {
-                    ValidateUserDefinedConditionalLogicOperator(XzaarExpressionType.OrElse, left.Type, right.Type, method);
+                    ValidateUserDefinedConditionalLogicOperator(ExpressionType.OrElse, left.Type, right.Type, method);
                     returnType = (XzaarTypeUtils.IsNullableType(left.Type) && method.ReturnType == XzaarTypeUtils.GetNonNullableType(left.Type)) ? left.Type : method.ReturnType;
-                    return new MethodBinaryExpression(XzaarExpressionType.OrElse, left, right, returnType, method);
+                    return new MethodBinaryExpression(ExpressionType.OrElse, left, right, returnType, method);
                 }
                 throw new InvalidOperationException("Binary operator not defined");
-                // throw Error.BinaryOperatorNotDefined(XzaarExpressionType.OrElse, left.Type, right.Type);
+                // throw Error.BinaryOperatorNotDefined(ExpressionType.OrElse, left.Type, right.Type);
             }
-            ValidateUserDefinedConditionalLogicOperator(XzaarExpressionType.OrElse, left.Type, right.Type, method);
+            ValidateUserDefinedConditionalLogicOperator(ExpressionType.OrElse, left.Type, right.Type, method);
             returnType = (XzaarTypeUtils.IsNullableType(left.Type) && method.ReturnType == XzaarTypeUtils.GetNonNullableType(left.Type)) ? left.Type : method.ReturnType;
-            return new MethodBinaryExpression(XzaarExpressionType.OrElse, left, right, returnType, method);
+            return new MethodBinaryExpression(ExpressionType.OrElse, left, right, returnType, method);
         }
 
         public static BinaryExpression LessThan(XzaarExpression left, XzaarExpression right)
@@ -535,9 +501,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (method == null)
             {
-                return GetComparisonOperator(XzaarExpressionType.LessThan, "op_LessThan", left, right, liftToNull);
+                return GetComparisonOperator(ExpressionType.LessThan, "op_LessThan", left, right, liftToNull);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.LessThan, left, right, method, liftToNull);
+            return GetMethodBasedBinaryOperator(ExpressionType.LessThan, left, right, method, liftToNull);
         }
 
 
@@ -557,26 +523,26 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 {
                     if (left.Type == XzaarBaseTypes.Boolean)
                     {
-                        return new LogicalBinaryExpression(XzaarExpressionType.AndAlso, left, right);
+                        return new LogicalBinaryExpression(ExpressionType.AndAlso, left, right);
                     }
                     else // if (left.Type == typeof(bool?))
                     {
-                        return new SimpleBinaryExpression(XzaarExpressionType.AndAlso, left, right, left.Type);
+                        return new SimpleBinaryExpression(ExpressionType.AndAlso, left, right, left.Type);
                     }
                 }
-                method = GetUserDefinedBinaryOperator(XzaarExpressionType.AndAlso, left.Type, right.Type, "op_BitwiseAnd");
+                method = GetUserDefinedBinaryOperator(ExpressionType.AndAlso, left.Type, right.Type, "op_BitwiseAnd");
                 if (method != null)
                 {
-                    ValidateUserDefinedConditionalLogicOperator(XzaarExpressionType.AndAlso, left.Type, right.Type, method);
+                    ValidateUserDefinedConditionalLogicOperator(ExpressionType.AndAlso, left.Type, right.Type, method);
                     returnType = (XzaarTypeUtils.IsNullableType(left.Type) && XzaarTypeUtils.AreEquivalent(method.ReturnType, XzaarTypeUtils.GetNonNullableType(left.Type))) ? left.Type : method.ReturnType;
-                    return new MethodBinaryExpression(XzaarExpressionType.AndAlso, left, right, returnType, method);
+                    return new MethodBinaryExpression(ExpressionType.AndAlso, left, right, returnType, method);
                 }
                 // throw Error.BinaryOperatorNotDefined(ExpressionType.AndAlso, left.Type, right.Type);
                 throw new InvalidOperationException("Binary operation not defined");
             }
-            ValidateUserDefinedConditionalLogicOperator(XzaarExpressionType.AndAlso, left.Type, right.Type, method);
+            ValidateUserDefinedConditionalLogicOperator(ExpressionType.AndAlso, left.Type, right.Type, method);
             returnType = (XzaarTypeUtils.IsNullableType(left.Type) && XzaarTypeUtils.AreEquivalent(method.ReturnType, XzaarTypeUtils.GetNonNullableType(left.Type))) ? left.Type : method.ReturnType;
-            return new MethodBinaryExpression(XzaarExpressionType.AndAlso, left, right, returnType, method);
+            return new MethodBinaryExpression(ExpressionType.AndAlso, left, right, returnType, method);
         }
 
         public static BinaryExpression And(XzaarExpression left, XzaarExpression right)
@@ -592,11 +558,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type.Name == right.Type.Name && XzaarTypeUtils.IsIntegerOrBool(left.Type))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.And, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.And, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.And, "op_BitwiseAnd", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.And, "op_BitwiseAnd", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.And, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.And, left, right, method, true);
         }
 
         public static BinaryExpression AndAssign(XzaarExpression left, XzaarExpression right)
@@ -612,11 +578,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsIntegerOrBool(left.Type))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.AndAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.AndAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.AndAssign, "op_BitwiseAnd", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.AndAssign, "op_BitwiseAnd", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.AndAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.AndAssign, left, right, method, true);
         }
         public static BinaryExpression OrAssign(XzaarExpression left, XzaarExpression right)
         {
@@ -631,11 +597,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsIntegerOrBool(left.Type))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.OrAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.OrAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.OrAssign, "op_BitwiseOr", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.OrAssign, "op_BitwiseOr", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.OrAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.OrAssign, left, right, method, true);
         }
         public static BinaryExpression Or(XzaarExpression left, XzaarExpression right)
         {
@@ -649,11 +615,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsIntegerOrBool(left.Type))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.Or, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.Or, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.Or, "op_BitwiseOr", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.Or, "op_BitwiseOr", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Or, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.Or, left, right, method, true);
         }
         public static BinaryExpression Power(XzaarExpression left, XzaarExpression right)
         {
@@ -669,10 +635,10 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 //method = mathType.GetMethod("Pow", BindingFlags.Static | BindingFlags.Public);
                 //if (method == null)
                 //{
-                //    throw Error.BinaryOperatorNotDefined(XzaarExpressionType.Power, left.Type, right.Type);
+                //    throw Error.BinaryOperatorNotDefined(ExpressionType.Power, left.Type, right.Type);
                 //}
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Power, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.Power, left, right, method, true);
         }
         public static BinaryExpression PowerAssign(XzaarExpression left, XzaarExpression right)
         {
@@ -692,7 +658,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 //    throw Error.BinaryOperatorNotDefined(ExpressionType.PowerAssign, left.Type, right.Type);
                 //}
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.PowerAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.PowerAssign, left, right, method, true);
         }
         public static BinaryExpression ArrayIndex(XzaarExpression array, XzaarExpression index)
         {
@@ -715,7 +681,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //    throw Error.IncorrectNumberOfIndexes();
             //}
 
-            return new SimpleBinaryExpression(XzaarExpressionType.ArrayIndex, array, index, arrayType.GetElementType());
+            return new SimpleBinaryExpression(ExpressionType.ArrayIndex, array, index, arrayType.GetElementType());
         }
 
         public static BinaryExpression AddChecked(XzaarExpression left, XzaarExpression right)
@@ -731,11 +697,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.AddChecked, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.AddChecked, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.AddChecked, "op_Addition", left, right, false);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.AddChecked, "op_Addition", left, right, false);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.AddChecked, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.AddChecked, left, right, method, true);
         }
         public static BinaryExpression Subtract(XzaarExpression left, XzaarExpression right)
         {
@@ -750,11 +716,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.Subtract, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.Subtract, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.Subtract, "op_Subtraction", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.Subtract, "op_Subtraction", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Subtract, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.Subtract, left, right, method, true);
         }
 
         public static BinaryExpression SubtractAssign(XzaarExpression left, XzaarExpression right)
@@ -771,11 +737,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.SubtractAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.SubtractAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.SubtractAssign, "op_Subtraction", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.SubtractAssign, "op_Subtraction", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.SubtractAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.SubtractAssign, left, right, method, true);
         }
 
         public static BinaryExpression SubtractAssignChecked(XzaarExpression left, XzaarExpression right)
@@ -793,11 +759,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
 
-                    return new SimpleBinaryExpression(XzaarExpressionType.SubtractAssignChecked, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.SubtractAssignChecked, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.SubtractAssignChecked, "op_Subtraction", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.SubtractAssignChecked, "op_Subtraction", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.SubtractAssignChecked, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.SubtractAssignChecked, left, right, method, true);
         }
         public static BinaryExpression SubtractChecked(XzaarExpression left, XzaarExpression right)
         {
@@ -821,11 +787,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type)|| (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.DivideAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.DivideAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.DivideAssign, "op_Division", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.DivideAssign, "op_Division", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.DivideAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.DivideAssign, left, right, method, true);
         }
 
         public static BinaryExpression Divide(XzaarExpression left, XzaarExpression right, XzaarMethodInfo method)
@@ -836,11 +802,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type)|| (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.Divide, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.Divide, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.Divide, "op_Division", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.Divide, "op_Division", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Divide, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.Divide, left, right, method, true);
         }
         public static BinaryExpression Modulo(XzaarExpression left, XzaarExpression right)
         {
@@ -854,11 +820,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type)|| (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.Modulo, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.Modulo, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.Modulo, "op_Modulus", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.Modulo, "op_Modulus", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Modulo, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.Modulo, left, right, method, true);
         }
         public static BinaryExpression ModuloAssign(XzaarExpression left, XzaarExpression right)
         {
@@ -873,11 +839,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.ModuloAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.ModuloAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.ModuloAssign, "op_Modulus", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.ModuloAssign, "op_Modulus", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.ModuloAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.ModuloAssign, left, right, method, true);
         }
         public static BinaryExpression Multiply(XzaarExpression left, XzaarExpression right)
         {
@@ -891,11 +857,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.Multiply, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.Multiply, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.Multiply, "op_Multiply", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.Multiply, "op_Multiply", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Multiply, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.Multiply, left, right, method, true);
         }
         public static BinaryExpression MultiplyAssign(XzaarExpression left, XzaarExpression right)
         {
@@ -912,11 +878,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
 
-                    return new SimpleBinaryExpression(XzaarExpressionType.MultiplyAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.MultiplyAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.MultiplyAssign, "op_Multiply", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.MultiplyAssign, "op_Multiply", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.MultiplyAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.MultiplyAssign, left, right, method, true);
         }
         public static BinaryExpression MultiplyAssignChecked(XzaarExpression left, XzaarExpression right)
         {
@@ -932,11 +898,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.MultiplyAssignChecked, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.MultiplyAssignChecked, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.MultiplyAssignChecked, "op_Multiply", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.MultiplyAssignChecked, "op_Multiply", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.MultiplyAssignChecked, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.MultiplyAssignChecked, left, right, method, true);
         }
 
         public static BinaryExpression MultiplyChecked(XzaarExpression left, XzaarExpression right)
@@ -952,11 +918,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.MultiplyChecked, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.MultiplyChecked, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.MultiplyChecked, "op_Multiply", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.MultiplyChecked, "op_Multiply", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.MultiplyChecked, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.MultiplyChecked, left, right, method, true);
         }
         private static bool IsSimpleShift(XzaarType left, XzaarType right)
         {
@@ -978,11 +944,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.SubtractChecked, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.SubtractChecked, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.SubtractChecked, "op_Subtraction", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.SubtractChecked, "op_Subtraction", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.SubtractChecked, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.SubtractChecked, left, right, method, true);
         }
         #region Arithmetic XzaarExpressions
 
@@ -999,11 +965,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.Add, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.Add, left, right, left.Type);
                 }
-                return GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType.Add, "op_Addition", left, right, true);
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.Add, "op_Addition", left, right, true);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Add, left, right, method, true);
+            return GetMethodBasedBinaryOperator(ExpressionType.Add, left, right, method, true);
         }
 
         public static BinaryExpression AddAssign(XzaarExpression left, XzaarExpression right)
@@ -1020,16 +986,16 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             {
                 if (left.Type == right.Type && XzaarTypeUtils.IsArithmetic(left.Type))
                 {
-                    return new SimpleBinaryExpression(XzaarExpressionType.AddAssign, left, right, left.Type);
+                    return new SimpleBinaryExpression(ExpressionType.AddAssign, left, right, left.Type);
                 }
-                return GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType.AddAssign, "op_Addition", left, right, true);
+                return GetUserDefinedAssignOperatorOrThrow(ExpressionType.AddAssign, "op_Addition", left, right, true);
             }
-            return GetMethodBasedAssignOperator(XzaarExpressionType.AddAssign, left, right, method, true);
+            return GetMethodBasedAssignOperator(ExpressionType.AddAssign, left, right, method, true);
         }
 
         #endregion
 
-        private static BinaryExpression GetComparisonOperator(XzaarExpressionType binaryType, string opName, XzaarExpression left, XzaarExpression right, bool liftToNull)
+        private static BinaryExpression GetComparisonOperator(ExpressionType binaryType, string opName, XzaarExpression left, XzaarExpression right, bool liftToNull)
         {
             if (left.Type == right.Type && XzaarTypeUtils.IsNumeric(left.Type) || (left.Type.IsNumeric && right.Type.IsNumeric))
             {
@@ -1051,18 +1017,18 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return c != null && c.Value == null;
         }
 
-        private static BinaryExpression GetUserDefinedAssignOperatorOrThrow(XzaarExpressionType binaryType, string name, XzaarExpression left, XzaarExpression right, bool liftToNull)
+        private static BinaryExpression GetUserDefinedAssignOperatorOrThrow(ExpressionType binaryType, string name, XzaarExpression left, XzaarExpression right, bool liftToNull)
         {
             BinaryExpression b = GetUserDefinedBinaryOperatorOrThrow(binaryType, name, left, right, liftToNull);
 
             //// add the conversion to the result
-            //ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.NodeType);
-            //b = new OpAssignMethodConversionBinaryExpression(b.NodeType, b.Left, b.Right, b.Left.Type, b.Method);
+            //ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.Kind);
+            //b = new OpAssignMethodConversionBinaryExpression(b.Kind, b.Left, b.Right, b.Left.Type, b.Method);
 
             return b;
         }
 
-        private static BinaryExpression GetMethodBasedAssignOperator(XzaarExpressionType binaryType, XzaarExpression left, XzaarExpression right, XzaarMethodInfo method, bool liftToNull)
+        private static BinaryExpression GetMethodBasedAssignOperator(ExpressionType binaryType, XzaarExpression left, XzaarExpression right, XzaarMethodInfo method, bool liftToNull)
         {
             BinaryExpression b = GetMethodBasedBinaryOperator(binaryType, left, right, method, liftToNull);
             //if (conversion == null)
@@ -1076,14 +1042,14 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //else
             //{
             //    // add the conversion to the result
-            //    ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.NodeType);
-            //    b = new OpAssignMethodConversionBinaryExpression(b.NodeType, b.Left, b.Right, b.Left.Type, b.Method, conversion);
+            //    ValidateOpAssignConversionLambda(conversion, b.Left, b.Method, b.Kind);
+            //    b = new OpAssignMethodConversionBinaryExpression(b.Kind, b.Left, b.Right, b.Left.Type, b.Method, conversion);
             //}
             return b;
         }
 
 
-        private static BinaryExpression GetUserDefinedBinaryOperatorOrThrow(XzaarExpressionType binaryType, string name, XzaarExpression left, XzaarExpression right, bool liftToNull)
+        private static BinaryExpression GetUserDefinedBinaryOperatorOrThrow(ExpressionType binaryType, string name, XzaarExpression left, XzaarExpression right, bool liftToNull)
         {
             BinaryExpression b = GetUserDefinedBinaryOperator(binaryType, name, left, right, liftToNull);
             if (b != null)
@@ -1128,12 +1094,12 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             RequiresCanRead(right, "right");
             if (method == null)
             {
-                return GetEqualityComparisonOperator(XzaarExpressionType.Equal, "op_Equality", left, right, liftToNull);
+                return GetEqualityComparisonOperator(ExpressionType.Equal, "op_Equality", left, right, liftToNull);
             }
-            return GetMethodBasedBinaryOperator(XzaarExpressionType.Equal, left, right, method, liftToNull);
+            return GetMethodBasedBinaryOperator(ExpressionType.Equal, left, right, method, liftToNull);
         }
 
-        private static void ValidateUserDefinedConditionalLogicOperator(XzaarExpressionType nodeType, XzaarType left, XzaarType right, XzaarMethodInfo method)
+        private static void ValidateUserDefinedConditionalLogicOperator(ExpressionType nodeType, XzaarType left, XzaarType right, XzaarMethodInfo method)
         {
             ValidateOperator(method);
             XzaarParameterInfo[] pms = method.GetParameters();
@@ -1186,7 +1152,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                    XzaarTypeUtils.AreEquivalent(pms[1].ParameterType, XzaarTypeUtils.GetNonNullableType(right));
         }
 
-        private static void VerifyOpTrueFalse(XzaarExpressionType nodeType, XzaarType left, XzaarMethodInfo opTrue)
+        private static void VerifyOpTrueFalse(ExpressionType nodeType, XzaarType left, XzaarMethodInfo opTrue)
         {
             XzaarParameterInfo[] pmsOpTrue = opTrue.GetParameters();
             if (pmsOpTrue.Length != 1)
@@ -1201,7 +1167,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        private static BinaryExpression GetEqualityComparisonOperator(XzaarExpressionType binaryType, string opName, XzaarExpression left, XzaarExpression right, bool liftToNull)
+        private static BinaryExpression GetEqualityComparisonOperator(ExpressionType binaryType, string opName, XzaarExpression left, XzaarExpression right, bool liftToNull)
         {
             // known comparison - numeric XzaarTypes, bools, object, enums
             if ((left.Type.IsNumeric && right.Type.IsNumeric) || left.Type == right.Type &&
@@ -1239,7 +1205,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             // throw Error.BinaryOperatorNotDefined(binaryType, left.Type, right.Type);
         }
 
-        private static BinaryExpression GetUserDefinedBinaryOperator(XzaarExpressionType binaryType, string name, XzaarExpression left, XzaarExpression right, bool liftToNull)
+        private static BinaryExpression GetUserDefinedBinaryOperator(ExpressionType binaryType, string name, XzaarExpression left, XzaarExpression right, bool liftToNull)
         {
             // try exact match first
             XzaarMethodInfo method = GetUserDefinedBinaryOperator(binaryType, left.Type, right.Type, name);
@@ -1281,16 +1247,16 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return null;
         }
 
-        private static bool IsBooleanExpr(XzaarExpressionType expr)
+        private static bool IsBooleanExpr(ExpressionType expr)
         {
-            return (expr == XzaarExpressionType.GreaterThan ||
-                    expr == XzaarExpressionType.GreaterThanOrEqual ||
-                    expr == XzaarExpressionType.Equal || expr == XzaarExpressionType.NotEqual ||
-                    expr == XzaarExpressionType.LessThan ||
-                    expr == XzaarExpressionType.LessThanOrEqual);
+            return (expr == ExpressionType.GreaterThan ||
+                    expr == ExpressionType.GreaterThanOrEqual ||
+                    expr == ExpressionType.Equal || expr == ExpressionType.NotEqual ||
+                    expr == ExpressionType.LessThan ||
+                    expr == ExpressionType.LessThanOrEqual);
         }
 
-        private static XzaarMethodInfo GetUserDefinedBinaryOperator(XzaarExpressionType binaryType, XzaarType leftType, XzaarType rightType, string name)
+        private static XzaarMethodInfo GetUserDefinedBinaryOperator(ExpressionType binaryType, XzaarType leftType, XzaarType rightType, string name)
         {
             // 
 
@@ -1310,15 +1276,15 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return method;
         }
 
-        private static bool IsLiftingConditionalLogicalOperator(XzaarType left, XzaarType right, XzaarMethodInfo method, XzaarExpressionType binaryType)
+        private static bool IsLiftingConditionalLogicalOperator(XzaarType left, XzaarType right, XzaarMethodInfo method, ExpressionType binaryType)
         {
             return XzaarTypeUtils.IsNullableType(right) &&
                     XzaarTypeUtils.IsNullableType(left) &&
                     method == null &&
-                    (binaryType == XzaarExpressionType.AndAlso || binaryType == XzaarExpressionType.OrElse);
+                    (binaryType == ExpressionType.AndAlso || binaryType == ExpressionType.OrElse);
         }
 
-        private static BinaryExpression GetMethodBasedBinaryOperator(XzaarExpressionType binaryType, XzaarExpression left, XzaarExpression right, XzaarMethodInfo method, bool liftToNull)
+        private static BinaryExpression GetMethodBasedBinaryOperator(ExpressionType binaryType, XzaarExpression left, XzaarExpression right, XzaarMethodInfo method, bool liftToNull)
         {
             System.Diagnostics.Debug.Assert(method != null);
             ValidateOperator(method);
@@ -1366,7 +1332,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return XzaarTypeUtils.AreReferenceAssignable(pType, argType);
         }
 
-        private static void ValidateParamswithOperandsOrThrow(XzaarType paramType, XzaarType operandType, XzaarExpressionType exprType, string name)
+        private static void ValidateParamswithOperandsOrThrow(XzaarType paramType, XzaarType operandType, ExpressionType exprType, string name)
         {
             if (XzaarTypeUtils.IsNullableType(paramType) && !XzaarTypeUtils.IsNullableType(operandType))
             {

@@ -9,20 +9,14 @@ namespace Shinobytes.XzaarScript
         private XzaarType declaringType;
         private XzaarMethodAttributes attributes;
 
-        public override string Name
-        {
-            get { return name; }
-        }
+        public override string Name => name;
 
         public override XzaarType GetXzaarType()
         {
             throw new NotImplementedException();
         }
 
-        public override XzaarType DeclaringType
-        {
-            get { return declaringType; }
-        }
+        public override XzaarType DeclaringType => declaringType;
 
         public override XzaarParameterInfo[] GetParameters()
         {
@@ -34,10 +28,7 @@ namespace Shinobytes.XzaarScript
             throw new NotImplementedException();
         }
 
-        public override XzaarMethodAttributes Attributes
-        {
-            get { return attributes; }
-        }
+        public override XzaarMethodAttributes Attributes => attributes;
 
         public override XzaarMethodInfo GetBaseDefinition()
         {

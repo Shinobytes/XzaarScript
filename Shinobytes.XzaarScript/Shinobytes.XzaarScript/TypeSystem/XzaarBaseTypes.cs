@@ -6,129 +6,30 @@ namespace Shinobytes.XzaarScript
 {
     public static class XzaarBaseTypes
     {
-        public static XzaarType Void
-        {
-            get { return _void; }
-        }
-
-        public static XzaarType String
-        {
-            get { return _string; }
-        }
-
-        public static XzaarType Number
-        {
-            get { return _number; }
-        }
-
-        public static XzaarType I8
-        {
-            get { return _i8; }
-        }
-
-        public static XzaarType I16
-        {
-            get { return _i16; }
-        }
-
-        public static XzaarType I32
-        {
-            get { return _i32; }
-        }
-
-        public static XzaarType I64
-        {
-            get { return _i64; }
-        }
-
-
-        public static XzaarType U8
-        {
-            get { return _u8; }
-        }
-
-        public static XzaarType U16
-        {
-            get { return _u16; }
-        }
-
-        public static XzaarType U32
-        {
-            get { return _u32; }
-        }
-
-        public static XzaarType U64
-        {
-            get { return _u64; }
-        }
-
-
-        public static XzaarType F32
-        {
-            get { return _f32; }
-        }
-
-        public static XzaarType F64
-        {
-            get { return _f64; }
-        }
-
-
-        public static XzaarType Boolean
-        {
-            get { return _boolean; }
-        }
-
-        public static XzaarType Any
-        {
-            get { return _any; }
-        }
-
-        public static XzaarType Char
-        {
-            get { return _char; }
-        }
-
-        public static XzaarType DateTime
-        {
-            get { return _datetime; }
-        }
-
-        public static XzaarType Array
-        {
-            get { return _array; }
-        }
-
-        public static XzaarType StringArray
-        {
-            get { return _stringArray; }
-        }
-
-        public static XzaarType NumberArray
-        {
-            get { return _numberArray; }
-        }
-
-        public static XzaarType BooleanArray
-        {
-            get { return _booleanArray; }
-        }
-
-        public static XzaarType ObjectArray
-        {
-            get { return _objectArray; }
-        }
-
-        public static XzaarType CharArray
-        {
-            get { return _charArray; }
-        }
-
-        public static XzaarType DateTimeArray
-        {
-            get { return _datetimeArray; }
-        }
-
+        public static XzaarType Void => _void;
+        public static XzaarType String => _string;
+        public static XzaarType Number => _number;
+        public static XzaarType I8 => _i8;
+        public static XzaarType I16 => _i16;
+        public static XzaarType I32 => _i32;
+        public static XzaarType I64 => _i64;
+        public static XzaarType U8 => _u8;
+        public static XzaarType U16 => _u16;
+        public static XzaarType U32 => _u32;
+        public static XzaarType U64 => _u64;
+        public static XzaarType F32 => _f32;
+        public static XzaarType F64 => _f64;
+        public static XzaarType Boolean => _boolean;
+        public static XzaarType Any => _any;
+        public static XzaarType Char => _char;
+        public static XzaarType Date => _date;
+        public static XzaarType Array => _array;
+        public static XzaarType StringArray => _stringArray;
+        public static XzaarType NumberArray => _numberArray;
+        public static XzaarType BooleanArray => _booleanArray;
+        public static XzaarType AnyArray => _anyArray;
+        public static XzaarType CharArray => _charArray;
+        public static XzaarType DateArray => _dateArray;
         internal static List<XzaarType> BaseTypes;
 
         private static readonly XzaarTypeBuilder _void;
@@ -149,14 +50,14 @@ namespace Shinobytes.XzaarScript
         private static readonly XzaarTypeBuilder _boolean;
         private static readonly XzaarTypeBuilder _any;
         private static readonly XzaarTypeBuilder _char;
-        private static readonly XzaarTypeBuilder _datetime;
+        private static readonly XzaarTypeBuilder _date;
         private static readonly XzaarTypeBuilder _array;
         private static readonly XzaarTypeBuilder _stringArray;
         private static readonly XzaarTypeBuilder _numberArray;
         private static readonly XzaarTypeBuilder _booleanArray;
-        private static readonly XzaarTypeBuilder _objectArray;
+        private static readonly XzaarTypeBuilder _anyArray;
         private static readonly XzaarTypeBuilder _charArray;
-        private static readonly XzaarTypeBuilder _datetimeArray;
+        private static readonly XzaarTypeBuilder _dateArray;
 
         static XzaarBaseTypes()
         {
@@ -183,7 +84,7 @@ namespace Shinobytes.XzaarScript
 
 
             _char = new XzaarTypeBuilder("char", null, Any, Any);
-            _datetime = new XzaarTypeBuilder("datetime", null, Any, Any);
+            _date = new XzaarTypeBuilder("date", null, Any, Any);
             _array = new XzaarTypeBuilder("array", null, Any, Any, Any);
 
             _stringArray = new XzaarTypeBuilder("string[]", null, Any, Any, String);
@@ -191,11 +92,11 @@ namespace Shinobytes.XzaarScript
             _numberArray = new XzaarTypeBuilder("number[]", null, Any, Any, Number);
             _booleanArray = new XzaarTypeBuilder("bool[]", null, Any, Any, Boolean);
             _charArray = new XzaarTypeBuilder("char[]", null, Any, Any, Char);
-            _objectArray = new XzaarTypeBuilder("object[]", null, Any, Any, Any);
-            _datetimeArray = new XzaarTypeBuilder("datetime[]", null, Any, Any, DateTime);
+            _anyArray = new XzaarTypeBuilder("any[]", null, Any, Any, Any);
+            _dateArray = new XzaarTypeBuilder("date[]", null, Any, Any, Date);
 
-            BaseTypes = new List<XzaarType>(new[] { Void, Any, Boolean, Number, String, Char, DateTime, Array,
-                StringArray, NumberArray, BooleanArray, CharArray, DateTimeArray,ObjectArray });
+            BaseTypes = new List<XzaarType>(new[] { Void, Any, Boolean, Number, String, Char, Date, Array,
+                StringArray, NumberArray, BooleanArray, CharArray, DateArray,AnyArray });
 
 
             // add type fields
@@ -204,8 +105,8 @@ namespace Shinobytes.XzaarScript
             _numberArray.AddField(XzaarBaseTypes.Number, "Length");
             _booleanArray.AddField(XzaarBaseTypes.Number, "Length");
             _charArray.AddField(XzaarBaseTypes.Number, "Length");
-            _objectArray.AddField(XzaarBaseTypes.Number, "Length");
-            _datetimeArray.AddField(XzaarBaseTypes.Number, "Length");
+            _anyArray.AddField(XzaarBaseTypes.Number, "Length");
+            _dateArray.AddField(XzaarBaseTypes.Number, "Length");
         }
 
         internal static void AddTypeToCache(XzaarType type)
@@ -238,13 +139,13 @@ namespace Shinobytes.XzaarScript
                 return Number;
             }
 
-            if (type == typeof(DateTime) || type == typeof(DateTime?)) return type.IsArray ? DateTimeArray : DateTime;
+            if (type == typeof(DateTime) || type == typeof(DateTime?)) return type.IsArray ? DateArray : Date;
             if (type == typeof(string)) return type.IsArray ? StringArray : String;
             if (type == typeof(bool)) return type.IsArray ? BooleanArray : Boolean;
             if (type == typeof(char)) return type.IsArray ? CharArray : Char;
             if (type == typeof(void)) return Void;
 
-            return type.IsArray ? ObjectArray : Any;
+            return type.IsArray ? AnyArray : Any;
         }
 
         public static XzaarType CreateTypeFromStructExpression(StructExpression typeExpression)

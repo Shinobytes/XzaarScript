@@ -2,7 +2,7 @@
 {
     public class WhileExpression : LoopExpression
     {
-        internal WhileExpression(XzaarExpression test, XzaarExpression body) : base(body, null, null, XzaarLoopTypes.While)
+        internal WhileExpression(XzaarExpression test, XzaarExpression body) : base(body, null, null, LoopTypes.While)
         {
             Test = test;
         }

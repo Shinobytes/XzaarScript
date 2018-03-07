@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using Shinobytes.XzaarScript.Ast.Compilers;
 using Shinobytes.XzaarScript.Ast.Expressions;
+using Shinobytes.XzaarScript.Compiler.Compilers;
 using Shinobytes.XzaarScript.Compiler.Types;
 
 namespace Shinobytes.XzaarScript.Compiler
@@ -56,7 +56,7 @@ namespace Shinobytes.XzaarScript.Compiler
         private readonly Dictionary<string, List<XsField>> fields = new Dictionary<string, List<XsField>>();
         private readonly HashSet<string> methodFinalized = new HashSet<string>();
 
-        public DotNetXzaarScriptCompilerContext(XzaarAnalyzedTree tree)
+        public DotNetXzaarScriptCompilerContext(AnalyzedTree tree)
         {
             this.Tree = tree;
 
@@ -108,10 +108,7 @@ namespace Shinobytes.XzaarScript.Compiler
             return method;
         }
 
-        public bool IsInGlobalScope
-        {
-            get { return /*rootFlowControl == flowControl || */ CurrentMethod == null || Equals(CurrentMethod, MainMethod); }
-        }
+        public bool IsInGlobalScope => CurrentMethod == null || Equals(CurrentMethod, MainMethod);
 
         public DotNetFlowControlScope CurrentScope => this.flowControl;
 
@@ -126,7 +123,7 @@ namespace Shinobytes.XzaarScript.Compiler
             this.flowControl = this.flowControl.EndControlBlock();
         }
 
-        public XzaarAnalyzedTree Tree { get; }
+        public AnalyzedTree Tree { get; }
         public XsMethod CurrentMethod { get; set; }
         public XsStruct CurrentType { get; set; }
 
@@ -208,6 +205,7 @@ namespace Shinobytes.XzaarScript.Compiler
                     target = typeof(double);
                     break;
                 case "datetime":
+                case "date":
                     target = typeof(DateTime);
                     break;
                 case "timespan":
@@ -279,7 +277,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public List<string> Errors { get; } = new List<string>();
 
-        public XzaarExpressionType LastBinaryOperationType { get; internal set; }
+        public ExpressionType LastBinaryOperationType { get; internal set; }
         public bool InsideBinaryOperation { get; internal set; }
         public object LastStoredReference { get; set; }
         public object LastLoadedReference { get; set; }

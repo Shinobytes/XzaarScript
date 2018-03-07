@@ -30,16 +30,13 @@ namespace Shinobytes.XzaarScript.Assembly.Models
             this.BaseType = baseType;
         }
 
-        public override MemberTypes MemberType
-        {
-            get { return IsClass ? MemberTypes.Class : MemberTypes.Struct; }
-        }
+        public override MemberTypes MemberType => IsClass ? MemberTypes.Class : MemberTypes.Struct;
 
         public XzaarType ArrayElementType { get; internal set; }
 
         public bool IsClass { get; internal set; }
 
-        public bool IsStruct { get { return MemberType == MemberTypes.Struct; } }
+        public bool IsStruct => MemberType == MemberTypes.Struct;
 
         public TypeReference BaseType { get; internal set; }
 

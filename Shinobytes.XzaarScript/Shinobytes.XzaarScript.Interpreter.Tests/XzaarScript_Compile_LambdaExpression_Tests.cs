@@ -119,7 +119,7 @@
 //            var ast0 = parser.Parse(tokens);
 //            var ast1 = transformer.Transform(ast0);
 
-//            compiler.RegisterExternFunction("println", this.GetType().GetMethod("WriteToString", new[] { typeof(string) }), XzaarScope.Global); // typeof(Console) ... WriteLine
+//            compiler.RegisterExternFunction("println", this.GetType().GetMethod("WriteToString", new[] { typeof(string) }), Scope.Global); // typeof(Console) ... WriteLine
 
 //            var expression = compiler.Compile(ast1) as LambdaXzaarCompiledScript;
 
@@ -244,7 +244,7 @@
 //        [TestMethod]
 //        public void Interpreter_full_chain_complex()
 //        {
-//            var interpreter = new XzaarScriptInterpreter(
+//            var interpreter = new ScriptInterpreter(
 //                new KeyValuePair<string, Type>("apa", typeof(int))
 //            );
 
@@ -265,7 +265,7 @@
 //        [TestMethod]
 //        public void Interpreter_full_chain_complex_2()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            interpreter.RegisterVariable<int>("apa");
 //            interpreter.RegisterVariable<int>("over");
 //            var expression = interpreter.CompileExpression("apa == 8 || over == 9000 || apa == 24") as LambdaXzaarCompiledScript;
@@ -283,7 +283,7 @@
 //        [TestMethod]
 //        public void AssignExpression_0()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            interpreter.RegisterVariable<int>("a");
 //            var expression = interpreter.CompileExpression("a = 100") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("a => (a = 100)", expression.GetLambdaExpression().ToString());
@@ -292,7 +292,7 @@
 //        //[TestMethod]
 //        //public void AssignExpression_1()
 //        //{
-//        //    var interpreter = new XzaarScriptInterpreter();
+//        //    var interpreter = new ScriptInterpreter();
 //        //    interpreter.RegisterVariable<int>("a");
 //        //    var expression = interpreter.CompileExpression("a = (a + a) > 0") as LambdaXzaarCompiledScript;
 //        //    Assert.AreEqual("a => ((a = (a + a)) > 0)", expression.GetLambdaExpression().ToString());
@@ -302,7 +302,7 @@
 //        [TestMethod]
 //        public void AssignExpression_strings_0()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            interpreter.RegisterVariable<string>("a");
 //            var expression = interpreter.CompileExpression("a = \"100\"") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("a => (a = \"100\")", expression.GetLambdaExpression().ToString());
@@ -312,7 +312,7 @@
 //        [TestMethod]
 //        public void AssignExpression_strings_1()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            interpreter.RegisterVariable<string>("a");
 //            var expression = interpreter.CompileExpression("a = \"1'00\"") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("a => (a = \"1'00\")", expression.GetLambdaExpression().ToString());
@@ -322,7 +322,7 @@
 //        [TestMethod]
 //        public void AssignExpression_strings_2()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            interpreter.RegisterVariable<string>("a");
 //            var expression = interpreter.CompileExpression("a = '100'") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("a => (a = \"100\")", expression.GetLambdaExpression().ToString());
@@ -331,7 +331,7 @@
 //        [TestMethod]
 //        public void AssignExpression_decimal()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            interpreter.RegisterVariable<double>("a");
 //            var expression = interpreter.CompileExpression("a = 1.01") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("a => (a = 1,01)", expression.GetLambdaExpression().ToString());
@@ -341,7 +341,7 @@
 //        //[TestMethod]
 //        //public void AssignExpression_2()
 //        //{
-//        //    var interpreter = new XzaarScriptInterpreter();
+//        //    var interpreter = new ScriptInterpreter();
 //        //    interpreter.RegisterVariable<int>("a");
 //        //    var expression = interpreter.CompileExpression("a += 5 > 0") as LambdaXzaarCompiledScript;
 
@@ -352,7 +352,7 @@
 //        //[TestMethod]
 //        //public void UnaryExpression_plus_plus_returns_boolean()
 //        //{
-//        //    var interpreter = new XzaarScriptInterpreter();
+//        //    var interpreter = new ScriptInterpreter();
 //        //    interpreter.RegisterVariable<int>("a");
 //        //    var expression = interpreter.CompileExpression("a++ > 0") as LambdaXzaarCompiledScript;
 //        //    Assert.AreEqual("a => ((a = (a + 1)) > 0)", expression.GetLambdaExpression().ToString());
@@ -361,7 +361,7 @@
 //        //[TestMethod]
 //        //public void UnaryExpression_minus_minus_returns_boolean()
 //        //{
-//        //    var interpreter = new XzaarScriptInterpreter();
+//        //    var interpreter = new ScriptInterpreter();
 //        //    interpreter.RegisterVariable<int>("a");
 //        //    var expression = interpreter.CompileExpression("a-- > 0") as LambdaXzaarCompiledScript;
 //        //    Assert.AreEqual("a => ((a = (a - 1)) > 0)", expression.GetLambdaExpression().ToString());
@@ -371,7 +371,7 @@
 //        [TestMethod]
 //        public void Multiple_Math_Expressions()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            var expression = interpreter.CompileExpression("25 + (10 * 100)") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("() => (25 + (10 * 100))", expression.GetLambdaExpression().ToString());
 //        }
@@ -379,7 +379,7 @@
 //        [TestMethod]
 //        public void Multiple_Math()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            var expression = interpreter.CompileExpression("25 + 10 * 100") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("() => (25 + (10 * 100))", expression.GetLambdaExpression().ToString());
 //        }
@@ -388,7 +388,7 @@
 //        [TestMethod]
 //        public void Multiple_Math_test_op_ordering_0()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            var expression = interpreter.CompileExpression("25 + 10 * 100 - 8 / 2 * 5") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("() => ((25 + (10 * 100)) - ((8 / 2) * 5))", expression.GetLambdaExpression().ToString());
 //        }
@@ -396,7 +396,7 @@
 //        [TestMethod]
 //        public void Multiple_Math_test_op_ordering_1()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            var expression = interpreter.CompileExpression("10 * 100 - 8 / 2 * 5") as LambdaXzaarCompiledScript;
 //            Assert.AreEqual("() => ((10 * 100) - ((8 / 2) * 5))", expression.GetLambdaExpression().ToString());
 //        }
@@ -406,7 +406,7 @@
 //        [TestMethod]
 //        public void EmptyStatement()
 //        {
-//            var interpreter = new XzaarScriptInterpreter();
+//            var interpreter = new ScriptInterpreter();
 //            var expression = interpreter.CompileExpression("()") as LambdaXzaarCompiledScript;
 //            var lambdaExpression = expression.GetLambdaExpression();
 //            Assert.AreEqual(null, lambdaExpression);
@@ -502,7 +502,7 @@
 //        //[TestMethod]
 //        //public void Interpreter_assign_return_value()
 //        //{
-//        //    var interpreter = new XzaarScriptInterpreter();
+//        //    var interpreter = new ScriptInterpreter();
 //        //    interpreter.RegisterVariable<int>("a");
 //        //    var expression = interpreter.CompileExpression("a++") as LambdaXzaarCompiledScript;
 

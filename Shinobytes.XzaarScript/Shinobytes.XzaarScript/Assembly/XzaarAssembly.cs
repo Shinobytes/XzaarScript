@@ -56,15 +56,9 @@ namespace Shinobytes.XzaarScript.Assembly
             this.filename = filename;
         }
 
-        public string Name
-        {
-            get { return name; }
-        }
+        public string Name => name;
 
-        public string Filename
-        {
-            get { return filename; }
-        }
+        public string Filename => filename;
 
         public TypeCollection Types { get; }
         public GlobalVariableCollection GlobalVariables { get; }

@@ -6,10 +6,10 @@ namespace Shinobytes.XzaarScript.Compiler
     public interface IScriptCompilerVisitor
     {
         object Visit(XzaarExpression expression);
-
+        object Visit(ConditionalExpression expr);
         object Visit(LogicalNotExpression expr);
         object Visit(BinaryExpression binaryOp);
-        object Visit(ConditionalExpression conditional);
+        object Visit(IfElseExpression ifElse);
         object Visit(MemberExpression access);
         object Visit(MemberAccessChainExpression access);
         object Visit(GotoExpression @goto);

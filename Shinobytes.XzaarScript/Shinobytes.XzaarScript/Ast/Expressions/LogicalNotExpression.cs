@@ -12,20 +12,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             this.expression = expression;
         }
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Not; }
-        }
+        public override ExpressionType NodeType => ExpressionType.Not;
 
-        public XzaarExpression Expression
-        {
-            get { return expression; }
-        }
+        public XzaarExpression Expression => expression;
 
-        public override XzaarType Type
-        {
-            get { return XzaarBaseTypes.Boolean; }
-        }
+        public override XzaarType Type => XzaarBaseTypes.Boolean;
     }
 
     [Serializable]
@@ -38,20 +29,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             this.expression = expression;
         }
 
-        public override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Negate; }
-        }
+        public override ExpressionType NodeType => ExpressionType.Negate;
 
-        public XzaarExpression Expression
-        {
-            get { return expression; }
-        }
+        public XzaarExpression Expression => expression;
 
-        public override XzaarType Type
-        {
-            get { return XzaarBaseTypes.Number; }
-        }
+        public override XzaarType Type => XzaarBaseTypes.Number;
     }
 
     public partial class XzaarExpression

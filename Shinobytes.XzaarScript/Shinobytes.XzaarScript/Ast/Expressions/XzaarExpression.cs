@@ -11,7 +11,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return this is DefaultExpression;
         }
 
-        public virtual XzaarExpressionType NodeType { get; }
+        public virtual ExpressionType NodeType { get; }
 
         public virtual XzaarType Type { get; }
 
@@ -27,16 +27,16 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //}
 
             //// validate that we can read the node
-            //switch (expression.NodeType)
+            //switch (expression.Kind)
             //{
-            //    case XzaarExpressionType.Index:
+            //    case ExpressionType.Index:
             //        IndexExpression index = (IndexExpression)expression;
             //        if (index.Indexer != null && !index.Indexer.CanRead)
             //        {
             //            throw new ArgumentException(Strings.ExpressionMustBeReadable, paramName);
             //        }
             //        break;
-            //    case XzaarExpressionType.MemberAccess:
+            //    case ExpressionType.MemberAccess:
             //        MemberExpression member = (MemberExpression)expression;
             //        XzaarMemberInfo memberInfo = member.Member;
             //        if (memberInfo.MemberType == XzaarMemberTypes.Property)

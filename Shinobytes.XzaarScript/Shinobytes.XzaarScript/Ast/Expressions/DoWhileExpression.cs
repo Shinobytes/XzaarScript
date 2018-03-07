@@ -2,7 +2,7 @@
 {
     public class DoWhileExpression : LoopExpression
     {
-        internal DoWhileExpression(XzaarExpression test, XzaarExpression body) : base(body, null, null, XzaarLoopTypes.DoWhile)
+        internal DoWhileExpression(XzaarExpression test, XzaarExpression body) : base(body, null, null, LoopTypes.DoWhile)
         {
             Test = test;
         }

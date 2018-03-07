@@ -7,14 +7,8 @@
         {
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return Left.Type; }
-        }
+        public sealed override XzaarType Type => Left.Type;
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Assign; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Assign;
     }
 }

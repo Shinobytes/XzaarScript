@@ -2,24 +2,18 @@
 {
     internal class SimpleBinaryExpression : BinaryExpression
     {
-        private readonly XzaarExpressionType _nodeType;
+        private readonly ExpressionType _nodeType;
         private readonly XzaarType _type;
 
-        internal SimpleBinaryExpression(XzaarExpressionType nodeType, XzaarExpression left, XzaarExpression right, XzaarType type)
+        internal SimpleBinaryExpression(ExpressionType nodeType, XzaarExpression left, XzaarExpression right, XzaarType type)
             : base(left, right)
         {
             _nodeType = nodeType;
             _type = type;
         }
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return _nodeType; }
-        }
+        public sealed override ExpressionType NodeType => _nodeType;
 
-        public sealed override XzaarType Type
-        {
-            get { return _type; }
-        }
+        public sealed override XzaarType Type => _type;
     }
 }

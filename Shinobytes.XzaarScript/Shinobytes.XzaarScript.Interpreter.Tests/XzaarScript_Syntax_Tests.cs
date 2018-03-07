@@ -1,7 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shinobytes.XzaarScript.Ast;
-using Shinobytes.XzaarScript.Ast.Compilers;
-using Shinobytes.XzaarScript.Ast.Nodes;
+using Shinobytes.XzaarScript.Compiler.Compilers;
+using Shinobytes.XzaarScript.Parser;
+using Shinobytes.XzaarScript.Parser.Nodes;
 using Shinobytes.XzaarScript.UtilityVisitors;
 
 namespace Shinobytes.XzaarScript.Interpreter.Tests
@@ -9,6 +10,15 @@ namespace Shinobytes.XzaarScript.Interpreter.Tests
     [TestClass]
     public class XzaarScript_Syntax_Tests
     {
+
+        [TestMethod]
+        public void assign_conditional()
+        {
+            // Assert.Inconclusive("Array initializers has not been implemented yet");
+            var code = FormatCode(@"let a = 1 > 0 ? true : false;");
+
+            Assert.AreEqual(@"var a = 1 > 0 ? True : False", code);
+        }
 
         [TestMethod]
         public void Bang_not_equal()
@@ -179,7 +189,7 @@ var c = apa == 8 || apa < 1 * 2", code);
         }
         [TestMethod]
         public void Conditional_Statement_2()
-        {            
+        {
             var code = FormatCode("let apa = 0 let c = ((apa == 8) || (apa < (1 * 2))) || (apa >= 100)");
             Assert.AreEqual(
 @"var apa = 0
@@ -553,7 +563,7 @@ fn main(a:f64) {
 }", code);
         }
 
-        [TestMethod, ExpectedException(typeof(XzaarExpressionTransformerException))]
+        [TestMethod, ExpectedException(typeof(ExpressionException))]
         public void Transform_Main_with_foreach_loop_throws_on_parameter_mismatch()
         {
             var code = FormatCode("fn main(int a) { let collection = [] foreach(let i in collection) { main(i) } }");
@@ -1873,7 +1883,7 @@ print_hello_world()", code);
             var code = FormatCode("let j = 0xff");
             Assert.AreEqual("var j = 255", code);
         }
-        
+
         [TestMethod]
         public void Assign_return_value_of_hidden_function_to_variable_and_print_value()
         {
@@ -2111,24 +2121,24 @@ var result = looper()", code);
   return s.Val.Test
 }", code);
         }
-        
-        private XzaarNodeTransformer Transformer(string code)
+
+        private LanguageParser Transformer(string code)
         {
-            return new XzaarNodeTransformer(new XzaarSyntaxParser(new XzaarScriptLexer(code).Tokenize()).Parse());
+            return new LanguageParser(new Lexer(code).Tokenize());
         }
 
-        private XzaarAstNode Reduce(string code, out XzaarNodeTransformer transformer)
+        private AstNode Reduce(string code, out LanguageParser parser)
         {
-            transformer = Transformer(code);
-            return new XzaarNodeReducer().Process(transformer.Transform());
+            parser = Transformer(code);
+            return new NodeReducer().Process(parser.Parse());
         }
 
         private string FormatCode(string code)
         {
-            XzaarNodeTransformer transformer;
-            var ast = new XzaarNodeTypeBinder().Process(Reduce(code, out transformer));
-            var analyzer = new XzaarExpressionAnalyzer();
-            var analyzed = analyzer.AnalyzeExpression(ast as EntryNode);
+            LanguageParser parser;
+            var ast = new NodeTypeBinder().Process(Reduce(code, out parser));
+            var analyzer = new NodeAnalyzer();
+            var analyzed = analyzer.Analyze(ast as EntryNode);
             var codeGenerator = new CodeGeneratorVisitor();
             return codeGenerator.Visit(analyzed.GetExpression()).TrimEnd('\r', '\n');
         }

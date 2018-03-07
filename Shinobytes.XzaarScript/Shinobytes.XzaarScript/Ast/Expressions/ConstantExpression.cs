@@ -35,16 +35,9 @@
             }
         }
 
-        public sealed override XzaarExpressionType NodeType
-        {
-            get { return XzaarExpressionType.Constant; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Constant;
 
-        public object Value
-        {
-            get { return value; }
-        }
-
+        public object Value => value;
     }
 
     internal class TypedConstantExpression : ConstantExpression
@@ -57,10 +50,7 @@
             _type = type;
         }
 
-        public sealed override XzaarType Type
-        {
-            get { return _type; }
-        }
+        public sealed override XzaarType Type => _type;
     }
 
     public partial class XzaarExpression

@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Shinobytes.XzaarScript.Ast.Expressions
 {
-    public class FunctionCallExpression : XzaarExpression, IXzaarArgumentProvider
+    public class FunctionCallExpression : XzaarExpression, IArgumentProvider
     {
         private readonly FunctionExpression _function;
         private XzaarMethodInfo _method;
@@ -26,38 +26,25 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             this._function = method;
         }
 
-        public sealed override XzaarExpressionType NodeType => XzaarExpressionType.Call;
+        public sealed override ExpressionType NodeType => ExpressionType.Call;
 
         public virtual XzaarExpression GetInstance()
         {
             return null;
         }
 
-        public override XzaarType Type
-        {
-            get
-            {
-                return (_method == null ? _function.ReturnType : _method.ReturnType) ?? XzaarBaseTypes.Any;
-            }
-        }
-        public XzaarExpression Object
-        {
-            get { return GetInstance(); }
-        }
+        public override XzaarType Type => (_method == null ? _function.ReturnType : _method.ReturnType) ?? XzaarBaseTypes.Any;
 
-        public string MethodName
-        {
-            get { return _method != null ? _method.Name : _function.Name; }
-        }
+        public XzaarExpression Object => GetInstance();
 
-        public XzaarMethodInfo Method { get { return _method; } }
+        public string MethodName => _method != null ? _method.Name : _function.Name;
 
-        public FunctionExpression MethodExpression { get { return _function; } }
+        public XzaarMethodInfo Method => _method;
 
-        public ReadOnlyCollection<XzaarExpression> Arguments
-        {
-            get { return GetOrMakeArguments(); }
-        }
+        public FunctionExpression MethodExpression => _function;
+
+        public ReadOnlyCollection<XzaarExpression> Arguments => GetOrMakeArguments();
+
         internal virtual ReadOnlyCollection<XzaarExpression> GetOrMakeArguments()
         {
             throw new InvalidOperationException();
@@ -72,16 +59,13 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return _arguments[index];
         }
 
-        public int ArgumentCount
-        {
-            get { return _arguments.Count; }
-        }
+        public int ArgumentCount => _arguments.Count;
     }
 
 
     #region Specialized Subclasses
 
-    internal class FunctionCallExpressionN : FunctionCallExpression, IXzaarArgumentProvider
+    internal class FunctionCallExpressionN : FunctionCallExpression, IArgumentProvider
     {
         public FunctionCallExpressionN(XzaarMethodInfo method, IList<XzaarExpression> args)
             : base(method, args)
@@ -95,18 +79,12 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arguments = args;
         }
 
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             return _arguments[index];
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return _arguments.Count;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => _arguments.Count;
 
         internal override ReadOnlyCollection<XzaarExpression> GetOrMakeArguments()
         {
@@ -122,7 +100,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class InstanceFunctionCallExpressionN : FunctionCallExpression, IXzaarArgumentProvider
+    internal class InstanceFunctionCallExpressionN : FunctionCallExpression, IArgumentProvider
     {
         private readonly XzaarExpression _instance;
 
@@ -140,18 +118,12 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arguments = args;
         }
 
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             return _arguments[index];
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return _arguments.Count;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => _arguments.Count;
 
         public override XzaarExpression GetInstance()
         {
@@ -172,9 +144,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class FunctionCallExpression1 : FunctionCallExpression, IXzaarArgumentProvider
+    internal class FunctionCallExpression1 : FunctionCallExpression, IArgumentProvider
     {
-        private object _arg0;       // storage for the 1st argument or a readonly collection.  See IXzaarArgumentProvider
+        private object _arg0;       // storage for the 1st argument or a readonly collection.  See IArgumentProvider
 
         public FunctionCallExpression1(XzaarMethodInfo method, XzaarExpression arg0)
             : base(method)
@@ -186,7 +158,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         {
             _arg0 = arg0;
         }
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             switch (index)
             {
@@ -195,13 +167,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => 1;
 
         internal override ReadOnlyCollection<XzaarExpression> GetOrMakeArguments()
         {
@@ -222,9 +188,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class FunctionCallExpression2 : FunctionCallExpression, IXzaarArgumentProvider
+    internal class FunctionCallExpression2 : FunctionCallExpression, IArgumentProvider
     {
-        private object _arg0;               // storage for the 1st argument or a readonly collection.  See IXzaarArgumentProvider
+        private object _arg0;               // storage for the 1st argument or a readonly collection.  See IArgumentProvider
         private readonly XzaarExpression _arg1;  // storage for the 2nd arg
 
         public FunctionCallExpression2(XzaarMethodInfo method, XzaarExpression arg0, XzaarExpression arg1)
@@ -240,7 +206,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arg0 = arg0;
             _arg1 = arg1;
         }
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             switch (index)
             {
@@ -250,13 +216,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return 2;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => 2;
 
         internal override ReadOnlyCollection<XzaarExpression> GetOrMakeArguments()
         {
@@ -276,9 +236,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class FunctionCallExpression3 : FunctionCallExpression, IXzaarArgumentProvider
+    internal class FunctionCallExpression3 : FunctionCallExpression, IArgumentProvider
     {
-        private object _arg0;           // storage for the 1st argument or a readonly collection.  See IXzaarArgumentProvider
+        private object _arg0;           // storage for the 1st argument or a readonly collection.  See IArgumentProvider
         private readonly XzaarExpression _arg1, _arg2; // storage for the 2nd - 3rd args.
 
         public FunctionCallExpression3(XzaarMethodInfo method, XzaarExpression arg0, XzaarExpression arg1, XzaarExpression arg2)
@@ -298,7 +258,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arg2 = arg2;
         }
 
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             switch (index)
             {
@@ -309,13 +269,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return 3;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => 3;
 
         internal override ReadOnlyCollection<XzaarExpression> GetOrMakeArguments()
         {
@@ -335,9 +289,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class FunctionCallExpression4 : FunctionCallExpression, IXzaarArgumentProvider
+    internal class FunctionCallExpression4 : FunctionCallExpression, IArgumentProvider
     {
-        private object _arg0;               // storage for the 1st argument or a readonly collection.  See IXzaarArgumentProvider
+        private object _arg0;               // storage for the 1st argument or a readonly collection.  See IArgumentProvider
         private readonly XzaarExpression _arg1, _arg2, _arg3;  // storage for the 2nd - 4th args.
 
         public FunctionCallExpression4(XzaarMethodInfo method, XzaarExpression arg0, XzaarExpression arg1, XzaarExpression arg2, XzaarExpression arg3)
@@ -356,7 +310,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arg2 = arg2;
             _arg3 = arg3;
         }
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             switch (index)
             {
@@ -368,13 +322,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return 4;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => 4;
 
         internal override ReadOnlyCollection<XzaarExpression> GetOrMakeArguments()
         {
@@ -394,9 +342,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class FunctionCallExpression5 : FunctionCallExpression, IXzaarArgumentProvider
+    internal class FunctionCallExpression5 : FunctionCallExpression, IArgumentProvider
     {
-        private object _arg0;           // storage for the 1st argument or a readonly collection.  See IXzaarArgumentProvider
+        private object _arg0;           // storage for the 1st argument or a readonly collection.  See IArgumentProvider
         private readonly XzaarExpression _arg1, _arg2, _arg3, _arg4;   // storage for the 2nd - 5th args.
 
         public FunctionCallExpression5(XzaarMethodInfo method, XzaarExpression arg0, XzaarExpression arg1, XzaarExpression arg2, XzaarExpression arg3, XzaarExpression arg4)
@@ -417,7 +365,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arg3 = arg3;
             _arg4 = arg4;
         }
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             switch (index)
             {
@@ -430,13 +378,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return 5;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => 5;
 
         internal override ReadOnlyCollection<XzaarExpression> GetOrMakeArguments()
         {
@@ -457,10 +399,10 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class InstanceFunctionCallExpression2 : FunctionCallExpression, IXzaarArgumentProvider
+    internal class InstanceFunctionCallExpression2 : FunctionCallExpression, IArgumentProvider
     {
         private readonly XzaarExpression _instance;
-        private object _arg0;                // storage for the 1st argument or a readonly collection.  See IXzaarArgumentProvider
+        private object _arg0;                // storage for the 1st argument or a readonly collection.  See IArgumentProvider
         private readonly XzaarExpression _arg1;   // storage for the 2nd argument
 
         public InstanceFunctionCallExpression2(XzaarMethodInfo method, XzaarExpression instance, XzaarExpression arg0, XzaarExpression arg1)
@@ -481,7 +423,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arg0 = arg0;
             _arg1 = arg1;
         }
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             switch (index)
             {
@@ -491,13 +433,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return 2;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => 2;
 
         public override XzaarExpression GetInstance()
         {
@@ -522,10 +458,10 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
     }
 
-    internal class InstanceFunctionCallExpression3 : FunctionCallExpression, IXzaarArgumentProvider
+    internal class InstanceFunctionCallExpression3 : FunctionCallExpression, IArgumentProvider
     {
         private readonly XzaarExpression _instance;
-        private object _arg0;                       // storage for the 1st argument or a readonly collection.  See IXzaarArgumentProvider
+        private object _arg0;                       // storage for the 1st argument or a readonly collection.  See IArgumentProvider
         private readonly XzaarExpression _arg1, _arg2;   // storage for the 2nd - 3rd argument
 
         public InstanceFunctionCallExpression3(XzaarMethodInfo method, XzaarExpression instance, XzaarExpression arg0, XzaarExpression arg1, XzaarExpression arg2)
@@ -548,7 +484,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             _arg1 = arg1;
             _arg2 = arg2;
         }
-        XzaarExpression IXzaarArgumentProvider.GetArgument(int index)
+        XzaarExpression IArgumentProvider.GetArgument(int index)
         {
             switch (index)
             {
@@ -559,13 +495,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        int IXzaarArgumentProvider.ArgumentCount
-        {
-            get
-            {
-                return 3;
-            }
-        }
+        int IArgumentProvider.ArgumentCount => 3;
 
         public override XzaarExpression GetInstance()
         {
@@ -626,7 +556,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             return (ReadOnlyCollection<T>)collection;
         }
 
-        internal static ReadOnlyCollection<XzaarExpression> ReturnReadOnly(IXzaarArgumentProvider provider, ref object collection)
+        internal static ReadOnlyCollection<XzaarExpression> ReturnReadOnly(IArgumentProvider provider, ref object collection)
         {
             XzaarExpression tObj = collection as XzaarExpression;
             if (tObj != null)
@@ -650,7 +580,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
 
             ValidateMethodInfo(method);
-            ValidateArgumentTypes(method, XzaarExpressionType.Call, ref argList);
+            ValidateArgumentTypes(method, ExpressionType.Call, ref argList);
             if (instance != null)
             {
                 return new InstanceFunctionCallExpressionN(method, instance, argList);
@@ -667,7 +597,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
 
             ValidateMethodInfo(method);
-            ValidateArgumentTypes(method, XzaarExpressionType.Call, ref argList);
+            ValidateArgumentTypes(method, ExpressionType.Call, ref argList);
 
             return new FunctionCallExpressionN(method, argList);
         }
@@ -701,10 +631,10 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 
             XzaarParameterInfo[] pis = ValidateMethodAndGetParameters(instance, method);
 
-            ValidateArgumentCount(method, XzaarExpressionType.Call, 2, pis);
+            ValidateArgumentCount(method, ExpressionType.Call, 2, pis);
 
-            arg0 = ValidateOneArgument(method, XzaarExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, XzaarExpressionType.Call, arg1, pis[1]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
 
             if (instance != null)
             {
@@ -723,11 +653,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 
             XzaarParameterInfo[] pis = ValidateMethodAndGetParameters(instance, method);
 
-            ValidateArgumentCount(method, XzaarExpressionType.Call, 3, pis);
+            ValidateArgumentCount(method, ExpressionType.Call, 3, pis);
 
-            arg0 = ValidateOneArgument(method, XzaarExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, XzaarExpressionType.Call, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, XzaarExpressionType.Call, arg2, pis[2]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
+            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2]);
 
             if (instance != null)
             {
@@ -759,7 +689,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
 
             ValidateMethodInfo(method);
             ValidateStaticOrInstanceMethod(instance, method);
-            ValidateArgumentTypes(method, XzaarExpressionType.Call, ref argList);
+            ValidateArgumentTypes(method, ExpressionType.Call, ref argList);
 
             if (instance == null)
             {
@@ -792,7 +722,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             ValidateMethodInfo(method);
             ValidateStaticOrInstanceMethod(instance, method);
 
-            return GetParametersForValidation(method, XzaarExpressionType.Call);
+            return GetParametersForValidation(method, ExpressionType.Call);
         }
 
         private static void ValidateStaticOrInstanceMethod(XzaarExpression instance, XzaarMethodInfo method)
@@ -817,9 +747,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             //}
         }
 
-        private static void ValidateArgumentTypes(FunctionExpression method, XzaarExpressionType nodeKind, ref ReadOnlyCollection<XzaarExpression> arguments)
+        private static void ValidateArgumentTypes(FunctionExpression method, ExpressionType nodeKind, ref ReadOnlyCollection<XzaarExpression> arguments)
         {
-            // Debug.Assert(nodeKind == XzaarExpressionType.Invoke || nodeKind == XzaarExpressionType.Call || nodeKind == XzaarExpressionType.Dynamic || nodeKind == XzaarExpressionType.New);
+            // Debug.Assert(nodeKind == ExpressionType.Invoke || nodeKind == ExpressionType.Call || nodeKind == ExpressionType.Dynamic || nodeKind == ExpressionType.New);
 
             ParameterExpression[] pis = GetParametersForValidation(method, nodeKind);
 
@@ -851,9 +781,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        private static void ValidateArgumentTypes(XzaarMethodBase method, XzaarExpressionType nodeKind, ref ReadOnlyCollection<XzaarExpression> arguments)
+        private static void ValidateArgumentTypes(XzaarMethodBase method, ExpressionType nodeKind, ref ReadOnlyCollection<XzaarExpression> arguments)
         {
-            // Debug.Assert(nodeKind == XzaarExpressionType.Invoke || nodeKind == XzaarExpressionType.Call || nodeKind == XzaarExpressionType.Dynamic || nodeKind == XzaarExpressionType.New);
+            // Debug.Assert(nodeKind == ExpressionType.Invoke || nodeKind == ExpressionType.Call || nodeKind == ExpressionType.Dynamic || nodeKind == ExpressionType.New);
 
             XzaarParameterInfo[] pis = GetParametersForValidation(method, nodeKind);
 
@@ -885,9 +815,9 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        private static ParameterExpression[] GetParametersForValidation(FunctionExpression method, XzaarExpressionType nodeKind)
+        private static ParameterExpression[] GetParametersForValidation(FunctionExpression method, ExpressionType nodeKind)
         {
-            if (nodeKind != XzaarExpressionType.Dynamic) return method.GetParameters();
+            if (nodeKind != ExpressionType.Dynamic) return method.GetParameters();
             var methodParam = method.GetParameters();
             var param = new ParameterExpression[methodParam.Length - 1];
             Array.Copy(methodParam, 1, param, 0, param.Length);
@@ -895,30 +825,30 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
         }
 
 
-        private static XzaarParameterInfo[] GetParametersForValidation(XzaarMethodBase method, XzaarExpressionType nodeKind)
+        private static XzaarParameterInfo[] GetParametersForValidation(XzaarMethodBase method, ExpressionType nodeKind)
         {
-            if (nodeKind != XzaarExpressionType.Dynamic) return method.GetParameters();
+            if (nodeKind != ExpressionType.Dynamic) return method.GetParameters();
             var methodParam = method.GetParameters();
             var param = new XzaarParameterInfo[methodParam.Length - 1];
             Array.Copy(methodParam, 1, param, 0, param.Length);
             return param;
         }
 
-        private static void ValidateArgumentCount(FunctionExpression method, XzaarExpressionType nodeKind, int count, ParameterExpression[] pis)
+        private static void ValidateArgumentCount(FunctionExpression method, ExpressionType nodeKind, int count, ParameterExpression[] pis)
         {
             if (pis.Length != count && method.GetParameters().Length != pis.Length)
             {
                 // Throw the right error for the node we were given
                 switch (nodeKind)
                 {
-                    case XzaarExpressionType.New:
+                    case ExpressionType.New:
                         throw new InvalidOperationException();
                     // throw Error.IncorrectNumberOfConstructorArguments();
-                    case XzaarExpressionType.Invoke:
+                    case ExpressionType.Invoke:
                         throw new InvalidOperationException();
                     // throw Error.IncorrectNumberOfLambdaArguments();
-                    case XzaarExpressionType.Dynamic:
-                    case XzaarExpressionType.Call:
+                    case ExpressionType.Dynamic:
+                    case ExpressionType.Call:
                         throw new InvalidOperationException();
                     // throw Error.IncorrectNumberOfMethodCallArguments(method);
                     default:
@@ -928,21 +858,21 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
         }
 
-        private static void ValidateArgumentCount(XzaarMethodBase method, XzaarExpressionType nodeKind, int count, XzaarParameterInfo[] pis)
+        private static void ValidateArgumentCount(XzaarMethodBase method, ExpressionType nodeKind, int count, XzaarParameterInfo[] pis)
         {
             if (pis.Length != count)
             {
                 // Throw the right error for the node we were given
                 switch (nodeKind)
                 {
-                    case XzaarExpressionType.New:
+                    case ExpressionType.New:
                         throw new InvalidOperationException();
                     // throw Error.IncorrectNumberOfConstructorArguments();
-                    case XzaarExpressionType.Invoke:
+                    case ExpressionType.Invoke:
                         throw new InvalidOperationException();
                     // throw Error.IncorrectNumberOfLambdaArguments();
-                    case XzaarExpressionType.Dynamic:
-                    case XzaarExpressionType.Call:
+                    case ExpressionType.Dynamic:
+                    case ExpressionType.Call:
                         throw new InvalidOperationException();
                     // throw Error.IncorrectNumberOfMethodCallArguments(method);
                     default:
@@ -951,7 +881,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 }
             }
         }
-        private static XzaarExpression ValidateOneArgument(FunctionExpression method, XzaarExpressionType nodeKind, XzaarExpression arg, ParameterExpression pi)
+        private static XzaarExpression ValidateOneArgument(FunctionExpression method, ExpressionType nodeKind, XzaarExpression arg, ParameterExpression pi)
         {
             if (pi == null)
             {
@@ -971,15 +901,15 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                 // Throw the right error for the node we were given
                 switch (nodeKind)
                 {
-                    case XzaarExpressionType.New:
+                    case ExpressionType.New:
                         throw new InvalidOperationException();
                     // throw Error.ExpressionTypeDoesNotMatchConstructorParameter(arg.Type, pType);
-                    case XzaarExpressionType.Invoke:
+                    case ExpressionType.Invoke:
                         throw new InvalidOperationException();
                     // throw Error.ExpressionTypeDoesNotMatchParameter(arg.Type, pType);
-                    case XzaarExpressionType.Dynamic:
-                    case XzaarExpressionType.Call:
-                        throw new XzaarExpressionTransformerException("Expression type does not match method parameter: '" + arg.Type.Name + "' and '" + pType.Name + "'");
+                    case ExpressionType.Dynamic:
+                    case ExpressionType.Call:
+                        throw new ExpressionException("Expression type does not match method parameter: '" + arg.Type.Name + "' and '" + pType.Name + "'");
                     // throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, pType, method);
                     default:
                         throw new InvalidOperationException();
@@ -988,7 +918,7 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             }
             return arg;
         }
-        private static XzaarExpression ValidateOneArgument(XzaarMethodBase method, XzaarExpressionType nodeKind, XzaarExpression arg, XzaarParameterInfo pi)
+        private static XzaarExpression ValidateOneArgument(XzaarMethodBase method, ExpressionType nodeKind, XzaarExpression arg, XzaarParameterInfo pi)
         {
             // this is most likely an 'Any' object
             if (pi == null) return arg;
@@ -1005,14 +935,14 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
                     // Throw the right error for the node we were given
                     switch (nodeKind)
                     {
-                        case XzaarExpressionType.New:
+                        case ExpressionType.New:
                             throw new InvalidOperationException();
                         // throw Error.ExpressionTypeDoesNotMatchConstructorParameter(arg.Type, pType);
-                        case XzaarExpressionType.Invoke:
+                        case ExpressionType.Invoke:
                             throw new InvalidOperationException();
                         // throw Error.ExpressionTypeDoesNotMatchParameter(arg.Type, pType);
-                        case XzaarExpressionType.Dynamic:
-                        case XzaarExpressionType.Call:
+                        case ExpressionType.Dynamic:
+                        case ExpressionType.Call:
                             throw new InvalidOperationException();
                         // throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, pType, method);
                         default:

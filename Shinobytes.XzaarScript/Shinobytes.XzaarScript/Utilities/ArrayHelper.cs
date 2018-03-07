@@ -1,5 +1,5 @@
 ﻿using System;
-using Shinobytes.XzaarScript.Ast.Nodes;
+using Shinobytes.XzaarScript.Parser.Nodes;
 
 namespace Shinobytes.XzaarScript.Utilities
 {

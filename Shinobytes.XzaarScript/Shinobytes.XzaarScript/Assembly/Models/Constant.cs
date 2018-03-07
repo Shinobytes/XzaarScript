@@ -6,10 +6,7 @@
 
         public bool IsArray { get; set; }
 
-        public override MemberTypes MemberType
-        {
-            get { return MemberTypes.Constant; }
-        }
+        public override MemberTypes MemberType => MemberTypes.Constant;
 
         public override string ToString()
         {

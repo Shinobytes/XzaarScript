@@ -8,7 +8,7 @@ using Shinobytes.XzaarScript.Utilities;
 
 namespace Shinobytes.XzaarScript.UtilityVisitors
 {
-    public class CodeGeneratorVisitor : IXzaarStringExpressionVisitor
+    public class CodeGeneratorVisitor : IStringExpressionVisitor
     {
         private int currentIndent = 0;
         private int insideExpressionCount;
@@ -27,6 +27,7 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
 #if UNITY
             if (expression is BinaryExpression) return Visit(expression as BinaryExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
             if (expression is MemberAccessChainExpression) return Visit(expression as MemberAccessChainExpression);
             if (expression is GotoExpression) return Visit(expression as GotoExpression);
@@ -57,6 +58,7 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
 #endif
         }
 
+
         public string Visit(BinaryExpression binaryOp)
         {
             var codeWriter = new XzaarCodeWriter();
@@ -80,19 +82,44 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
             return codeWriter.ToString();
         }
 
-        public string Visit(ConditionalExpression conditional)
+        public string Visit(ConditionalExpression expr)
+        {
+            var codeWriter = new XzaarCodeWriter();
+            insideExpressionCount++;
+            codeWriter.Write(Visit(expr.Test));
+            insideExpressionCount--;
+            codeWriter.Write(" ? ");
+            if (expr.WhenTrue != null)
+            {
+                currentIndent++;
+                codeWriter.Write(Visit(expr.WhenTrue));
+                currentIndent--;
+
+            }
+            codeWriter.Write(" : ");
+
+            if (expr.WhenFalse != null)
+            {                
+                currentIndent++;
+                codeWriter.Write(Visit(expr.WhenFalse));
+                currentIndent--;                
+            }
+            return codeWriter.ToString();
+        }
+
+        public string Visit(IfElseExpression ifElse)
         {
             var codeWriter = new XzaarCodeWriter();
             codeWriter.Write("if (", currentIndent);
             insideExpressionCount++;
-            codeWriter.Write(Visit(conditional.Test));
+            codeWriter.Write(Visit(ifElse.Test));
             insideExpressionCount--;
             codeWriter.Write(") { ");
             codeWriter.NewLine();
-            if (conditional.IfTrue != null)
+            if (ifElse.IfTrue != null)
             {
                 currentIndent++;
-                codeWriter.Write(Visit(conditional.IfTrue));
+                codeWriter.Write(Visit(ifElse.IfTrue));
                 currentIndent--;
 
             }
@@ -100,13 +127,13 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
             codeWriter.Write("}", currentIndent);
             codeWriter.NewLine();
 
-            if (conditional.IfFalse != null && !conditional.IfFalse.IsEmpty())
+            if (ifElse.IfFalse != null && !ifElse.IfFalse.IsEmpty())
             {
                 codeWriter.Write("else {", currentIndent);
                 codeWriter.NewLine();
 
                 currentIndent++;
-                codeWriter.Write(Visit(conditional.IfFalse));
+                codeWriter.Write(Visit(ifElse.IfFalse));
                 currentIndent--;
 
                 codeWriter.Write("}", currentIndent);
@@ -204,13 +231,13 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
         {
             switch (@goto.Kind)
             {
-                case XzaarGotoExpressionKind.Break:
+                case GotoExpressionKind.Break:
                     return VisitBreak(@goto);
-                case XzaarGotoExpressionKind.Continue:
+                case GotoExpressionKind.Continue:
                     return VisitContinue(@goto);
-                case XzaarGotoExpressionKind.Return:
+                case GotoExpressionKind.Return:
                     return VisitReturn(@goto);
-                case XzaarGotoExpressionKind.Goto:
+                case GotoExpressionKind.Goto:
                     return VisitGoto(@goto);
 
             }
@@ -274,21 +301,21 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
             var indent = isInsideExpression ? 0 : currentIndent;
             switch (unary.NodeType)
             {
-                case XzaarExpressionType.PostIncrementAssign:
+                case ExpressionType.PostIncrementAssign:
                     codeWriter.Write("", indent);
                     codeWriter.Write(Visit(unary.Item));
                     codeWriter.Write("++");
                     break;
-                case XzaarExpressionType.PostDecrementAssign:
+                case ExpressionType.PostDecrementAssign:
                     codeWriter.Write("", indent);
                     codeWriter.Write(Visit(unary.Item));
                     codeWriter.Write("--");
                     break;
-                case XzaarExpressionType.Increment:
+                case ExpressionType.Increment:
                     codeWriter.Write("++", indent);
                     codeWriter.Write(Visit(unary.Item));
                     break;
-                case XzaarExpressionType.Decrement:
+                case ExpressionType.Decrement:
                     codeWriter.Write("--", indent);
                     codeWriter.Write(Visit(unary.Item));
                     break;
@@ -381,7 +408,7 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
 
             //        var added = false;
             //        var f = mb.Expression as FieldExpression;
-            //        var p = mb.Expression as ParameterExpression;
+            //        var p = mb.Expression as ParameterDefinitionExpression;
             //        var c = mb.Expression as ConstantExpression;
             //        if (p != null)
             //        {
@@ -717,60 +744,60 @@ namespace Shinobytes.XzaarScript.UtilityVisitors
         }
 
 
-        private string GetBinaryOperator(XzaarExpressionType binaryOpNodeType)
+        private string GetBinaryOperator(ExpressionType binaryOpNodeType)
         {
             switch (binaryOpNodeType)
             {
-                case XzaarExpressionType.AddAssignChecked:
-                case XzaarExpressionType.AddAssign: return "+=";
-                case XzaarExpressionType.AddChecked:
-                case XzaarExpressionType.Add: return "+";
-                case XzaarExpressionType.SubtractChecked:
-                case XzaarExpressionType.Subtract: return "-";
-                case XzaarExpressionType.SubtractAssignChecked:
-                case XzaarExpressionType.SubtractAssign: return "-=";
-                case XzaarExpressionType.And: return "&";
-                case XzaarExpressionType.AndAlso: return "&&";
-                case XzaarExpressionType.AndAssign: return "&=";
-                case XzaarExpressionType.Coalesce: return "~";
-                case XzaarExpressionType.Or: return "|";
-                case XzaarExpressionType.OrAssign: return "|=";
-                case XzaarExpressionType.OrElse: return "||";
-                case XzaarExpressionType.Modulo:
+                case ExpressionType.AddAssignChecked:
+                case ExpressionType.AddAssign: return "+=";
+                case ExpressionType.AddChecked:
+                case ExpressionType.Add: return "+";
+                case ExpressionType.SubtractChecked:
+                case ExpressionType.Subtract: return "-";
+                case ExpressionType.SubtractAssignChecked:
+                case ExpressionType.SubtractAssign: return "-=";
+                case ExpressionType.And: return "&";
+                case ExpressionType.AndAlso: return "&&";
+                case ExpressionType.AndAssign: return "&=";
+                case ExpressionType.Coalesce: return "~";
+                case ExpressionType.Or: return "|";
+                case ExpressionType.OrAssign: return "|=";
+                case ExpressionType.OrElse: return "||";
+                case ExpressionType.Modulo:
                     return "%";
-                case XzaarExpressionType.ModuloAssign:
+                case ExpressionType.ModuloAssign:
                     return "%=";
-                case XzaarExpressionType.Divide:
+                case ExpressionType.Divide:
                     return "/";
-                case XzaarExpressionType.DivideAssign:
+                case ExpressionType.DivideAssign:
                     return "/=";
-                case XzaarExpressionType.MultiplyChecked:
-                case XzaarExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.Multiply:
                     return "*";
-                case XzaarExpressionType.MultiplyAssignChecked:
-                case XzaarExpressionType.MultiplyAssign:
+                case ExpressionType.MultiplyAssignChecked:
+                case ExpressionType.MultiplyAssign:
                     return "*=";
-                case XzaarExpressionType.Assign:
+                case ExpressionType.Assign:
                     return "=";
-                case XzaarExpressionType.Not:
+                case ExpressionType.Not:
                     return "!";
-                case XzaarExpressionType.NotEqual:
+                case ExpressionType.NotEqual:
                     return "!=";
-                case XzaarExpressionType.Equal:
+                case ExpressionType.Equal:
                     return "==";
-                case XzaarExpressionType.LessThan:
+                case ExpressionType.LessThan:
                     return "<";
-                case XzaarExpressionType.GreaterThan:
+                case ExpressionType.GreaterThan:
                     return ">";
-                case XzaarExpressionType.LessThanOrEqual:
+                case ExpressionType.LessThanOrEqual:
                     return "<=";
-                case XzaarExpressionType.GreaterThanOrEqual:
+                case ExpressionType.GreaterThanOrEqual:
                     return ">=";
-                case XzaarExpressionType.PostDecrementAssign:
-                case XzaarExpressionType.Decrement:
+                case ExpressionType.PostDecrementAssign:
+                case ExpressionType.Decrement:
                     return "--";
-                case XzaarExpressionType.PostIncrementAssign:
-                case XzaarExpressionType.Increment:
+                case ExpressionType.PostIncrementAssign:
+                case ExpressionType.Increment:
                     return "++";
                 default: throw new NotImplementedException(binaryOpNodeType + " has not been implemented with a known binary operator");
             }

@@ -5,7 +5,7 @@
 //        private readonly XzaarExpression array;
 //        private readonly XzaarExpression index;
 //        private readonly XzaarType elementType;
-//        private XzaarExpressionType nodeType;
+//        private ExpressionType nodeType;
 
 //        internal ArrayIndexExpression(XzaarExpression array, XzaarExpression index)
 //        {
@@ -32,9 +32,9 @@
 //            }
 //        }
 
-//        public override XzaarExpressionType NodeType
+//        public override ExpressionType Kind
 //        {
-//            get { return XzaarExpressionType.ArrayIndex; }
+//            get { return ExpressionType.ArrayIndex; }
 //        }
 //    }
 

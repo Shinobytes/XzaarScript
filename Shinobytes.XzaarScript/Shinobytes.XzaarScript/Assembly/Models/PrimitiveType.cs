@@ -6,7 +6,7 @@
         Object,
         String,
         Char,
-        Datetime,
+        Date,
         Number,
         Boolean
     }

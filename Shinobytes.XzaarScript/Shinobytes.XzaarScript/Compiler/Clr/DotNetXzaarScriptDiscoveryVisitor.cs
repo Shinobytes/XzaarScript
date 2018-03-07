@@ -20,7 +20,7 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             AssertPossibleStackOverflow(expression);
 
-            if (expression.NodeType == XzaarExpressionType.Block)
+            if (expression.NodeType == ExpressionType.Block)
             {
                 var block = expression as BlockExpression;
                 if (block != null)
@@ -40,6 +40,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
 
             if (expression is UnaryExpression) return Visit(expression as UnaryExpression);
+            if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
             if (expression is GotoExpression) return Visit(expression as GotoExpression);
             if (expression is MemberExpression) return Visit(expression as MemberExpression);
@@ -67,11 +68,12 @@ namespace Shinobytes.XzaarScript.Compiler
 
         }
 
+
         private void AssertPossibleStackOverflow(XzaarExpression expression)
         {
             // TODO: Dependecy Inject a stack guard validation object to do take care of this for us
             if (ctx.StackRecursionCount > 10)
-                throw new XzaarCompilerException(
+                throw new CompilerException(
                     $"PANIC!! StackOverflow! {expression.GetType()} [{expression.NodeType}] could not be handled.");
 
             if (ctx.LastVisitedExpression == expression)
@@ -137,7 +139,7 @@ namespace Shinobytes.XzaarScript.Compiler
             return null;
         }
 
-        public object Visit(ConditionalExpression node)
+        public object Visit(IfElseExpression node)
         {
             return null;
         }
@@ -175,6 +177,12 @@ namespace Shinobytes.XzaarScript.Compiler
         public object Visit(ParameterExpression parameter)
         {
             return new XsParameter(parameter.Name, ctx.GetClrType(parameter.Type));
+        }
+
+
+        public object Visit(ConditionalExpression expr)
+        {
+            return null;
         }
 
         public object Visit(FunctionExpression function)

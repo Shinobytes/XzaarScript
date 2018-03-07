@@ -51,18 +51,24 @@
   <ItemGroup>
     <Compile Include="XzaarScript_Compiler_Tests.cs" />
     <Compile Include="XzaarScript_DotNet_Compiler_Tests.cs" />
-    <Compile Include="XzaarScript_Parser.cs" />
+    <Compile Include="XzaarScript_Parser_Reduction.cs" />
+    <Compile Include="XzaarScript_Parser_simple.cs" />
+    <Compile Include="XzaarScript_Parser_TypeLookup.cs" />
     <Compile Include="XzaarScript_Syntax_Tests.cs" />
     <Compile Include="XzaarScript_Lexer_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XzaarScript_Compile_LambdaExpression_Tests.cs" />
-    <Compile Include="XzaarScript_Transformer.cs" />
+    <Compile Include="XzaarScript_Parser.cs" />
     <Compile Include="XzaarScript_VM.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Shinobytes.CrackerMonkey.Puzzles\Shinobytes.Bytecode.Puzzles.csproj">
+      <Project>{24e3cbbc-6a2c-4f40-89eb-0603437ee314}</Project>
+      <Name>Shinobytes.Bytecode.Puzzles</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Shinobytes.XzaarScript\Shinobytes.XzaarScript.csproj">
       <Project>{adf1097d-6d40-42e1-a77e-eda68ecd1116}</Project>
       <Name>Shinobytes.XzaarScript</Name>

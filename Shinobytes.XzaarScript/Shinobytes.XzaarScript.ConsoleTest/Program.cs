@@ -348,7 +348,7 @@ $console.log(val)";
             {
                 var sw = new Stopwatch();
                 sw.Start();
-                var rt = new XzaarScriptInterpreter(script);
+                var rt = new ScriptInterpreter(script);
                 rt.RegisterVariable("$console", console);
                 sw.Stop();
                 var loadTime = sw.ElapsedMilliseconds;
@@ -378,7 +378,7 @@ $console.log(val)";
 
         public void log(object text)
         {
-            var rtVar = text as XzaarRuntimeVariable;
+            var rtVar = text as RuntimeVariable;
             if (rtVar != null)
             {
                 Output += rtVar.Value + "";

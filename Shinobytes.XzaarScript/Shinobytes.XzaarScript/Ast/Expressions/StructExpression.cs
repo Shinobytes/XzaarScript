@@ -14,12 +14,11 @@ namespace Shinobytes.XzaarScript.Ast.Expressions
             this.fields = fields;
         }
 
-        public string Name { get { return name; } }
-        public XzaarExpression[] Fields { get { return fields; } }
+        public string Name => name;
+        public XzaarExpression[] Fields => fields;
 
 
-        public override XzaarExpressionType NodeType { get { return XzaarExpressionType.Struct; } }
-
+        public override ExpressionType NodeType => ExpressionType.Struct;
     }
 
     public partial class XzaarExpression

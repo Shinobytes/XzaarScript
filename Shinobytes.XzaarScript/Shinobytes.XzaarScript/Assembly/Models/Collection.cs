@@ -52,15 +52,9 @@ namespace Shinobytes.XzaarScript.Assembly.Models
             return this.InternalItems.Remove(item);
         }
 
-        public virtual int Count
-        {
-            get { return this.InternalItems.Count; }
-        }
+        public virtual int Count => this.InternalItems.Count;
 
-        public virtual bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public virtual bool IsReadOnly => false;
 
         public virtual int IndexOf(T item)
         {
