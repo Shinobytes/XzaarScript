@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shinobytes.XzaarScript.Cons
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transpilers", "Transpilers", "{9A5406CE-99FD-4DCE-9EFA-1FCA808432D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XzaarScript-cli", "src\XzaarScript-cli\XzaarScript-cli.csproj", "{91A75BC6-512D-441E-B9D3-62CC94DF6814}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XzaarScript-cli", "src\XzaarScript-cli\_XzaarScript-cli.csproj", "{91A75BC6-512D-441E-B9D3-62CC94DF6814}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shinobytes.XzaarScript.Transpilers", "src\Shinobytes.XzaarScript.Transpilers\Shinobytes.XzaarScript.Transpilers.csproj", "{772B8772-D069-47ED-8DAB-A3CE01D8E97C}"
 EndProject
