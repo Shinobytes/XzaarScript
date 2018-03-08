@@ -9,15 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shinobytes.XzaarScript.Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shinobytes.XzaarScript", "src\Shinobytes.XzaarScript\Shinobytes.XzaarScript.csproj", "{ADF1097D-6D40-42E1-A77E-EDA68ECD1116}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDemo", "samples\web\WebDemo.csproj", "{7729D1DF-EEDF-46C5-BCF2-E03952CA4D12}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shinobytes.XzaarScript.ConsoleTest", "tests\Shinobytes.XzaarScript.ConsoleTest\Shinobytes.XzaarScript.ConsoleTest.csproj", "{D28F7629-2B16-4740-9917-EDEA9E848143}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transpilers", "Transpilers", "{9A5406CE-99FD-4DCE-9EFA-1FCA808432D6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{801F7E01-AD63-4EE5-8436-62CB7C18EFD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XzaarScript-CLI", "src\XzaarScript-CLI\XzaarScript-CLI.csproj", "{91A75BC6-512D-441E-B9D3-62CC94DF6814}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XzaarScript-CLI", "src\XzaarScript-cli\XzaarScript-cli.csproj", "{91A75BC6-512D-441E-B9D3-62CC94DF6814}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shinobytes.XzaarScript.Transpilers", "src\Shinobytes.XzaarScript.Transpilers\Shinobytes.XzaarScript.Transpilers.csproj", "{772B8772-D069-47ED-8DAB-A3CE01D8E97C}"
 EndProject
