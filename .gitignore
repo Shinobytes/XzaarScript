@@ -26,6 +26,9 @@ x64/
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/packages/repositories.config
 
+# credentials n stuff, don't want that to be accidentially pushed
+*.pubxml
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
