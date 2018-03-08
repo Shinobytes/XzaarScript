@@ -1,0 +1,60 @@
+﻿/* 
+ *  This file is part of XzaarScript.
+ *  Copyright © 2018 Karl Patrik Johansson, zerratar@gmail.com
+ *
+ *  XzaarScript is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  XzaarScript is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XzaarScript.  If not, see <http://www.gnu.org/licenses/>. 
+ *  
+ */
+
+using Shinobytes.XzaarScript.Parser.Nodes;
+
+namespace Shinobytes.XzaarScript.Utilities
+{
+    internal static class StringHelper
+    {
+        public static bool IsStringProperty(MemberAccessNode member)
+        {
+            return IsStringProperty(member.Value + "");
+        }
+
+        public static bool IsStringProperty(string v)
+        {
+            return IsLengthProperty(v);
+        }
+
+        public static bool IsLengthProperty(MemberAccessNode v)
+        {
+            return IsLengthProperty(v.Value + "");
+        }
+
+        public static bool IsLengthProperty(string v)
+        {
+            return v.ToLower() == "length";
+        }
+
+        public static bool IsStringFunction(string name)
+        {
+            return IsCharAt(name) || IsIndexOf(name);
+        }
+
+        public static bool IsCharAt(string name)
+        {
+            return name.ToLower() == "charat";
+        }
+        public static bool IsIndexOf(string name)
+        {
+            return name.ToLower() == "indexof";
+        }
+    }
+}

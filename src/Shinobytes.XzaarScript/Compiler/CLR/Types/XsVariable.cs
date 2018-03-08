@@ -1,0 +1,42 @@
+﻿/* 
+ *  This file is part of XzaarScript.
+ *  Copyright © 2018 Karl Patrik Johansson, zerratar@gmail.com
+ *
+ *  XzaarScript is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  XzaarScript is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XzaarScript.  If not, see <http://www.gnu.org/licenses/>. 
+ *  
+ */
+
+using System;
+using System.Reflection.Emit;
+
+namespace Shinobytes.XzaarScript.Compiler.Types
+{
+    public class XsVariable : XsTypedObject
+    {
+        private readonly XsILGenerator ilGenerator;
+        private LocalBuilder builder;
+
+        public XsVariable(XsILGenerator ilGenerator, string name, Type type) : base(name, type)
+        {
+            this.ilGenerator = ilGenerator;
+            this.builder = this.ilGenerator.DeclareLocal(type);
+            if (!string.IsNullOrEmpty(name))
+                this.builder.SetLocalSymInfo(name);
+        }
+
+        public int Index => this.builder.LocalIndex;
+
+        public LocalBuilder VariableInfo => builder;
+    }
+}

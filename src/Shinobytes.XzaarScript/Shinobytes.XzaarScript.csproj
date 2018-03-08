@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ADF1097D-6D40-42E1-A77E-EDA68ECD1116}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Shinobytes.XzaarScript</RootNamespace>
+    <AssemblyName>Shinobytes.XzaarScript</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">UNITY</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">UNITY</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assembly\IO\AssemblyReader.cs" />
+    <Compile Include="Assembly\IO\AssemblyReaderContext.cs" />
+    <Compile Include="Assembly\IO\AssemblyWriter.cs" />
+    <Compile Include="Assembly\IO\AssemblyWriterContext.cs" />
+    <Compile Include="Assembly\Collection.cs" />
+    <Compile Include="Assembly\Constant.cs" />
+    <Compile Include="Assembly\GlobalInstructionCollection.cs" />
+    <Compile Include="Assembly\GlobalVariableCollection.cs" />
+    <Compile Include="Assembly\Instruction.cs" />
+    <Compile Include="Assembly\InstructionCollection.cs" />
+    <Compile Include="Assembly\InstructionVariableCollection.cs" />
+    <Compile Include="Assembly\Label.cs" />
+    <Compile Include="Assembly\MemberReference.cs" />
+    <Compile Include="Assembly\MethodBody.cs" />
+    <Compile Include="Assembly\MethodCollection.cs" />
+    <Compile Include="Assembly\MethodDefinition.cs" />
+    <Compile Include="Assembly\MethodInstructionCollection.cs" />
+    <Compile Include="Assembly\MethodReference.cs" />
+    <Compile Include="Assembly\MethodTypes.cs" />
+    <Compile Include="Assembly\MethodVariableCollection.cs" />
+    <Compile Include="Assembly\OpCode.cs" />
+    <Compile Include="Assembly\ParameterCollection.cs" />
+    <Compile Include="Assembly\ParameterDefinition.cs" />
+    <Compile Include="Assembly\PrimitiveType.cs" />
+    <Compile Include="Assembly\TypeCollection.cs" />
+    <Compile Include="Assembly\TypeDefinition.cs" />
+    <Compile Include="Assembly\TypeReference.cs" />
+    <Compile Include="Assembly\TypeVariableCollection.cs" />
+    <Compile Include="Assembly\VariableCollection.cs" />
+    <Compile Include="Assembly\VariableDefinition.cs" />
+    <Compile Include="Assembly\VariableReference.cs" />
+    <Compile Include="Assembly\Operation.cs" />
+    <Compile Include="Assembly\XzaarAssembly.cs" />
+    <Compile Include="Compiler\CLR\DotNetFlowControlScope.cs" />
+    <Compile Include="Parser\Ast\Expressions\LogicalNotExpression.cs" />
+    <Compile Include="Compiler\CompilerInstructionCollection.cs" />
+    <Compile Include="Parser\Ast\TokenPosition.cs" />
+    <Compile Include="Parser\Ast\TokenStream.cs" />
+    <Compile Include="Parser\INodeProcessor.cs" />
+    <Compile Include="Parser\Nodes\ConditionalExpressionNode.cs" />
+    <Compile Include="Parser\Nodes\MemberAccessChainNode.cs" />
+    <Compile Include="Parser\Nodes\LogicalNotNode.cs" />
+    <Compile Include="Parser\Nodes\NegativeNode.cs" />
+    <Compile Include="Parser\Nodes\SyntaxNode.cs" />
+    <Compile Include="Parser\ParserScope.cs" />
+    <Compile Include="Parser\Ast\NodeStream.cs" />
+    <Compile Include="Parser\SyntaxParser.cs" />
+    <Compile Include="Parser\Ast\NodeTypeBinder.cs" />
+    <Compile Include="Parser\Ast\SyntaxKind.cs" />
+    <Compile Include="Parser\Precedence.cs" />
+    <Compile Include="Parser\Ast\CollectionStream.cs" />
+    <Compile Include="Parser\LexerException.cs" />
+    <Compile Include="Parser\Lexer.cs" />
+    <Compile Include="Parser\Ast\SyntaxFacts.cs" />
+    <Compile Include="Parser\Ast\StringCollectionStream.cs" />
+    <Compile Include="Parser\Ast\SyntaxTokenCollection.cs" />
+    <Compile Include="Compiler\CLR\DotNetXzaarScriptCompiler.cs" />
+    <Compile Include="Compiler\CLR\DotNetXzaarScriptCompilerContext.cs" />
+    <Compile Include="Compiler\CLR\DotNetXzaarScriptDiscoveryVisitor.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Arguments.codegen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Arguments.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ArithmeticOperations.codegen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ArithmeticOperations.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ArrayManipulation.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ArrayManipulation.cs" />
+    <Compile Include="Compiler\CLR\Extensions\BitOperations.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\CompareAndBranch.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\CompareAndBranch.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ConditionalWeakTable.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ControlFlow.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ConvertTo.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\DebugOperations.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ExceptionBlock\CatchBlock.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ExceptionBlock\ExceptionBlock.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ExceptionBlock\ExceptionHandling.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ExceptionBlock\FaultBlock.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ExceptionBlock\FinallyBlock.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Fields.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Fields.cs" />
+    <Compile Include="Compiler\CLR\Extensions\FluentInterface.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\FluentInterface.cs" />
+    <Compile Include="Compiler\CLR\Extensions\FunctionPointers.cs" />
+    <Compile Include="Compiler\CLR\Extensions\LoadConstants.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Locals.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Locals.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Members.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Members.cs" />
+    <Compile Include="Compiler\CLR\Extensions\MethodFlow.autogen.cs" />
+    <Compile Include="Compiler\CLR\Extensions\MethodFlow.cs" />
+    <Compile Include="Compiler\CLR\Extensions\NativeInteger.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ObjectCreation.cs" />
+    <Compile Include="Compiler\CLR\Extensions\ObjectManipulation.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Prefixes.cs" />
+    <Compile Include="Compiler\CLR\Extensions\Properties\JetBrainsAnnotations.cs" />
+    <Compile Include="Compiler\CLR\Extensions\StackOperations.cs" />
+    <Compile Include="Compiler\CLR\Extensions\TokenExtensions.cs" />
+    <Compile Include="Compiler\CLR\Extensions\TypedReferences.cs" />
+    <Compile Include="Compiler\CLR\Extensions\TypeManipulation.cs" />
+    <Compile Include="Compiler\CLR\Types\XsILGenerator.cs" />
+    <Compile Include="Compiler\CLR\Types\XsClass.cs" />
+    <Compile Include="Compiler\CLR\Types\XsField.cs" />
+    <Compile Include="Compiler\CLR\Types\XsGlobal.cs" />
+    <Compile Include="Compiler\CLR\Types\XsMethod.cs" />
+    <Compile Include="Compiler\CLR\Types\XsObject.cs" />
+    <Compile Include="Compiler\CLR\Types\XsParameter.cs" />
+    <Compile Include="Compiler\CLR\Types\XsStruct.cs" />
+    <Compile Include="Compiler\CLR\Types\XsTypedObject.cs" />
+    <Compile Include="Compiler\CLR\Types\XsVariable.cs" />
+    <Compile Include="Extensions\ScriptVmExtensions.cs" />
+    <Compile Include="RuntimeSettings.cs" />
+    <Compile Include="TypeSystem\XzaarFieldBuilder.cs" />
+    <Compile Include="Utilities\ArrayHelper.cs" />
+    <Compile Include="Compiler\FlowControlScope.cs" />
+    <Compile Include="Compiler\IScriptCompilerVisitor.cs" />
+    <Compile Include="Compiler\IReferenceBinder.cs" />
+    <Compile Include="Utilities\StringHelper.cs" />
+    <Compile Include="Utilities\XzaarCodeWriter.cs" />
+    <Compile Include="Compiler\CompilerException.cs" />
+    <Compile Include="Compiler\ScriptCompiler.cs" />
+    <Compile Include="Compiler\ScriptCompilerContext.cs" />
+    <Compile Include="Tools\XzaarScriptDisassembler.cs" />
+    <Compile Include="Compiler\ScriptDiscoveryVisitor.cs" />
+    <Compile Include="TypeSystem\IXzaarFieldInfo.cs" />
+    <Compile Include="TypeSystem\IXzaarMemberInfo.cs" />
+    <Compile Include="TypeSystem\IXzaarPropertyInfo.cs" />
+    <Compile Include="Compiler\IExpressionCompiler.cs" />
+    <Compile Include="Compiler\ExpressionCompiler.cs" />
+    <Compile Include="Compiler\NodeToExpressionVisitor.cs" />
+    <Compile Include="Parser\Ast\Expressions\CreateStructExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\FieldExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\MemberAccessChainExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\StructExpression.cs" />
+    <Compile Include="Parser\Ast\NodeProcessorVisitor.cs" />
+    <Compile Include="Parser\Ast\Expressions\ArrayIndexExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\AssignBinaryExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\CoalesceConversionBinaryExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\DefaultExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\DoWhileExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\ForEachExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\ForExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\FunctionExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\GotoExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\IArgumentProvider.cs" />
+    <Compile Include="Parser\Ast\Expressions\LabelExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\BinaryExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\BlockExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\IfElseExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\ConstantExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\ListArgumentProvider.cs" />
+    <Compile Include="Parser\Ast\Expressions\LogicalBinaryExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\LoopExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\MemberExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\MethodBinaryExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\FunctionCallExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\ParameterExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\SimpleBinaryExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\SwitchExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\UnaryExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\VariableDefinitionExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\WhileExpression.cs" />
+    <Compile Include="Parser\Ast\Expressions\XzaarExpression.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
+    <Compile Include="Parser\Ast\Expressions\ExpressionType.cs" />
+    <Compile Include="Parser\Ast\Expressions\GotoExpressionKind.cs" />
+    <Compile Include="Parser\Ast\Expressions\XzaarTypeUtils.cs" />
+    <Compile Include="Parser\Ast\IStringExpressionVisitor.cs" />
+    <Compile Include="Parser\Ast\INodeProcessorVisitor.cs" />
+    <Compile Include="Parser\Nodes\AnyNode.cs" />
+    <Compile Include="Parser\Nodes\ArgumentNode.cs" />
+    <Compile Include="Parser\Nodes\ArrayIndexNode.cs" />
+    <Compile Include="Parser\Nodes\ArrayNode.cs" />
+    <Compile Include="Parser\Nodes\AssignNode.cs" />
+    <Compile Include="Parser\Nodes\BinaryOperatorNode.cs" />
+    <Compile Include="Parser\Nodes\BlockNode.cs" />
+    <Compile Include="Parser\Nodes\BreakNode.cs" />
+    <Compile Include="Parser\Nodes\CaseNode.cs" />
+    <Compile Include="Parser\Nodes\IfElseNode.cs" />
+    <Compile Include="Parser\Nodes\LogicalConditionalNode.cs" />
+    <Compile Include="Parser\Nodes\ContinueNode.cs" />
+    <Compile Include="Parser\Nodes\ControlFlowNode.cs" />
+    <Compile Include="Parser\Nodes\CreateStructNode.cs" />
+    <Compile Include="Parser\Nodes\DefineVariableNode.cs" />
+    <Compile Include="Parser\Nodes\DefinitionNode.cs" />
+    <Compile Include="Parser\Nodes\DoWhileLoopNode.cs" />
+    <Compile Include="Parser\Nodes\EmptyNode.cs" />
+    <Compile Include="Parser\Nodes\EqualityOperatorNode.cs" />
+    <Compile Include="Parser\Nodes\FieldNode.cs" />
+    <Compile Include="Parser\Nodes\ForeachLoopNode.cs" />
+    <Compile Include="Parser\Nodes\ForLoopNode.cs" />
+    <Compile Include="Parser\Nodes\FunctionCallNode.cs" />
+    <Compile Include="Parser\Nodes\FunctionNode.cs" />
+    <Compile Include="Parser\Nodes\FunctionParametersNode.cs" />
+    <Compile Include="Parser\INodeVisitor.cs" />
+    <Compile Include="Parser\Nodes\GotoNode.cs" />
+    <Compile Include="Parser\Nodes\LabelNode.cs" />
+    <Compile Include="Parser\Nodes\LiteralNode.cs" />
+    <Compile Include="Parser\Nodes\LoopNode.cs" />
+    <Compile Include="Parser\Nodes\MatchNode.cs" />
+    <Compile Include="Parser\Nodes\MemberAccessNode.cs" />
+    <Compile Include="Parser\Nodes\ReturnNode.cs" />
+    <Compile Include="Parser\Nodes\StructNode.cs" />
+    <Compile Include="Parser\Nodes\UnaryNode.cs" />
+    <Compile Include="Parser\Nodes\VariableNode.cs" />
+    <Compile Include="Parser\Nodes\WhileLoopNode.cs" />
+    <Compile Include="Parser\NullNodeVisitor.cs" />
+    <Compile Include="Parser\Nodes\NumberNode.cs" />
+    <Compile Include="Parser\Nodes\ParameterNode.cs" />
+    <Compile Include="Parser\Nodes\EntryNode.cs" />
+    <Compile Include="Parser\Nodes\BodyNode.cs" />
+    <Compile Include="Parser\Nodes\ExpressionNode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Parser\Nodes\TypeFinderVisitor.cs" />
+    <Compile Include="Parser\Ast\Expressions\LabelTarget.cs" />
+    <Compile Include="Parser\Ast\TypeCode.cs" />
+    <Compile Include="TypeSystem\XzaarBaseTypes.cs" />
+    <Compile Include="TypeSystem\XzaarFieldInfo.cs" />
+    <Compile Include="TypeSystem\XzaarMemberInfo.cs" />
+    <Compile Include="TypeSystem\XzaarMemberTypes.cs" />
+    <Compile Include="TypeSystem\XzaarMethodAttributes.cs" />
+    <Compile Include="TypeSystem\XzaarMethodBase.cs" />
+    <Compile Include="TypeSystem\XzaarMethodBody.cs" />
+    <Compile Include="TypeSystem\XzaarParameterInfo.cs" />
+    <Compile Include="Parser\Nodes\AstNode.cs" />
+    <Compile Include="Parser\Ast\ParserException.cs" />
+    <Compile Include="Parser\Ast\SyntaxToken.cs" />
+    <Compile Include="Parser\Ast\SyntaxTokenProvider.cs" />
+    <Compile Include="Parser\Ast\ExpressionException.cs" />
+    <Compile Include="TypeSystem\XzaarPropertyInfo.cs" />
+    <Compile Include="TypeSystem\XzaarType.cs" />
+    <Compile Include="TypeSystem\XzaarTypeBuilder.cs" />
+    <Compile Include="TypeSystem\XzaarTypeInfo.cs" />
+    <Compile Include="Tools\XzaarScriptCodeFormatter.cs" />
+    <Compile Include="VM\ReflectionCache.cs" />
+    <Compile Include="VM\Runtime.cs" />
+    <Compile Include="VM\RuntimeException.cs" />
+    <Compile Include="VM\RuntimeObject.cs" />
+    <Compile Include="VM\RuntimeScope.cs" />
+    <Compile Include="VM\RuntimeStepType.cs" />
+    <Compile Include="VM\RuntimeVariable.cs" />
+    <Compile Include="VM\VirtualMachine.cs" />
+    <Compile Include="VM\VirtualMachineInstructionInterpreter.cs" />
+    <Compile Include="InterpreterError.cs" />
+    <Compile Include="InterpreterErrorCollection.cs" />
+    <Compile Include="InterpreterErrorLocation.cs" />
+    <Compile Include="Interpreter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CodeGen\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
