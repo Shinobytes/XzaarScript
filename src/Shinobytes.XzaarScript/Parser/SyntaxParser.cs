@@ -30,7 +30,7 @@ namespace Shinobytes.XzaarScript.Parser
     public class SyntaxParser
     {
         private readonly TokenStream tokens;
-        
+
         private readonly List<string> errors = new List<string>();
         private readonly List<ErrorNode> errorNodes = new List<ErrorNode>();
 
@@ -176,7 +176,7 @@ namespace Shinobytes.XzaarScript.Parser
             var labelName = WalkIdentifier();
             Tokens.Consume(SyntaxKind.Colon);
 
-            var label = AstNode.Label(labelName.ValueText);
+            var label = AstNode.Label(labelName.StringValue);
 
             labels.Add(label);
 
@@ -191,11 +191,11 @@ namespace Shinobytes.XzaarScript.Parser
             }
             var before = Tokens.Current;
             var target = WalkIdentifier();
-            var label = labels.FirstOrDefault(l => l.Name == target.ValueText);
+            var label = labels.FirstOrDefault(l => l.Name == target.StringValue);
             if (label == null)
-                return Error("No labels with the name '" + target.ValueText + "' could be found.", before);
+                return Error("No labels with the name '" + target.StringValue + "' could be found.", before);
 
-            return AstNode.Goto(target.ValueText);
+            return AstNode.Goto(target.StringValue);
         }
 
         private AstNode WalkExpressionStatement()
@@ -382,7 +382,7 @@ namespace Shinobytes.XzaarScript.Parser
 
         private ArgumentNode[] WalkArgumentList()
         {
-            return WalkArgumentList(SyntaxKind.OpenParan, SyntaxKind.CloseParan);
+            return WalkArgumentList(SyntaxKind.OpenParen, SyntaxKind.CloseParen);
         }
 
         private ArgumentNode[] WalkArgumentList(SyntaxKind open, SyntaxKind close)
@@ -415,10 +415,10 @@ namespace Shinobytes.XzaarScript.Parser
         }
 
 
-        private AstNode WalkParameterList()
+        private FunctionParametersNode WalkParameterList()
         {
             var args = new List<ParameterNode>();
-            Tokens.ConsumeExpected(SyntaxKind.OpenParan);
+            Tokens.ConsumeExpected(SyntaxKind.OpenParen);
             if (PrepareScope())
             {
 
@@ -427,7 +427,7 @@ namespace Shinobytes.XzaarScript.Parser
                 {
                     var before = Tokens.Current;
 
-                    if (before.Kind == SyntaxKind.CloseParan)
+                    if (before.Kind == SyntaxKind.CloseParen)
                         break;
 
                     var possibleIdentifier = Tokens.PeekAt(1);
@@ -442,15 +442,26 @@ namespace Shinobytes.XzaarScript.Parser
                     else
                     {
                         // javascript/java/c#/c/c++, list goes long - style
-                        var type = WalkType();
-                        var name = WalkIdentifier();
-                        args.Add(AstNode.Parameter(name, type));
+                        // NOTE: Type is optional, any types not set will be "any"
+                        if (possibleIdentifier != null &&
+                            (possibleIdentifier.Kind == SyntaxKind.Comma ||
+                             possibleIdentifier.Kind == SyntaxKind.CloseParen))
+                        {
+                            var name = WalkIdentifier();
+                            args.Add(AstNode.Parameter(name));
+                        }
+                        else
+                        {
+                            var type = WalkType();
+                            var name = WalkIdentifier();
+                            args.Add(AstNode.Parameter(name, type));
+                        }
                     }
 
                     //this.Tokens.Next(); 
                     if (before == Tokens.Current || (Tokens.Current != null && Tokens.Current.Kind == SyntaxKind.Comma)) Tokens.Consume();
                 }
-                EndScope(SyntaxKind.CloseParan);
+                EndScope(SyntaxKind.CloseParen);
             }
             return AstNode.Parameters(args.ToArray());
         }
@@ -817,11 +828,11 @@ namespace Shinobytes.XzaarScript.Parser
             tokens.ConsumeExpected(SyntaxKind.OpenCurly);
 
 
-            var fields = WalkStructFields(name.ValueText);
+            var fields = WalkStructFields(name.StringValue);
 
-            var str = AstNode.Struct(name.ValueText, fields);
+            var str = AstNode.Struct(name.StringValue, fields);
 
-            definedStructs.Add(name.ValueText, str);
+            definedStructs.Add(name.StringValue, str);
 
             tokens.ConsumeExpected(SyntaxKind.CloseCurly);
 
@@ -849,7 +860,7 @@ namespace Shinobytes.XzaarScript.Parser
                         var name = WalkIdentifier();
                         Tokens.Consume();
                         var type = WalkType();
-                        fields.Add(AstNode.Field(type.ValueText, name.ValueText, declaringTypeName));
+                        fields.Add(AstNode.Field(type.StringValue, name.StringValue, declaringTypeName));
                     }
                     else
                     {
@@ -857,7 +868,7 @@ namespace Shinobytes.XzaarScript.Parser
                         // type name                                                
                         var type = WalkType();
                         var name = WalkIdentifier();
-                        fields.Add(AstNode.Field(type.ValueText, name.ValueText, declaringTypeName));
+                        fields.Add(AstNode.Field(type.StringValue, name.StringValue, declaringTypeName));
                     }
 
                     if (Tokens.Current != null)
@@ -1052,11 +1063,11 @@ namespace Shinobytes.XzaarScript.Parser
 
             Tokens.Consume(SyntaxKind.KeywordSwitch);
 
-            Tokens.ConsumeExpected(SyntaxKind.OpenParan);
+            Tokens.ConsumeExpected(SyntaxKind.OpenParen);
 
             var expr = WalkExpressionCore();
 
-            Tokens.ConsumeExpected(SyntaxKind.CloseParan);
+            Tokens.ConsumeExpected(SyntaxKind.CloseParen);
 
             var switchCases = new List<CaseNode>();
 
@@ -1114,12 +1125,12 @@ namespace Shinobytes.XzaarScript.Parser
 
         private AstNode WalkForStatementExpressionList()
         {
-            return WalkStatementExpressionList(SyntaxKind.OpenParan, SyntaxKind.Semicolon, SyntaxKind.CloseParan, 3);
+            return WalkStatementExpressionList(SyntaxKind.OpenParen, SyntaxKind.Semicolon, SyntaxKind.CloseParen, 3);
         }
 
         private AstNode WalkForEachStatementExpressionList()
         {
-            return WalkStatementExpressionList(SyntaxKind.OpenParan, SyntaxKind.KeywordIn, SyntaxKind.CloseParan, 2);
+            return WalkStatementExpressionList(SyntaxKind.OpenParen, SyntaxKind.KeywordIn, SyntaxKind.CloseParen, 2);
         }
 
 
@@ -1272,8 +1283,8 @@ namespace Shinobytes.XzaarScript.Parser
 
             var ifFalse = WalkElseClause();
 
-            result = ifFalse != null 
-                ? AstNode.IfElseThen(condition, ifTrue, ifFalse) 
+            result = ifFalse != null
+                ? AstNode.IfElseThen(condition, ifTrue, ifFalse)
                 : AstNode.IfThen(condition, ifTrue);
 
             return result;
@@ -1324,7 +1335,7 @@ namespace Shinobytes.XzaarScript.Parser
             {
                 Tokens.Consume();
                 varTypeExplicit = true;
-                varType = WalkType().ValueText;
+                varType = WalkType().StringValue;
             }
 
             var isAssign = Tokens.Current != null && SyntaxFacts.IsAssignment(Tokens.Current.Kind);
@@ -1355,10 +1366,10 @@ namespace Shinobytes.XzaarScript.Parser
                 // variables can NEVER be of type void
                 if (varType == "void") varType = "any";
 
-                return AddVariable(AstNode.DefineVariable(varType, name.ValueText, valueAssignment));
+                return AddVariable(AstNode.DefineVariable(varType, name.StringValue, valueAssignment));
             }
             // Tokens.Consume();
-            return AddVariable(AstNode.DefineVariable(varType, name.ValueText, null));
+            return AddVariable(AstNode.DefineVariable(varType, name.StringValue, null));
         }
 
         private string GetExpressionResultType(AstNode expr)
@@ -1366,11 +1377,11 @@ namespace Shinobytes.XzaarScript.Parser
             var call = expr as FunctionCallNode;
             if (call != null)
             {
-                if (!definedFunctions.ContainsKey(call.Function.ValueText))
+                if (!definedFunctions.ContainsKey(call.Function.StringValue))
                 {
                     return "any";
                 }
-                var func = definedFunctions[call.Function.ValueText];
+                var func = definedFunctions[call.Function.StringValue];
                 return func.ReturnType?.Name ?? "any";
             }
 
@@ -1386,12 +1397,12 @@ namespace Shinobytes.XzaarScript.Parser
                 if (literal.NodeName == "ARRAY") return "array";
                 if (literal.NodeName == "NAME")
                 {
-                    if (literal.ValueText == "false" || literal.ValueText == "true") return XzaarBaseTypes.Boolean.Name;
-                    var p = FindParameter(literal.ValueText);
+                    if (literal.StringValue == "false" || literal.StringValue == "true") return XzaarBaseTypes.Boolean.Name;
+                    var p = FindParameter(literal.StringValue);
                     if (p != null) return p.Type;
-                    var v = currentScope.FindVariable(literal.ValueText);
+                    var v = currentScope.FindVariable(literal.StringValue);
                     if (v != null) return v.Type;
-                    if (definedStructs.ContainsKey(literal.ValueText)) return literal.ValueText;
+                    if (definedStructs.ContainsKey(literal.StringValue)) return literal.StringValue;
                 }
             }
 
@@ -1463,13 +1474,13 @@ namespace Shinobytes.XzaarScript.Parser
 
             currentParameters.AddRange(parameters.Parameters);
 
-            var functionName = name.ValueText;
+            var functionName = name.StringValue;
             if (Tokens.Current.Kind == SyntaxKind.MinusGreater || Tokens.Current.Kind == SyntaxKind.Colon)
             {
                 AssertMinExpectedNodeCount(3);
                 Tokens.Consume();
 
-                var returnType = WalkType().ValueText;
+                var returnType = WalkType().StringValue;
                 var function = AstNode.Function(functionName, returnType, parameters);
                 definedFunctions.Add(functionName, function);
 
@@ -1582,8 +1593,8 @@ namespace Shinobytes.XzaarScript.Parser
             AstNode subExpr = null;
             var before = Tokens.Current;
             var isExpression = before.Kind == SyntaxKind.Expression;
-            subExpr = isExpression 
-                ? WalkManyExpressions() 
+            subExpr = isExpression
+                ? WalkManyExpressions()
                 : WalkSubExpression(Precedence.Expression);
 
             //if (isExpression && subExpr.Kind != SyntaxKind.EXPRESSION)
@@ -1608,7 +1619,14 @@ namespace Shinobytes.XzaarScript.Parser
             switch (tk)
             {
                 case SyntaxKind.Identifier:
-                    expr = WalkIdentifier();
+                    if (IsPossibleLambdaExpression(precedence))
+                    {
+                        expr = WalkLambdaExpression();
+                    }
+                    else
+                    {
+                        expr = WalkIdentifier();
+                    }
                     break;
 
                 // case SyntaxKind.ArgListKeyword:
@@ -1617,7 +1635,7 @@ namespace Shinobytes.XzaarScript.Parser
                 case SyntaxKind.KeywordNull:
                     expr = WalkKnownConstant();
                     break;
-                case SyntaxKind.OpenParan:
+                case SyntaxKind.OpenParen:
                     expr = WalkCastOrParenExpressionOrLambdaOrTuple(precedence);
                     break;
                 case SyntaxKind.Number:
@@ -1641,12 +1659,137 @@ namespace Shinobytes.XzaarScript.Parser
             return WalkPostFixExpression(expr);
         }
 
+        private bool IsPossibleLambdaExpression(Precedence precedence)
+        {
+            var syntaxToken = Tokens.PeekNext();
+            if (precedence <= Precedence.Lambda && syntaxToken != null && syntaxToken.Kind == SyntaxKind.EqualsGreater)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private AstNode WalkLambdaExpression()
+        {
+            if (Tokens.CurrentIs(SyntaxKind.OpenParen))
+            {
+                // lambda with open paren. (x) => ...
+                var parameters = WalkLambdaParameterList();
+                var arrow = Tokens.ConsumeExpected(SyntaxKind.EqualsGreater);
+                var body = WalkLambdaBody();
+                return AstNode.Lambda(parameters, body);
+            }
+            else
+            {
+                // lambda without open paren. x => ...
+                var identifierName = WalkIdentifier();
+                var arrow = Tokens.ConsumeExpected(SyntaxKind.EqualsGreater);
+                var parameter = AstNode.Parameter(identifierName);
+                var body = WalkLambdaBody();
+                return AstNode.Lambda(parameter, body);
+            }
+        }
+
+        private FunctionParametersNode WalkLambdaParameterList()
+        {
+            return WalkParameterList();
+        }
+
+        private AstNode WalkLambdaBody()
+        {
+            if (Tokens.CurrentIs(SyntaxKind.OpenCurly))
+            {
+                return WalkBody();
+            }
+            else
+            {
+                // return WalkPossibleRefExpression();
+                return WalkExpressionCore();
+            }
+        }
+
         private AstNode WalkCastOrParenExpressionOrLambdaOrTuple(Precedence precedence)
         {
-            Tokens.ConsumeExpected(SyntaxKind.OpenParan);
+            // check whether this is a type cast, an expression or a lambda/arrow-function
+
+            if (ScanForArrowFunction(precedence))
+            {
+                return this.WalkLambdaExpression();
+            }
+
+            //if (ScanForCast())
+            //{
+
+            //}
+
+            Tokens.ConsumeExpected(SyntaxKind.OpenParen);
             var expression = WalkSubExpression(Precedence.Expression);
-            Tokens.ConsumeExpected(SyntaxKind.CloseParan);
+            Tokens.ConsumeExpected(SyntaxKind.CloseParen);
             return expression;
+        }
+
+        private bool ScanForArrowFunction(Precedence precedence)
+        {
+            if (!(precedence <= Precedence.Lambda))
+            {
+                return false;
+            }
+
+            // check for unclosed lambda ( x ,
+            var nextToken = Tokens.PeekNext();
+            if (nextToken.Kind == SyntaxKind.Identifier && (Tokens.PeekAt(2).Kind == SyntaxKind.Comma || Tokens.PeekAt(2).Kind == SyntaxKind.Colon))
+            {
+                var tokenIndex = 3;
+                while (true)
+                {
+                    var token = Tokens.PeekAt(tokenIndex++);
+                    if (token.Kind != SyntaxKind.Identifier && token.Kind != SyntaxKind.Comma && token.Kind != SyntaxKind.Colon 
+                        && token.Kind != SyntaxKind.OpenBracket || token.Kind == SyntaxKind.OpenBracket && Tokens.PeekAt(tokenIndex++).Kind != SyntaxKind.CloseBracket)
+                    {                        
+                        break;
+                    }
+                }
+
+                // check for closing
+                return Tokens.PeekAt(tokenIndex - 1).Kind == SyntaxKind.CloseParen &&
+                       Tokens.PeekAt(tokenIndex).Kind == SyntaxKind.EqualsGreater;
+            }
+
+            // check for lambda ( x : any ) => and ( x ) =>
+
+            if (nextToken.Kind == SyntaxKind.Identifier)
+            {
+                var tokenIndex = 2;
+
+                //if (Tokens.PeekAt(tokenIndex).Kind == SyntaxKind.Colon)
+                //{
+                //    var after = Tokens.PeekAt(tokenIndex + 1);
+                //    if (after != null && after.Kind == SyntaxKind.Identifier)
+                //    {
+                //        var parenOrComma = Tokens.PeekAt(tokenIndex + 2);
+                //        var arrow = Tokens.PeekAt(tokenIndex + 3);
+                //        if (parenOrComma?.Kind == SyntaxKind.Comma || (parenOrComma?.Kind == SyntaxKind.CloseParen && arrow?.Kind == SyntaxKind.EqualsGreater))
+                //        {
+                //            return true;
+                //        }
+                //    }
+                //}
+                //else
+                if (Tokens.PeekAt(tokenIndex).Kind == SyntaxKind.CloseParen
+                        && Tokens.PeekAt(tokenIndex + 1).Kind == SyntaxKind.EqualsGreater)
+                {
+                    return true;
+                }
+
+            }
+
+            if (nextToken.Kind == SyntaxKind.CloseParen && Tokens.PeekAt(2).Kind == SyntaxKind.EqualsGreater)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private AstNode WalkPostFixExpression(AstNode expr)
@@ -1668,7 +1811,7 @@ namespace Shinobytes.XzaarScript.Parser
                 SyntaxKind tk = Tokens.Current.Kind;
                 switch (tk)
                 {
-                    case SyntaxKind.OpenParan:
+                    case SyntaxKind.OpenParen:
                         expr = AstNode.Call(expr, WalkArgumentList());
                         break;
 
@@ -1699,7 +1842,7 @@ namespace Shinobytes.XzaarScript.Parser
                     case SyntaxKind.MemberAccess:
                     case SyntaxKind.Dot:
                         var identifier = WalkIdentifier();
-                        expr = AstNode.MemberAccessChain(expr, AstNode.MemberAccess(identifier, expr.Type, FindMemberType(expr.ValueText, expr.Type, identifier)));
+                        expr = AstNode.MemberAccessChain(expr, AstNode.MemberAccess(identifier, expr.Type, FindMemberType(expr.StringValue, expr.Type, identifier)));
                         break;
 
                         //case SyntaxKind.Dot:
@@ -1810,8 +1953,8 @@ namespace Shinobytes.XzaarScript.Parser
 
                 if (SyntaxFacts.IsExpectedBinaryOperator(tk) || SyntaxFacts.IsBinaryExpression(tk))
                 {
-                    opKind = SyntaxFacts.IsExpectedBinaryOperator(tk) 
-                        ? SyntaxFacts.GetBinaryExpression(tk) 
+                    opKind = SyntaxFacts.IsExpectedBinaryOperator(tk)
+                        ? SyntaxFacts.GetBinaryExpression(tk)
                         : tk;
                 }
                 else if (SyntaxFacts.IsExpectedAssignmentOperator(tk) || SyntaxFacts.IsAssignment(tk))
@@ -1970,7 +2113,7 @@ namespace Shinobytes.XzaarScript.Parser
                 case SyntaxKind.KeywordReturn:
                 case SyntaxKind.KeywordSwitch:
                 case SyntaxKind.KeywordWhile:
-                case SyntaxKind.OpenParan:
+                case SyntaxKind.OpenParen:
                 case SyntaxKind.OpenBracket:
                 case SyntaxKind.Semicolon:
                     return true;

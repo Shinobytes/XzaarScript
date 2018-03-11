@@ -30,6 +30,10 @@ namespace Shinobytes.XzaarScript.Compiler
         //private readonly Stack<Scope> _scopes = new Stack<Scope>();
         //private readonly Stack<BoundConstants> _constants = new Stack<BoundConstants>();
 
+        public ExpressionCompiler(IScopeProvider scopeProvider = null) : base(scopeProvider ?? new DefaultScopeProvider())
+        {
+        }
+
         public XzaarExpression Compile(AstNode entry)
         {
             // 1. do analyzing steps on the entry node..

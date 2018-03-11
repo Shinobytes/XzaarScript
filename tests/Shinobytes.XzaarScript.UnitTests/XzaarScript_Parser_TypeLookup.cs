@@ -18,12 +18,9 @@
  */
 
 using System;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shinobytes.XzaarScript.Compiler;
 using Shinobytes.XzaarScript.Parser;
-using Shinobytes.XzaarScript.Parser.Ast;
-using Shinobytes.XzaarScript.Parser.Nodes;
 using Shinobytes.XzaarScript.Tools;
 
 namespace Shinobytes.XzaarScript.UnitTests
@@ -31,9 +28,6 @@ namespace Shinobytes.XzaarScript.UnitTests
     [TestClass]
     public class XzaarScript_Parser_TypeLookup
     {
-
-
-
         [TestMethod]
         public void conditional_assign()
         {

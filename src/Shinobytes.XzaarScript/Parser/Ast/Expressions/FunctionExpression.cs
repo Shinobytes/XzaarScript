@@ -21,10 +21,10 @@ using System;
 
 namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 {
-    public class FunctionExpression : XzaarExpression
+    public class FunctionExpression : AnonymousFunctionExpression
     {
         private readonly string name;
-        private readonly ParameterExpression[] parameters;
+        
         private XzaarType returnType;
         private XzaarExpression body;
         private Func<XzaarType> returnTypeBinding;
@@ -32,7 +32,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         internal FunctionExpression(string name, ParameterExpression[] parameters, XzaarType returnType, XzaarExpression body, bool isExtern)
         {
             this.name = name;
-            this.parameters = parameters;
+            this.Parameters = parameters;
             this.returnType = returnType;
             this.body = body;
             this.IsExtern = isExtern;
@@ -40,10 +40,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
         public string Name => name;
 
-        public ParameterExpression[] GetParameters()
-        {
-            return parameters;
-        }
+        public ParameterExpression[] Parameters { get; }
 
         public XzaarType ReturnType
         {

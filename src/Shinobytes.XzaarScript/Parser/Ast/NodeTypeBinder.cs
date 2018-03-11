@@ -97,27 +97,27 @@ namespace Shinobytes.XzaarScript.Parser.Ast
                 if (node.Accessor.Type == "any")
                 {
 
-                    var v = Variable(node.LastAccessor.ValueText);
+                    var v = Variable(node.LastAccessor.StringValue);
                     if (v != null)
                     {
                         // NOTE: This could potentially be a class in the future and not just a struct.
                         if (IsStruct(v.Type))
                         {
-                            var f = structs[v.Type].Fields.Cast<FieldNode>().FirstOrDefault(a => a.Name == node.Accessor.ValueText);
+                            var f = structs[v.Type].Fields.Cast<FieldNode>().FirstOrDefault(a => a.Name == node.Accessor.StringValue);
                             if (f != null) node.Accessor.Type = f.Type;
                             node.LastAccessor.Type = v.Type;
                         }
                     }
                     else
                     {
-                        var p = Parameter(node.LastAccessor.ValueText);
+                        var p = Parameter(node.LastAccessor.StringValue);
                         if (p != null)
                         {
                             // declaring type                            
                             // NOTE: This could potentially be a class in the future and not just a struct.
                             if (IsStruct(p.Type))
                             {
-                                var f = structs[p.Type].Fields.Cast<FieldNode>().FirstOrDefault(a => a.Name == node.Accessor.ValueText);
+                                var f = structs[p.Type].Fields.Cast<FieldNode>().FirstOrDefault(a => a.Name == node.Accessor.StringValue);
                                 if (f != null) node.Accessor.Type = f.Type;
                                 node.LastAccessor.Type = p.Type;
                             }
@@ -159,10 +159,10 @@ namespace Shinobytes.XzaarScript.Parser.Ast
             }
 
             if (node.AssignmentExpression is LiteralNode literalNode 
-                && (literalNode.NodeName == literalNode.ValueText || literalNode.NodeName == "NAME"))
+                && (literalNode.NodeName == literalNode.StringValue || literalNode.NodeName == "NAME"))
             {
                 // identity
-                var identity = literalNode.ValueText;
+                var identity = literalNode.StringValue;
                 if (IsStruct(identity))
                 {
                     node.SetValue(new CreateStructNode(structs[identity], literalNode.Index));

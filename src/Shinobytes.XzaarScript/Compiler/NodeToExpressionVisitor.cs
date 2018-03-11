@@ -30,24 +30,35 @@ namespace Shinobytes.XzaarScript.Compiler
 {
     public abstract class NodeToExpressionVisitor : INodeVisitor
     {
-        private const string GlobalScopeName = "$GLOBAL";
+        private readonly IScopeProvider scopeProvider;
 
         private readonly List<string> errors = new List<string>();
-        private Dictionary<string, List<ParameterExpression>> functionParameters = new Dictionary<string, List<ParameterExpression>>();
-        private Dictionary<string, List<ParameterExpression>> scopeVariables = new Dictionary<string, List<ParameterExpression>>();
-        private Dictionary<string, List<FunctionExpression>> scopeFunctions = new Dictionary<string, List<FunctionExpression>>();
-        private Dictionary<FunctionExpression, XzaarMethodBase> compiledFunctions = new Dictionary<FunctionExpression, XzaarMethodBase>();
+
+        //private Dictionary<string, List<ParameterExpression>> functionParameters = new Dictionary<string, List<ParameterExpression>>();
+        //private Dictionary<string, List<ParameterExpression>> scopeVariables = new Dictionary<string, List<ParameterExpression>>();
+        //private Dictionary<string, List<FunctionExpression>> scopeFunctions = new Dictionary<string, List<FunctionExpression>>();
+        //private Dictionary<string, Dictionary<string, LambdaExpression>> scopeLambdas = new Dictionary<string, Dictionary<string, LambdaExpression>>();
+
+        //private Dictionary<FunctionExpression, XzaarMethodBase> compiledFunctions = new Dictionary<FunctionExpression, XzaarMethodBase>();
         private List<LabelTarget> definedLabels = new List<LabelTarget>();
-        private List<StructExpression> structs = new List<StructExpression>();
-        private XzaarScopeType currentScopeType = XzaarScopeType.Global;
-        private string currentScopeIdentifier = GlobalScopeName;
-        private int currentScopeLevel = 0;
+        //private List<StructExpression> structs = new List<StructExpression>();
+
+        private readonly Dictionary<string, StructExpression> structs = new Dictionary<string, StructExpression>();
+
+        //private ExpressionScopeType currentScopeType = ExpressionScopeType.Global;
+        //private string currentScopeIdentifier = GlobalScopeIdentifier;
+        //private int currentScopeLevel = 0;
         private string currentFunctionName;
         private bool visitFunctionBody = true;
 
 
         public bool HasErrors => errors.Count > 0;
         public IList<string> Errors => errors;
+
+        internal NodeToExpressionVisitor(IScopeProvider scopeProvider)
+        {
+            this.scopeProvider = scopeProvider;
+        }
 
         private XzaarExpression Error(string message)
         {
@@ -56,6 +67,17 @@ namespace Shinobytes.XzaarScript.Compiler
         }
 
         // public void RegisterExternFunction()
+
+        public XzaarExpression Visit(LambdaNode lambda)
+        {
+            var lambdaParameters = lambda.Parameters.Parameters.Select(Visit).Cast<ParameterExpression>().ToArray();
+            var lambdaBody = Visit(lambda.Body);
+            var lambdaExpr = XzaarExpression.Lambda(lambdaParameters, lambdaBody);
+
+
+
+            return lambdaExpr;
+        }
 
         public virtual XzaarExpression Visit(LogicalConditionalNode logicalConditional)
         {
@@ -273,10 +295,15 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             if (type == null) type = XzaarBaseTypes.Void;
             var field = type.GetField(s);
-            if (field != null) return new FieldExpression(field.FieldType, field.Name, type);
+            if (field != null)
+            {
+                return new FieldExpression(field.FieldType, field.Name, type);
+            }
 
-            var str = this.structs.FirstOrDefault(s1 => s1.Name == type.Name);
-            if (str != null) return str.Fields.Cast<FieldExpression>().FirstOrDefault(b => b.Name == s);
+            if (structs.TryGetValue(type.Name, out var str))
+            {
+                return str.Fields.Cast<FieldExpression>().FirstOrDefault(b => b.Name == s);
+            }
 
             return null;
         }
@@ -447,13 +474,11 @@ namespace Shinobytes.XzaarScript.Compiler
                 variable = XzaarExpression.DefineVariable(GetOrCreateType(definedVariable.Type), definedVariable.Name);
             }
 
-            if (!scopeVariables.ContainsKey(this.currentScopeIdentifier))
+            this.scopeProvider.Current.AddVariable(variable);
+
+            if (variable.AssignmentExpression is LambdaExpression lambda)
             {
-                scopeVariables.Add(this.currentScopeIdentifier, new List<ParameterExpression> { variable });
-            }
-            else
-            {
-                scopeVariables[this.currentScopeIdentifier].Add(variable);
+                this.scopeProvider.Current.BindLambda(variable, lambda);
             }
 
             return variable;
@@ -465,14 +490,16 @@ namespace Shinobytes.XzaarScript.Compiler
             if (@type == null) throw new InvalidOperationException(variable.Type + " is an unknown type.");
             var v = XzaarExpression.Variable(@type, variable.Name);
 
-            if (!scopeVariables.ContainsKey(this.currentScopeIdentifier))
-            {
-                scopeVariables.Add(this.currentScopeIdentifier, new List<ParameterExpression> { v });
-            }
-            else
-            {
-                scopeVariables[this.currentScopeIdentifier].Add(v);
-            }
+            this.scopeProvider.Current.AddVariable(v);
+
+            //if (!scopeVariables.ContainsKey(this.currentScopeIdentifier))
+            //{
+            //    scopeVariables.Add(this.currentScopeIdentifier, new List<ParameterExpression> { v });
+            //}
+            //else
+            //{
+            //    scopeVariables[this.currentScopeIdentifier].Add(v);
+            //}
             return v;
         }
 
@@ -484,17 +511,19 @@ namespace Shinobytes.XzaarScript.Compiler
 
             if (parameter.Parent != null && parameter.Parent.Parent != null)
             {
-                var function = parameter.Parent.Parent as FunctionNode;
-                if (function != null)
+                if (parameter.Parent.Parent is FunctionNode function)
                 {
-                    if (!functionParameters.ContainsKey(function.Name))
-                    {
-                        functionParameters.Add(function.Name, new List<ParameterExpression> { param });
-                    }
-                    else
-                    {
-                        functionParameters[function.Name].Add(param);
-                    }
+
+                    scopeProvider.Current.AddParameter(param);
+
+                    //if (!functionParameters.ContainsKey(function.Name))
+                    //{
+                    //    functionParameters.Add(function.Name, new List<ParameterExpression> { param });
+                    //}
+                    //else
+                    //{
+                    //    functionParameters[function.Name].Add(param);
+                    //}
                 }
             }
             return param;
@@ -502,36 +531,37 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public virtual XzaarExpression Visit(FunctionCallNode call)
         {
-            var arguments = call.Arguments.Select(Visit).Where(a => a != null).ToArray();
-
+            string functionAlias = null;
+            var arguments = call.Arguments.Select(Visit).Where(a => a != null).ToArray();            
             var f = call.Function;
 
             if (f.Kind == SyntaxKind.FunctionDefinitionExpression)
             {
                 // using an already declared function
-                var function = f as FunctionNode;
-                if (function == null) throw new ArgumentNullException("function", "Target function cannot be null");
-
-                var method = Visit(function) as FunctionExpression;
-                if (method != null)
+                if (!(f is FunctionNode function))
                 {
-                    if (call.Instance == null)
-                    {
-                        return XzaarExpression.Call(method, arguments);
-                    }
-                    else
-                    {
-                        return Error("The function '" + call.Instance.ValueText + "." + function.Name + "' cannot be called as locally defined instanced functions are not supported");
-                    }
+                    throw new ArgumentNullException("function", "Target function cannot be null");
                 }
+
+                if (!(Visit(function) is FunctionExpression method))
+                {
+                    return Error("Call to unknown function. Something must have gone really bad!");
+                }
+
+                if (call.Instance == null)
+                {
+                    return XzaarExpression.Call(method, arguments);
+                }
+
+                return Error("The function '" + call.Instance.StringValue + "." + function.Name + "' cannot be called as locally defined instanced functions are not supported");
             }
 
-            else if (SyntaxFacts.IsLiteral(f.Kind) || SyntaxFacts.IsMemberAccess(f.Kind))
+            if (SyntaxFacts.IsLiteral(f.Kind) || SyntaxFacts.IsMemberAccess(f.Kind))
             {
                 var functionName = "";
                 if (f is MemberAccessChainNode chain)
                 {
-                    functionName = chain.Accessor.ValueText;
+                    functionName = chain.Accessor.StringValue;
                     if (call.Instance == null) call.Instance = chain.LastAccessor;
                 }
                 else
@@ -545,40 +575,70 @@ namespace Shinobytes.XzaarScript.Compiler
 
                 if (call.Instance == null)
                 {
-                    var function = FindMatchingFunctionInGlobalScope(functionName, arguments.Length);
+                    var function =
+                        scopeProvider.Current.Find<AnonymousFunctionExpression>(functionName, arguments.Length);// FindMatchingFunctionInCurrentOrGlobalScope(functionName, arguments.Length);
                     if (function == null)
                     {
-                        // oh well. still can't seem to determine what function it is. still undefined 'extern' function as well?
-                        return Error("Target function '" + functionName + "' was not found. Forgot to declare it?");
-                    }
-                    return XzaarExpression.Call(function, arguments);
-                }
-                var instanceVariableName = call.Instance.Value + "";
-                if (currentFunctionName != null && this.functionParameters.ContainsKey(currentFunctionName))
-                {
-                    var parameters = functionParameters[currentFunctionName];
-                    var p = parameters.FirstOrDefault(pa => pa.Name == instanceVariableName);
-                    if (p != null)
-                    {
-                        if (Equals(p.Type, XzaarBaseTypes.Any) || (ArrayHelper.IsArrayFunction(call.Value + "") && p.Type.IsArray))
+                        // if its not a function, lets see if we are trying to invoke a function reference
+                        var varOrParam = scopeProvider.Current.Find<ParameterExpression>(functionName);
+                        if (varOrParam == null || !varOrParam.IsFunctionReference)
                         {
-                            return XzaarExpression.Call(p,
-                                XzaarExpression.Function(functionName, new ParameterExpression[arguments.Length], XzaarBaseTypes.Any, true),
-                                arguments);
+                            // to avoid traversing the tree here to find the source. We will just return 
+                            // oh well. still can't seem to determine what function it is. still undefined 'extern' function as well?
+                            return Error("Target function '" + functionName + "' was not found. Forgot to declare it?");
                         }
+
+                        function = varOrParam.FunctionReference;
+                        functionAlias = varOrParam.Name;
                     }
+
+                    if (function is FunctionExpression invocation)
+                    {
+                        return XzaarExpression.Call(functionAlias, invocation, arguments);
+                    }
+
+                    return XzaarExpression.Call(function as LambdaExpression, arguments);
                 }
 
-                var v = this.FindVariable(instanceVariableName, true);
-                if (v != null)
+                var instanceVariableName = call.Instance.Value + "";
+                var variableOrParameter = this.scopeProvider.Current.Find<ParameterExpression>(instanceVariableName);
+                if (variableOrParameter != null)
                 {
-                    if (Equals(v.Type, XzaarBaseTypes.Any) || (ArrayHelper.IsArrayFunction(functionName) && v.Type.IsArray))
+                    if (Equals(variableOrParameter.Type, XzaarBaseTypes.Any) || (ArrayHelper.IsArrayFunction(functionName) && variableOrParameter.Type.IsArray))
                     {
-                        return XzaarExpression.Call(v,
+                        return XzaarExpression.Call(variableOrParameter,
                             XzaarExpression.Function(functionName, new ParameterExpression[arguments.Length], XzaarBaseTypes.Any, true),
                             arguments);
                     }
                 }
+
+                //var p = scopeProvider.Current.FindParameter(instanceVariableName);
+                //if (currentFunctionName != null && this.functionParameters.ContainsKey(currentFunctionName))
+                //{
+                //    //var parameters = functionParameters[currentFunctionName];
+                //    //var p = parameters.FirstOrDefault(pa => pa.Name == instanceVariableName);
+                //    if (p != null)
+                //    {
+                //        if (Equals(p.Type, XzaarBaseTypes.Any) || (ArrayHelper.IsArrayFunction(call.Value + "") && p.Type.IsArray))
+                //        {
+                //            return XzaarExpression.Call(p,
+                //                XzaarExpression.Function(functionName, new ParameterExpression[arguments.Length], XzaarBaseTypes.Any, true),
+                //                arguments);
+                //        }
+                //    }
+                //}
+
+                ////var v = this.FindVariable(instanceVariableName, true);
+                //var v = this.scopeProvider.Current.FindVariable(instanceVariableName);
+                //if (v != null)
+                //{
+                //    if (Equals(v.Type, XzaarBaseTypes.Any) || (ArrayHelper.IsArrayFunction(functionName) && v.Type.IsArray))
+                //    {
+                //        return XzaarExpression.Call(v,
+                //            XzaarExpression.Function(functionName, new ParameterExpression[arguments.Length], XzaarBaseTypes.Any, true),
+                //            arguments);
+                //    }
+                //}
 
                 // find function based on the instance
                 return Error("Target function '" + functionName + "' was not found. Forgot to declare it?");
@@ -611,53 +671,69 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public virtual XzaarExpression Visit(FunctionNode function)
         {
-            var existing = FindMatchingFunctionInGlobalScope(function);
-            if (existing != null)
+            if (FindMatchingFunctionInGlobalScope(function) is FunctionExpression existing)
             {
                 // if the function has already been added but the body or return type hasnt been defined then we want to do that.
                 // this is because the function was already added during the 'function discovery' step
                 if (existing.ReturnType == null || existing.GetBody() == null)
                 {
-                    this.currentFunctionName = function.Name;
-
-                    SetCurrentScope(function.Name, XzaarScopeType.Function);
-
-                    existing.SetReturnType(function.GetReturnType(
-                     new XzaarTypeFinderContext(
-                         FindMatchingFunctionInGlobalScope,
-                         FindVariable
-                     ))).SetBody(Visit(function.Body));
-
-                    if (function.IsReturnTypeBound)
+                    using (EnterScope(function.Name, ExpressionScopeType.Function))
                     {
-                        var fn = FindMatchingFunctionInGlobalScope(function.ReturnTypeBindingName);
-                        if (fn != null)
-                            existing.BindReturnType(() => fn.ReturnType);
+
+                        this.currentFunctionName = function.Name;
+
+                        // Increase scope depth.
+
+                        //SetCurrentScope(function.Name, ExpressionScopeType.Function);
+
+                        existing.SetReturnType(function.GetReturnType(
+                            new XzaarTypeFinderContext(
+                                // FindMatchingFunctionInGlobalScope,
+                                (a, b) => scopeProvider.Current.Find<AnonymousFunctionExpression>(a, b),
+                                (a, b) => scopeProvider.Current.Find<ParameterExpression>(a)
+                            ))).SetBody(Visit(function.Body));
+
+                        if (function.IsReturnTypeBound)
+                        {
+                            if (scopeProvider.Current.Find<AnonymousFunctionExpression>(function.ReturnTypeBindingName) is FunctionExpression fn)
+                                //if (FindMatchingFunctionInGlobalScope(function.ReturnTypeBindingName) is FunctionExpression fn)
+                                existing.BindReturnType(() => fn.ReturnType);
+                        }
+
                     }
                 }
+
+
                 return existing;
             }
 
-            SetCurrentScope(function.Name, XzaarScopeType.Function);
+            //SetCurrentScope(function.Name, ExpressionScopeType.Function);
 
-            var f = XzaarExpression.Function(
-                function.Name,
-                function.Parameters.Parameters.Select(Visit).Cast<ParameterExpression>().ToArray(),
-                function.ReturnType,
-                null,
-                function.IsExtern
-            );
+            using (EnterScope(function.Name, ExpressionScopeType.Function))
+            {
 
-            // late bind the body so we can add this function to the global scope before we parse the body (instance functions are not supported yet)
-            var targetFunction = AddFunctionToGlobalScope(f)
-                .SetReturnType(function.GetReturnType(
-                     new XzaarTypeFinderContext(
-                         FindMatchingFunctionInGlobalScope,
-                         FindVariable)
-                     { IgnoreMissingMembers = !visitFunctionBody }));
-            if (visitFunctionBody) targetFunction.SetBody(Visit(function.Body));
+                var f = XzaarExpression.Function(
+                    function.Name,
+                    function.Parameters.Parameters.Select(Visit).Cast<ParameterExpression>().ToArray(),
+                    function.ReturnType,
+                    null,
+                    function.IsExtern
+                );
 
-            return f;
+                // late bind the body so we can add this function to the global scope before we parse the body (instance functions are not supported yet)
+                var targetFunction = AddFunctionToGlobalScope(f)
+                    .SetReturnType(function.GetReturnType(
+                         new XzaarTypeFinderContext(
+                             //FindMatchingFunctionInGlobalScope,
+                             (a, b) => scopeProvider.Current.Find<AnonymousFunctionExpression>(a, b),
+                             (a, b) => scopeProvider.Current.Find<ParameterExpression>(a))
+                         { IgnoreMissingMembers = !visitFunctionBody }));
+                if (visitFunctionBody) targetFunction.SetBody(Visit(function.Body));
+
+                // leave scope
+
+                return f;
+            }
         }
 
         public virtual XzaarExpression Visit(StructNode node)
@@ -672,11 +748,10 @@ namespace Shinobytes.XzaarScript.Compiler
         public virtual XzaarExpression Visit(FieldNode node)
         {
             var declaringType = GetOrCreateType(node.DeclaringType);
-            var a = this.structs.FirstOrDefault(s => s.Name == node.Type);
-            if (a != null)
+
+            if (structs.TryGetValue(node.Type, out var a))
             {
-                XzaarType newType;
-                if (XzaarType.TryGetType(a.Name, a, out newType))
+                if (XzaarType.TryGetType(a.Name, a, out var newType))
                 {
                     return XzaarExpression.Field(newType, node.Name, declaringType);
                 }
@@ -699,60 +774,36 @@ namespace Shinobytes.XzaarScript.Compiler
                     return GetKnownConstant(value);
                 }
 
-                if (this.currentScopeType == XzaarScopeType.Function)
+                var variableOrParameter = scopeProvider.Current.Find<ParameterExpression>(literal.StringValue);
+
+                if (variableOrParameter != null)
                 {
-                    if (this.functionParameters.ContainsKey(this.currentScopeIdentifier))
+                    if (variableOrParameter.IsParameter)
                     {
-                        var plist = this.functionParameters[this.currentScopeIdentifier];
-                        var param = plist.FirstOrDefault(p => p.Name == literal.Value.ToString());
-                        if (param != null)
-                        {
-                            return XzaarExpression.Parameter(param.Type, param.Name);
-                        }
+                        return XzaarExpression.Parameter(variableOrParameter.Type, variableOrParameter.Name);
                     }
 
-                    var variable = FindVariable(literal.Value.ToString(), true);
-
-                    if (variable != null)
-                    {
-                        return XzaarExpression.Variable(variable.Type, variable.Name);
-                    }
-                }
-                else
-                {
-                    var variable = FindVariable(literal.Value.ToString(), true);
-
-                    if (variable != null)
-                    {
-                        return XzaarExpression.Variable(variable.Type, variable.Name);
-                    }
+                    return XzaarExpression.Variable(variableOrParameter.Type, variableOrParameter.Name);
                 }
             }
             else
             {
                 if (literal.NodeName == "ARRAY" && literal.Children.Count > 0)
                 {
-                    var expr = new List<XzaarExpression>();
-                    foreach (var c in literal.Children)
-                    {
-                        expr.Add(Visit(c));
-                    }
-
                     // return XzaarExpression.ArrayInitializer(expr.ToArray());
-                    return XzaarExpression.Constant(expr.ToArray(), GetOrCreateType(literal.NodeName.ToLower()));
+                    return XzaarExpression.Constant(literal.Children.Select(Visit).ToArray(), GetOrCreateType(literal.NodeName.ToLower()));
                 }
-                else
-                {
-                    return XzaarExpression.Constant(literal.Value, GetOrCreateType(literal.NodeName.ToLower()));
-                }
+
+                return XzaarExpression.Constant(literal.Value, GetOrCreateType(literal.NodeName.ToLower()));
             }
 
-            // if ((literal.Value + "").StartsWith("$"))
+            var function = FindFunction(literal.StringValue);
+            if (function != null)
             {
-                return XzaarExpression.Variable(XzaarBaseTypes.Any, literal.Value + "");
+                return XzaarExpression.FunctionReference(function, literal.StringValue);
             }
 
-            return Error("Use of unknown or undefined variable '" + literal.Value + "'");
+            return XzaarExpression.Variable(XzaarBaseTypes.Any, literal.Value + "");
         }
 
         private bool IsKnownConstant(object value)
@@ -769,43 +820,56 @@ namespace Shinobytes.XzaarScript.Compiler
             return null;
         }
 
-        private ParameterExpression FindVariable(string variableOrValue, bool includeGlobalVariables)
+        private AnonymousFunctionExpression FindFunction(string functionName)
         {
-            // need a way to traverse scope upwards, right now we only have global and function scope at undefined level
+            return scopeProvider.Current.Find<AnonymousFunctionExpression>(functionName);
 
-            if (variableOrValue.StartsWith("$"))
-            {
-                return new ParameterExpression(variableOrValue);
-            }
+            //var function = FindMatchingFunctionInCurrentScope(functionName);
+            //if (function != null)
+            //{
+            //    return function;
+            //}
 
-            if (includeGlobalVariables)
-            {
-                if (this.currentScopeIdentifier != GlobalScopeName && this.scopeVariables.ContainsKey(currentScopeIdentifier))
-                {
-                    var vlist = this.scopeVariables[this.currentScopeIdentifier];
-                    var v = vlist.FirstOrDefault(p => p.Name == variableOrValue);
-                    if (v != null) return v;
-                }
-
-                if (this.scopeVariables.ContainsKey(GlobalScopeName))
-                {
-                    var vlist = this.scopeVariables[GlobalScopeName];
-                    var v = vlist.FirstOrDefault(p => p.Name == variableOrValue);
-                    if (v != null) return v;
-                }
-
-            }
-            else
-            {
-                if (this.scopeVariables.ContainsKey((this.currentScopeIdentifier)))
-                {
-                    var vlist = this.scopeVariables[this.currentScopeIdentifier];
-                    return vlist.FirstOrDefault(p => p.Name == variableOrValue);
-                }
-            }
-
-            return null;
+            //return FindMatchingFunctionInGlobalScope(functionName);
         }
+
+        //private ParameterExpression FindVariable(string variableOrValue, bool includeGlobalVariables)
+        //{
+        //    // need a way to traverse scope upwards, right now we only have global and function scope at undefined level
+
+        //    if (variableOrValue.StartsWith("$"))
+        //    {
+        //        return new ParameterExpression(variableOrValue);
+        //    }
+
+        //    if (includeGlobalVariables)
+        //    {
+        //        if (this.currentScopeIdentifier != GlobalScopeIdentifier && this.scopeVariables.ContainsKey(currentScopeIdentifier))
+        //        {
+        //            var vlist = this.scopeVariables[this.currentScopeIdentifier];
+        //            var v = vlist.FirstOrDefault(p => p.Name == variableOrValue);
+        //            if (v != null) return v;
+        //        }
+
+        //        if (this.scopeVariables.ContainsKey(GlobalScopeIdentifier))
+        //        {
+        //            var vlist = this.scopeVariables[GlobalScopeIdentifier];
+        //            var v = vlist.FirstOrDefault(p => p.Name == variableOrValue);
+        //            if (v != null) return v;
+        //        }
+
+        //    }
+        //    else
+        //    {
+        //        if (this.scopeVariables.ContainsKey((this.currentScopeIdentifier)))
+        //        {
+        //            var vlist = this.scopeVariables[this.currentScopeIdentifier];
+        //            return vlist.FirstOrDefault(p => p.Name == variableOrValue);
+        //        }
+        //    }
+
+        //    return null;
+        //}
 
 
         public virtual BlockExpression Visit(BlockNode block)
@@ -839,21 +903,21 @@ namespace Shinobytes.XzaarScript.Compiler
 
             foreach (var c in items)
             {
-                var function = c as FunctionNode;
-                if (function != null)
+                if (c is FunctionNode function)
                 {
-
                     if (function.ReturnType == null)
                     {
-                        var identifier = currentScopeIdentifier;
-                        var type = currentScopeType;
-                        var level = currentScopeLevel;
+                        //var identifier = currentScopeIdentifier;
+                        //var type = currentScopeType;
+                        //var level = currentScopeLevel;
+
                         visitFunctionBody = false;
 
                         Visit(function);
 
                         visitFunctionBody = true;
-                        SetCurrentScope(identifier, type, level);
+
+                        //SetCurrentScope(identifier, type, level);
 
                         if (function.ReturnType != null && function.ReturnType.IsAny)
                         {
@@ -874,8 +938,7 @@ namespace Shinobytes.XzaarScript.Compiler
                 }
                 else
                 {
-                    var str = c as StructNode;
-                    if (str != null)
+                    if (c is StructNode str)
                     {
                         var s = XzaarExpression.Struct(
                             str.Name,
@@ -885,6 +948,14 @@ namespace Shinobytes.XzaarScript.Compiler
                         // late bind the body so we can add this function to the global scope before we parse the body (instance functions are not supported yet)
                         AddStructToGlobalScope(s);
                     }
+
+                    //if (c is ClassNode clss)
+                    //{
+                    //}
+
+                    //if (c is EnumNode enm)
+                    //{
+                    //}
                 }
             }
         }
@@ -905,85 +976,89 @@ namespace Shinobytes.XzaarScript.Compiler
             var name = node.GetType().Name;
             if (name.EndsWith("XzaarNode"))
                 return Error("Unknown node '" + name + "' found. Something really really bad happened here");
-
-            if (node is ConditionalExpressionNode) return Visit(node as ConditionalExpressionNode);
-            if (node is LogicalConditionalNode) return Visit(node as LogicalConditionalNode);
-            if (node is EqualityOperatorNode) return Visit(node as EqualityOperatorNode);
-            if (node is BinaryOperatorNode) return Visit(node as BinaryOperatorNode);
-            if (node is LogicalNotNode) return Visit(node as LogicalNotNode);
-            if (node is IfElseNode) return Visit(node as IfElseNode);
-            if (node is FunctionParametersNode) return Visit(node as FunctionParametersNode);
-            if (node is ReturnNode) return Visit(node as ReturnNode);
-            if (node is ContinueNode) return Visit(node as ContinueNode);
-            if (node is BreakNode) return Visit(node as BreakNode);
-            if (node is LabelNode) return Visit(node as LabelNode);
-            if (node is GotoNode) return Visit(node as GotoNode);
-            if (node is MemberAccessChainNode) return Visit(node as MemberAccessChainNode);
-            if (node is CreateStructNode) return Visit(node as CreateStructNode);
-            if (node is MemberAccessNode) return Visit(node as MemberAccessNode);
-            if (node is AssignNode) return Visit(node as AssignNode);
-            if (node is UnaryNode) return Visit(node as UnaryNode);
-            if (node is CaseNode) return Visit(node as CaseNode);
-            if (node is MatchNode) return Visit(node as MatchNode);
-            if (node is DoWhileLoopNode) return Visit(node as DoWhileLoopNode);
-            if (node is WhileLoopNode) return Visit(node as WhileLoopNode);
-            if (node is ForeachLoopNode) return Visit(node as ForeachLoopNode);
-            if (node is ForLoopNode) return Visit(node as ForLoopNode);
-            if (node is LoopNode) return Visit(node as LoopNode);
-            if (node is DefineVariableNode) return Visit(node as DefineVariableNode);
-            if (node is VariableNode) return Visit(node as VariableNode);
-            if (node is ParameterNode) return Visit(node as ParameterNode);
-            if (node is FunctionCallNode) return Visit(node as FunctionCallNode);
-            if (node is ExpressionNode) return Visit(node as ExpressionNode);
-            if (node is ArgumentNode) return Visit(node as ArgumentNode);
-            if (node is FunctionNode) return Visit(node as FunctionNode);
-            if (node is StructNode) return Visit(node as StructNode);
-            if (node is FieldNode) return Visit(node as FieldNode);
-            if (node is NumberNode) return Visit(node as NumberNode);
-            if (node is LiteralNode) return Visit(node as LiteralNode);
-            if (node is BodyNode) return Visit(node as BodyNode);
-            if (node is BlockNode) return Visit(node as BlockNode);
-            if (node is EmptyNode) return Visit(node as EmptyNode);
-            if (node is EntryNode) return Visit(node as EntryNode);
-
+            if (node is LambdaNode lambdaNode) return Visit(lambdaNode);
+            if (node is ConditionalExpressionNode expressionNode) return Visit(expressionNode);
+            if (node is LogicalConditionalNode conditionalNode) return Visit(conditionalNode);
+            if (node is EqualityOperatorNode operatorNode) return Visit(operatorNode);
+            if (node is BinaryOperatorNode binaryOperatorNode) return Visit(binaryOperatorNode);
+            if (node is LogicalNotNode notNode) return Visit(notNode);
+            if (node is IfElseNode elseNode) return Visit(elseNode);
+            if (node is FunctionParametersNode parametersNode) return Visit(parametersNode);
+            if (node is ReturnNode returnNode) return Visit(returnNode);
+            if (node is ContinueNode continueNode) return Visit(continueNode);
+            if (node is BreakNode breakNode) return Visit(breakNode);
+            if (node is LabelNode labelNode) return Visit(labelNode);
+            if (node is GotoNode gotoNode) return Visit(gotoNode);
+            if (node is MemberAccessChainNode chainNode) return Visit(chainNode);
+            if (node is CreateStructNode structNode) return Visit(structNode);
+            if (node is MemberAccessNode accessNode) return Visit(accessNode);
+            if (node is AssignNode assignNode) return Visit(assignNode);
+            if (node is UnaryNode unaryNode) return Visit(unaryNode);
+            if (node is CaseNode caseNode) return Visit(caseNode);
+            if (node is MatchNode matchNode) return Visit(matchNode);
+            if (node is DoWhileLoopNode loopNode) return Visit(loopNode);
+            if (node is WhileLoopNode whileLoopNode) return Visit(whileLoopNode);
+            if (node is ForeachLoopNode foreachLoopNode) return Visit(foreachLoopNode);
+            if (node is ForLoopNode forLoopNode) return Visit(forLoopNode);
+            if (node is LoopNode node1) return Visit(node1);
+            if (node is DefineVariableNode variableNode) return Visit(variableNode);
+            if (node is VariableNode variableNode1) return Visit(variableNode1);
+            if (node is ParameterNode parameterNode) return Visit(parameterNode);
+            if (node is FunctionCallNode callNode) return Visit(callNode);
+            if (node is ExpressionNode expressionNode1) return Visit(expressionNode1);
+            if (node is ArgumentNode argumentNode) return Visit(argumentNode);
+            if (node is FunctionNode functionNode) return Visit(functionNode);
+            if (node is StructNode structNode1) return Visit(structNode1);
+            if (node is FieldNode fieldNode) return Visit(fieldNode);
+            if (node is NumberNode numberNode) return Visit(numberNode);
+            if (node is LiteralNode literalNode) return Visit(literalNode);
+            if (node is BodyNode bodyNode) return Visit(bodyNode);
+            if (node is BlockNode blockNode) return Visit(blockNode);
+            if (node is EmptyNode emptyNode) return Visit(emptyNode);
+            if (node is EntryNode entryNode) return Visit(entryNode);
 
             return Visit(node);
+
+            // or just simply:
             // return Visit((dynamic)node);
         }
 
 
         private XzaarType GetOrCreateType(string typeName)
         {
-            var a = this.structs.FirstOrDefault(s => s.Name == typeName);
-            if (a != null)
+            if (this.structs.TryGetValue(typeName, out var a))
             {
-                XzaarType newType;
-                if (XzaarType.TryGetType(a.Name, a, out newType))
+                if (XzaarType.TryGetType(a.Name, a, out var newType))
                 {
                     return newType;
                 }
             }
-            var final = XzaarType.GetType(typeName);
-            if (final == null) final = XzaarBaseTypes.Void;
-            return final;
+
+            return XzaarType.GetType(typeName) ?? XzaarBaseTypes.Void;
         }
 
-        private void SetCurrentScope(string identifier)
+        //private void SetCurrentScope(string identifier)
+        //{
+        //    SetCurrentScope(identifier, currentScopeType, currentScopeLevel);
+        //}
+
+        //private void SetCurrentScope(string identifier, ExpressionScopeType type)
+        //{
+        //    SetCurrentScope(identifier, type, currentScopeLevel);
+        //}
+
+        //private void SetCurrentScope(string identifier, ExpressionScopeType type, int level)
+        //{
+        //    this.currentScopeIdentifier = identifier;
+        //    this.currentScopeType = type;
+        //    this.currentScopeLevel = level;
+        //}
+
+        private ExpressionScope EnterScope(string name, ExpressionScopeType scopeType)
         {
-            SetCurrentScope(identifier, currentScopeType, currentScopeLevel);
+            return scopeProvider.Get(name, scopeType);
         }
 
-        private void SetCurrentScope(string identifier, XzaarScopeType type)
-        {
-            SetCurrentScope(identifier, type, currentScopeLevel);
-        }
-
-        private void SetCurrentScope(string identifier, XzaarScopeType type, int level)
-        {
-            this.currentScopeIdentifier = identifier;
-            this.currentScopeType = type;
-            this.currentScopeLevel = level;
-        }
 
         //private XzaarMethodBase BuildMethod(FunctionExpression func)
         //{
@@ -999,36 +1074,93 @@ namespace Shinobytes.XzaarScript.Compiler
         //    return f;
         //}
 
-        private FunctionExpression FindMatchingFunctionInGlobalScope(string name)
+        //private AnonymousFunctionExpression FindMatchingFunctionInGlobalScope(string name, int argCount = -1)
+        //{
+        //    return FindMatchingFunctionInScope(name, GlobalScopeIdentifier, argCount);
+        //}
+
+        //private AnonymousFunctionExpression FindMatchingFunctionInCurrentScope(string name, int argCount = -1)
+        //{
+        //    return FindMatchingFunctionInScope(name, this.currentScopeIdentifier, argCount);
+        //}
+
+        //private AnonymousFunctionExpression FindMatchingFunctionInCurrentOrGlobalScope(string name, int argCount = -1)
+        //{
+        //    var function = FindMatchingFunctionInScope(name, this.currentScopeIdentifier, argCount);
+        //    if (function != null)
+        //    {
+        //        return function;
+        //    }
+
+        //    return FindMatchingFunctionInGlobalScope(name, argCount);
+        //}
+
+        //private AnonymousFunctionExpression FindMatchingFunctionInScope(string name, string scope, int argCount = -1)
+        //{
+        //    if (this.scopeFunctions.ContainsKey(scope))
+        //    {
+        //        var function = this.scopeFunctions[scope].FirstOrDefault(f => f.Name == name && (argCount == -1 || f.GetParameters().Length == argCount));
+        //        if (function != null)
+        //        {
+        //            return function;
+        //        }
+        //    }
+
+        //    if (this.scopeLambdas.ContainsKey(scope))
+        //    {
+        //        // in case its a lambda invocation, test to see if we got any variables names that may match.
+        //        if (this.scopeLambdas[scope].TryGetValue(name, out var result) && (argCount == -1 || result.Parameters.Length == argCount))
+        //        {
+        //            return result;
+        //        }
+        //    }
+
+        //    return null;
+        //}
+
+        //private AnonymousFunctionExpression FindMatchingFunctionInGlobalScope(string name, int argCount)
+        //{
+        //    if (this.scopeFunctions.ContainsKey(GlobalScopeIdentifier))
+        //    {
+        //        var function = this.scopeFunctions[GlobalScopeIdentifier].FirstOrDefault(f => f.Name == name && (argCount == -1 || f.GetParameters().Length == argCount));
+        //        if (function != null)
+        //        {
+        //            return function;
+        //        }
+        //    }
+        //    // in case its a lambda invocation, test to see if we got any variables names that may match.
+        //    if (this.scopeLambdas.ContainsKey(GlobalScopeIdentifier))
+        //    {
+        //        if (this.scopeLambdas[GlobalScopeIdentifier].TryGetValue(name, out var result) && (argCount == -1 || result.Parameters.Length == argCount))
+        //        {
+        //            return result;
+        //        }
+        //    }
+        //    return null;
+        //}
+
+
+        //private AnonymousFunctionExpression FindMatchingFunctionInGlobalScope(string name, XzaarType returnType, int argCount)
+        //{
+        //    if (!this.scopeFunctions.ContainsKey(GlobalScopeIdentifier))
+        //    {
+        //        return null;
+        //    }
+
+        //    // ... don't support lambdas here. besides i do
+
+        //    return this.scopeFunctions[GlobalScopeIdentifier].FirstOrDefault(f => f.Name == name && f.ReturnType.Name == returnType.Name && f.GetParameters().Length == argCount);
+        //}
+
+        private AnonymousFunctionExpression FindMatchingFunctionInGlobalScope(FunctionNode function)
         {
-            if (!this.scopeFunctions.ContainsKey(GlobalScopeName)) return null;
-            return this.scopeFunctions[GlobalScopeName].FirstOrDefault(f => f.Name == name);
-        }
-
-        private FunctionExpression FindMatchingFunctionInGlobalScope(string name, int argCount)
-        {
-            if (!this.scopeFunctions.ContainsKey(GlobalScopeName)) return null;
-            return this.scopeFunctions[GlobalScopeName].FirstOrDefault(f => f.Name == name && f.GetParameters().Length == argCount);
-        }
-
-
-        private FunctionExpression FindMatchingFunctionInGlobalScope(string name, XzaarType returnType, int argCount)
-        {
-            if (!this.scopeFunctions.ContainsKey(GlobalScopeName)) return null;
-            return this.scopeFunctions[GlobalScopeName].FirstOrDefault(f => f.Name == name && f.ReturnType.Name == returnType.Name && f.GetParameters().Length == argCount);
-        }
-
-        private FunctionExpression FindMatchingFunctionInGlobalScope(FunctionNode function)
-        {
-            if (!this.scopeFunctions.ContainsKey(GlobalScopeName)) return null;
-            var finderContext = new XzaarTypeFinderContext(FindMatchingFunctionInGlobalScope, FindVariable);
-            var possibleMatches = this.scopeFunctions[GlobalScopeName].Where(
-                f => f.Name == function.Name);//&& f.ReturnType.Name == function.GetReturnType(finderContext).Name);
-
-            foreach (var f in possibleMatches)
+            var functions = scopeProvider.Current.FindFunctions(function.Name, function.Parameters.Parameters.Count);
+            //var possibleMatches = this.scopeFunctions[GlobalScopeIdentifier].Where(
+            //    f => f.Name == function.Name);//&& f.ReturnType.Name == function.GetReturnType(finderContext).Name);
+            foreach (var f in functions)
             {
                 var param1 = function.Parameters.Parameters;
-                var param2 = f.GetParameters();
+                var param2 = f.Parameters;
                 if (ParameterSequenceMatch(param1, param2))
                 {
                     return f;
@@ -1054,55 +1186,32 @@ namespace Shinobytes.XzaarScript.Compiler
 
         private StructExpression AddStructToGlobalScope(StructExpression structExpr)
         {
-            if (this.scopeFunctions.ContainsKey(GlobalScopeName))
-            {
-                var wasModified = false;
-                for (var i = 0; i < this.structs.Count; i++)
-                {
-                    if (this.structs[i].Name == structExpr.Name)
-                    {
-                        this.structs[i] = structExpr;
-                        wasModified = true;
-                        break;
-                    }
-                }
-
-                if (!wasModified)
-                    this.structs.Add(structExpr);
-            }
-            else
-                this.structs.Add(structExpr);
-            return structExpr;
+            return this.structs[structExpr.Name] = structExpr;
         }
 
         private FunctionExpression AddFunctionToGlobalScope(FunctionExpression functionExpression)
         {
-            if (this.scopeFunctions.ContainsKey(GlobalScopeName))
-            {
-                var wasModified = false;
-                for (var i = 0; i < this.scopeFunctions[GlobalScopeName].Count; i++)
-                {
-                    if (this.scopeFunctions[GlobalScopeName][i].Name == functionExpression.Name)
-                    {
-                        this.scopeFunctions[GlobalScopeName][i] = functionExpression;
-                        wasModified = true;
-                        break;
-                    }
-                }
-
-                if (!wasModified)
-                    this.scopeFunctions[GlobalScopeName].Add(functionExpression);
-            }
-            else
-                this.scopeFunctions.Add(GlobalScopeName, new List<FunctionExpression> { functionExpression });
+            this.scopeProvider.Current.AddFunction(functionExpression);
             return functionExpression;
-        }
+            //if (this.scopeFunctions.ContainsKey(GlobalScopeIdentifier))
+            //{
+            //    var wasModified = false;
+            //    for (var i = 0; i < this.scopeFunctions[GlobalScopeIdentifier].Count; i++)
+            //    {
+            //        if (this.scopeFunctions[GlobalScopeIdentifier][i].Name == functionExpression.Name)
+            //        {
+            //            this.scopeFunctions[GlobalScopeIdentifier][i] = functionExpression;
+            //            wasModified = true;
+            //            break;
+            //        }
+            //    }
 
-        private enum XzaarScopeType
-        {
-            Global,
-            Class,
-            Function
+            //    if (!wasModified)
+            //        this.scopeFunctions[GlobalScopeIdentifier].Add(functionExpression);
+            //}
+            //else
+            //    this.scopeFunctions.Add(GlobalScopeIdentifier, new List<FunctionExpression> { functionExpression });
+            //return functionExpression;
         }
     }
 }

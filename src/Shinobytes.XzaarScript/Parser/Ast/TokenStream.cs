@@ -34,6 +34,11 @@ namespace Shinobytes.XzaarScript.Parser.Ast
             return peekNext != null && peekNext.Kind == kind;
         }
 
+        public bool CurrentIs(SyntaxKind kind)
+        {
+            return Current != null && Current.Kind == kind;
+        }
+
         public SyntaxToken Consume(SyntaxKind kind)
         {
             return this.Consume(x => x.Kind == kind);

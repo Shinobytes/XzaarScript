@@ -257,7 +257,7 @@ namespace Shinobytes.XzaarScript.Compiler
             if (ctx.CurrentType == null)
             {
                 // global function
-                var parameters = function.GetParameters().Select(Visit).ToArray();
+                var parameters = function.Parameters.Select(Visit).ToArray();
                 var method = new MethodDefinition(function.Name, parameters, function.IsExtern);
 
                 method.SetReturnType(TypeLookup(function.ReturnType, null));

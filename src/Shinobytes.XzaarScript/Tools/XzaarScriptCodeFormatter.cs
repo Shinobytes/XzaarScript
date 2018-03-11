@@ -59,6 +59,7 @@ namespace Shinobytes.XzaarScript.Tools
         public string Visit(XzaarExpression expression)
         {
 #if UNITY
+            if (expression is LambdaExpression lambda) return Visit(lambda);
             if (expression is BinaryExpression binaryExpression) return Visit(binaryExpression);
             if (expression is ConditionalExpression conditionalExpression) return Visit(conditionalExpression);
             if (expression is IfElseExpression elseExpression) return Visit(elseExpression);
@@ -90,6 +91,19 @@ namespace Shinobytes.XzaarScript.Tools
 #else 
             return Visit((dynamic)expression);
 #endif
+        }
+
+
+        public string Visit(LambdaExpression lambda)
+        {
+            var codeWriter = new XzaarCodeWriter();
+
+            codeWriter.Write("(" + string.Join(", ", lambda.Parameters.Select(Visit).ToArray()) + ") => ");
+            
+            // This will fail on single-line lambdas!!
+            codeWriter.Write("{" + Visit(lambda.Body) + "}");
+
+            return codeWriter.ToString();
         }
 
 
@@ -131,10 +145,10 @@ namespace Shinobytes.XzaarScript.Tools
             codeWriter.Write(" : ");
 
             if (expr.WhenFalse != null)
-            {                
+            {
                 currentIndent++;
                 codeWriter.Write(Visit(expr.WhenFalse));
-                currentIndent--;                
+                currentIndent--;
             }
             return codeWriter.ToString();
         }
@@ -679,6 +693,7 @@ namespace Shinobytes.XzaarScript.Tools
             var codeWriter = new XzaarCodeWriter();
             var indent = IsInsideExpression ? 0 : currentIndent;
             var instance = call.GetInstance();
+
             var methodInvocation = call.MethodName + "(";
             var instanceText = string.Empty;
             if (instance != null)
@@ -749,7 +764,7 @@ namespace Shinobytes.XzaarScript.Tools
         {
             var codeWriter = new XzaarCodeWriter();
             codeWriter.Write("fn " + function.Name + "(", currentIndent);
-            codeWriter.Write(string.Join(", ", function.GetParameters().Select(v => v.Name + ":" + v.Type.Name).ToArray()));
+            codeWriter.Write(string.Join(", ", function.Parameters.Select(v => v.Name + ":" + v.Type.Name).ToArray()));
             codeWriter.Write(") ");
             if (function.ReturnType.Name != "void") codeWriter.Write("-> " + function.ReturnType.Name + " ");
             codeWriter.Write("{");

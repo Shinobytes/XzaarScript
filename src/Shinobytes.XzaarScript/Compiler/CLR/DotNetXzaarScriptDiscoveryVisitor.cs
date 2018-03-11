@@ -209,7 +209,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
             // NOTE: If the function is static then parameterIndex should start at 0, but we don't support static functions yet
             int parameterIndex = 1; // 0 is the 'this' keyword
-            foreach (var p in function.GetParameters())
+            foreach (var p in function.Parameters)
             {
                 var pa = Visit(p) as XsParameter;
                 pa.Index = parameterIndex++;

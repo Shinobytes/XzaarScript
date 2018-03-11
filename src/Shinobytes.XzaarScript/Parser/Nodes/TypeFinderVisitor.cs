@@ -276,9 +276,8 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
             if (expr.Kind == SyntaxKind.FunctionInvocation)
             {
-                var function = context.FindFunctionByExpression(expr);
-
-                if (function == null)
+                var anon = context.FindFunctionByExpression(expr);
+                if (anon == null)
                 {
                     var similar = context.FindSimilarNamedFunctionByExpression(expr);
                     if (context.IgnoreMissingMembers) return null;
@@ -286,8 +285,9 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
                         (similar != null ? " Did you possibly mean '" + similar.Name + "'?" : ""));
                 }
 
-                if (currentFunction != null)
+                if (currentFunction != null && anon is FunctionExpression function)
                 {
+
                     if (function.Name == currentFunction.Name) // && ParameterSequenceMatch(function, currentFunction))
                     {
                         // recursion detected, we cannot determine the return type here.
@@ -301,13 +301,11 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
                         // so we can break out from any potential 8-looped recursions (or other kind of recursions)
                         if (function.ReturnType == null)
                         {
-                            this.context.AddToCallStack(currentFunction, function);
+                            this.context.AddToCallStack(currentFunction, anon);
 
                             // we need to late bind the returntype to match this function's type,
                             // that way it will autocorrect itself the moment the other function has determined its return type.
                             currentFunction.BindReturnType(function.Name, () => function.ReturnType);
-
-
                         }
                         else
                         {
@@ -335,15 +333,13 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
     public class XzaarTypeFinderContext
     {
-        private readonly Func<string, FunctionExpression> findFunction;
+        private readonly Func<string, int, AnonymousFunctionExpression> findFunction;
         private readonly Func<string, bool, ParameterExpression> findVariable;
 
         private XzaarCallStack callstack;
-
-
-
+        
         public XzaarTypeFinderContext(
-            Func<string, FunctionExpression> findFunction,
+            Func<string, int, AnonymousFunctionExpression> findFunction,
             Func<string, bool, ParameterExpression> findVariable)
         {
             this.findFunction = findFunction;
@@ -353,15 +349,14 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public bool IgnoreMissingMembers { get; set; }
 
-        public FunctionExpression FindFunctionByExpression(AstNode expr)
+        public AnonymousFunctionExpression FindFunctionByExpression(AstNode expr)
         {
             if (findFunction == null) return null;
 
             var functionName = "";
-            var functionCall = expr as FunctionCallNode;
-            if (functionCall != null)
+            if (expr is FunctionCallNode invocation)
             {
-                functionName = functionCall.Function.Value + "";
+                functionName = invocation.Function.Value + "";
             }
             if (string.IsNullOrEmpty(functionName))
             {
@@ -369,7 +364,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             }
             if (string.IsNullOrEmpty(functionName)) return null;
 
-            return this.findFunction(functionName);
+            return this.findFunction(functionName, -1);
         }
 
         public ParameterExpression FindVariableByExpression(AstNode expr, bool includeGlobalScope)

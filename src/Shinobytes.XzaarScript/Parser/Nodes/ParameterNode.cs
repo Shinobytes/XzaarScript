@@ -42,7 +42,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public override string ToString()
         {
-            return "Parameter: (Type " + Type + ") " + Name;
+            return Name + " : " + Type;
         }
 
         public override bool IsEmpty()

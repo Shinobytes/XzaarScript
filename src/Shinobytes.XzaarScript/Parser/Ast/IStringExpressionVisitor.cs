@@ -23,6 +23,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast
 {
     public interface IStringExpressionVisitor
     {
+        string Visit(LambdaExpression lambda);
         string Visit(XzaarExpression expression);
         string Visit(ConditionalExpression expr);
         string Visit(BinaryExpression binaryOp);

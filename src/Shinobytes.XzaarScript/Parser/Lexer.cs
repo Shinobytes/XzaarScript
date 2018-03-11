@@ -100,8 +100,8 @@ namespace Shinobytes.XzaarScript.Parser
                 case ',': return Token(SyntaxKind.Comma);
                 case '.': return Token(SyntaxKind.Dot);
                 case ';': return Token(SyntaxKind.Semicolon);
-                case '(': return Token(SyntaxKind.OpenParan);
-                case ')': return Token(SyntaxKind.CloseParan);
+                case '(': return Token(SyntaxKind.OpenParen);
+                case ')': return Token(SyntaxKind.CloseParen);
                 case '[': return Token(SyntaxKind.OpenBracket);
                 case ']': return Token(SyntaxKind.CloseBracket);
                 case '{': return Token(SyntaxKind.OpenCurly);

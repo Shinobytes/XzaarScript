@@ -26,13 +26,62 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         internal VariableDefinitionExpression(XzaarType type, string name, XzaarExpression assignmentExpression)
             : base(name)
         {
-            this.type = type;            
+            this.type = type;
             AssignmentExpression = assignmentExpression;
         }
 
         public override XzaarType Type => type;
 
-        public XzaarExpression AssignmentExpression { get; }        
+        public XzaarExpression AssignmentExpression { get; }
+
+        public override AnonymousFunctionExpression FunctionReference
+        {
+            get
+            {
+                if (base.FunctionReference != null)
+                {
+                    return base.FunctionReference;
+                }
+
+                if (AssignmentExpression is ParameterExpression param)
+                {
+                    return param.FunctionReference;
+                }
+
+                return null;
+            }
+        }
+
+        public override bool IsFunctionReference
+        {
+            get
+            {
+                if (base.IsFunctionReference)
+                {
+                    return true;
+                }
+
+                if (AssignmentExpression is ParameterExpression param)
+                {
+                    return param.IsFunctionReference;
+                }
+
+                return false;
+            }
+        }
+
+        //public bool IsFunctionReference
+        //{
+        //    get
+        //    {
+        //        if (AssignmentExpression is ParameterExpression param)
+        //        {
+        //            return param.IsFunctionReference;
+        //        }
+
+        //        return false;
+        //    }
+        //}
     }
 
     public partial class XzaarExpression

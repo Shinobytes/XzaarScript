@@ -25,10 +25,12 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
     {
         private string _name;
 
-        internal ParameterExpression(string name)
+        internal ParameterExpression(string name, AnonymousFunctionExpression functionExpression = null)
         {
             _name = name;
+            this.FunctionReference = functionExpression;
         }
+
         public override XzaarType Type => XzaarBaseTypes.Any;
 
         public override ExpressionType NodeType => ExpressionType.Parameter;
@@ -37,10 +39,21 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
         public XzaarExpression ArrayIndex { get; set; }
 
+        public virtual bool IsFunctionReference => FunctionReference != null;
+
+        public virtual AnonymousFunctionExpression FunctionReference { get; }
+
+        public bool IsParameter { get; set; }
+
+        internal static ParameterExpression Make(AnonymousFunctionExpression function, string name)
+        {
+            return new ParameterExpression(name, function);
+        }
+
         internal static ParameterExpression Make(XzaarType type, string name, bool isByRef)
         {
             if (isByRef)
-            {                
+            {
                 return new ByRefParameterExpression(type, name);
             }
             else
@@ -52,13 +65,13 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
                         case TypeCode.Boolean: return new PrimitiveParameterExpression<Boolean>(name);
                         case TypeCode.Byte: return new PrimitiveParameterExpression<Byte>(name);
                         case TypeCode.Char: return new PrimitiveParameterExpression<Char>(name);
-                        case TypeCode.Date: return new PrimitiveParameterExpression<DateTime>(name);                        
+                        case TypeCode.Date: return new PrimitiveParameterExpression<DateTime>(name);
                         case TypeCode.Decimal: return new PrimitiveParameterExpression<Decimal>(name);
                         case TypeCode.Double: return new PrimitiveParameterExpression<Double>(name);
                         case TypeCode.Int16: return new PrimitiveParameterExpression<Int16>(name);
                         case TypeCode.Int32: return new PrimitiveParameterExpression<Int32>(name);
                         case TypeCode.Int64: return new PrimitiveParameterExpression<Int64>(name);
-                        
+
                         case TypeCode.Any:
                             // common reference types which we optimize go here.  Of course object is in
                             // the list, the others are driven by profiling of various workloads.  This list
@@ -128,6 +141,12 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
     public partial class XzaarExpression
     {
+
+        public static ParameterExpression FunctionReference(AnonymousFunctionExpression functionExpression, string name)
+        {
+            return ParameterExpression.Make(functionExpression, name);
+        }
+
         public static ParameterExpression Parameter(XzaarType type)
         {
             return Parameter(type, null);
@@ -139,12 +158,13 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         public static ParameterExpression Variable(XzaarType type, string name)
         {
             if (type == (XzaarType)typeof(void)) throw new InvalidOperationException("Argument cannot be of type void");
-            if (type.IsByRef) throw  new InvalidOperationException("Type must not be by ref");// Error.TypeMustNotBeByRef();
+            if (type.IsByRef) throw new InvalidOperationException("Type must not be by ref");// Error.TypeMustNotBeByRef();
+
             return ParameterExpression.Make(type, name, false);
         }
         public static ParameterExpression Parameter(XzaarType type, string name)
         {
-           
+
             if (type == XzaarBaseTypes.Void)
             {
                 // throw Error.ArgumentCannotBeOfTypeVoid();
@@ -157,7 +177,9 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
                 type = type.GetElementType();
             }
 
-            return ParameterExpression.Make(type, name, byref);
+            var parameterExpression = ParameterExpression.Make(type, name, byref);
+            parameterExpression.IsParameter = true;
+            return parameterExpression;
         }
 
     }

@@ -29,8 +29,12 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
     public class FunctionCallExpression : XzaarExpression, IArgumentProvider
     {
         private readonly FunctionExpression function;
+        private readonly LambdaExpression lambda;
         private readonly XzaarMethodBase method;
+        private readonly string alias;
+
         protected IList<XzaarExpression> arguments;
+
 
         internal FunctionCallExpression(XzaarMethodBase method, IList<XzaarExpression> args = null)
         {
@@ -43,6 +47,17 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             arguments = args ?? new List<XzaarExpression>();
             this.function = method;
         }
+        internal FunctionCallExpression(string alias, FunctionExpression method, IList<XzaarExpression> args = null)
+        {
+            arguments = args ?? new List<XzaarExpression>();
+            this.function = method;
+            this.alias = alias;
+        }
+        internal FunctionCallExpression(LambdaExpression method, IList<XzaarExpression> args = null)
+        {
+            arguments = args ?? new List<XzaarExpression>();
+            this.lambda = method;
+        }
 
         public sealed override ExpressionType NodeType => ExpressionType.Call;
 
@@ -51,15 +66,15 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             return null;
         }
 
+
+
         public override XzaarType Type => (method == null ? function.ReturnType : method.ReturnType) ?? XzaarBaseTypes.Any;
 
         public XzaarExpression Object => GetInstance();
 
-        public string MethodName => method != null ? method.Name : function.Name;
+        public string MethodName => alias ?? (method != null ? method.Name : function != null ? function.Name : lambda?.AssignmentName);
 
         public XzaarMethodBase Method => method;
-
-        public FunctionExpression MethodExpression => function;
 
         public ReadOnlyCollection<XzaarExpression> Arguments => GetOrMakeArguments();
 
@@ -91,8 +106,18 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             arguments = args;
         }
 
-        public FunctionCallExpressionN(FunctionExpression method, IList<XzaarExpression> args)
-                    : base(method, args)
+        public FunctionCallExpressionN(LambdaExpression method, IList<XzaarExpression> args)
+            : base(method, args)
+        {
+            arguments = args;
+        }
+
+        public FunctionCallExpressionN(FunctionExpression method, IList<XzaarExpression> args) : base(method, args)
+        {
+            arguments = args;
+        }
+        public FunctionCallExpressionN(string alias, FunctionExpression method, IList<XzaarExpression> args)
+            : base(alias, method, args)
         {
             arguments = args;
         }
@@ -606,10 +631,17 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             return new FunctionCallExpressionN(method, argList);
         }
 
+        public static FunctionCallExpression Call(LambdaExpression method, params XzaarExpression[] arguments)
+        {
+            if (method == null) throw new ArgumentNullException(nameof(method));
+
+            ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
+
+            return new FunctionCallExpressionN(method, argList);
+        }
 
         public static FunctionCallExpression Call(FunctionExpression method, params XzaarExpression[] arguments)
         {
-
             if (method == null) throw new ArgumentNullException(nameof(method));
 
             ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
@@ -618,6 +650,17 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             ValidateArgumentTypes(method, ExpressionType.Call, ref argList);
 
             return new FunctionCallExpressionN(method, argList);
+        }
+        public static FunctionCallExpression Call(string alias, FunctionExpression method, params XzaarExpression[] arguments)
+        {
+            if (method == null) throw new ArgumentNullException(nameof(method));
+
+            ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
+
+            ValidateMethodInfo(method);
+            ValidateArgumentTypes(method, ExpressionType.Call, ref argList);
+
+            return new FunctionCallExpressionN(alias, method, argList);
         }
 
         public static FunctionCallExpression Call(XzaarMethodBase method, params XzaarExpression[] arguments)
@@ -835,8 +878,8 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
         private static ParameterExpression[] GetParametersForValidation(FunctionExpression method, ExpressionType nodeKind)
         {
-            if (nodeKind != ExpressionType.Dynamic) return method.GetParameters();
-            var methodParam = method.GetParameters();
+            if (nodeKind != ExpressionType.Dynamic) return method.Parameters;
+            var methodParam = method.Parameters;
             var param = new ParameterExpression[methodParam.Length - 1];
             Array.Copy(methodParam, 1, param, 0, param.Length);
             return param;
@@ -854,7 +897,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
         private static void ValidateArgumentCount(FunctionExpression method, ExpressionType nodeKind, int count, ParameterExpression[] pis)
         {
-            if (pis.Length != count && method.GetParameters().Length != pis.Length)
+            if (pis.Length != count && method.Parameters.Length != pis.Length)
             {
                 // Throw the right error for the node we were given
                 switch (nodeKind)

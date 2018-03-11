@@ -543,8 +543,8 @@ namespace Shinobytes.XzaarScript.Parser.Ast
             return kind == SyntaxKind.EqualsEquals || kind == SyntaxKind.NotEquals || kind == SyntaxKind.LessEquals || kind == SyntaxKind.Less || kind == SyntaxKind.Greater || kind == SyntaxKind.Greater;
         }
 
-        public static bool IsOpenStatement(SyntaxKind kind) => kind == SyntaxKind.OpenParan;
-        public static bool IsCloseStatement(SyntaxKind kind) => kind == SyntaxKind.CloseParan;
+        public static bool IsOpenStatement(SyntaxKind kind) => kind == SyntaxKind.OpenParen;
+        public static bool IsCloseStatement(SyntaxKind kind) => kind == SyntaxKind.CloseParen;
         public static bool IsOpenIndexer(SyntaxKind kind) => kind == SyntaxKind.OpenBracket;
         public static bool IsCloseIndexer(SyntaxKind kind) => kind == SyntaxKind.CloseBracket;
         public static bool IsOpenBody(SyntaxKind kind) => kind == SyntaxKind.OpenCurly;

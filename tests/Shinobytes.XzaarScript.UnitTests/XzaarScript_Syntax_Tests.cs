@@ -18,10 +18,7 @@
  */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Shinobytes.XzaarScript.Compiler;
-using Shinobytes.XzaarScript.Parser;
 using Shinobytes.XzaarScript.Parser.Ast;
-using Shinobytes.XzaarScript.Parser.Nodes;
 using Shinobytes.XzaarScript.Tools;
 
 namespace Shinobytes.XzaarScript.UnitTests
@@ -2139,6 +2136,28 @@ var result = looper()", code);
   s.Val.Test = ""HEHEHE""
   return s.Val.Test
 }", code);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_02()
+        {
+            var code = FormatCode("let a = (x) => {}; a(123);");
+            Assert.AreEqual("var a = (x) => {}\r\na(123)", code);
+        }
+
+        [TestMethod]
+        public void assign_function_ref()
+        {
+            var code = FormatCode("fn test() { return 0 } let a = test; a(123);");
+            Assert.AreEqual("fn test() -> number {\r\n  return 0\r\n}\r\nvar a = test\r\na(123)", code);
+        }
+
+        [TestMethod]
+        public void reassign_function_with_lambda()
+        {
+//#error this will not run
+            var code = FormatCode("fn test() { return 0 }; test = () => { };");        
+            Assert.AreEqual("fn test() -> number {\r\n  return 0\r\n}\r\ntest = () => {}", code);
         }
 
         private string FormatCode(string code)

@@ -149,7 +149,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public override string ToString()
         {
-            return "fn " + this.Name + "(" + this.Parameters + ")";
+            return "fn " + this.Name + "(" + this.Parameters + ") { " + this.Body + " }";
         }
 
         public void BindReturnType(string name, Func<XzaarType> func)

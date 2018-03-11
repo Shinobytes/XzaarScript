@@ -24,6 +24,7 @@ namespace Shinobytes.XzaarScript.Parser
 {
     public interface INodeVisitor
     {
+        XzaarExpression Visit(LambdaNode lambda);
         XzaarExpression Visit(LogicalConditionalNode logicalConditional);
         XzaarExpression Visit(EqualityOperatorNode equalityOperator);
         XzaarExpression Visit(BinaryOperatorNode bin);

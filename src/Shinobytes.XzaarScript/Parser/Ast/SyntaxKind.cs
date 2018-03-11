@@ -160,8 +160,8 @@ namespace Shinobytes.XzaarScript.Parser.Ast
         ColonColon,
         Comma,
         Dot,
-        OpenParan,
-        CloseParan,
+        OpenParen,
+        CloseParen,
         OpenCurly,
         CloseCurly,
         OpenBracket,
@@ -211,6 +211,8 @@ namespace Shinobytes.XzaarScript.Parser.Ast
 
         FieldDefinitionExpression,
         FunctionDefinitionExpression,
+        LambdaFunctionDefinitionExpression,
+
         ParameterDefinitionExpression,
         StructDefinitionExpression,
         VariableDefinitionExpression,

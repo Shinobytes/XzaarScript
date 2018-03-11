@@ -478,7 +478,7 @@ namespace Shinobytes.XzaarScript.UnitTests
             Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
             Assert.AreEqual("a.hello()", ast.ToString());
         }
-        
+
         [TestMethod]
         public void while_true_empty_body()
         {
@@ -532,6 +532,116 @@ namespace Shinobytes.XzaarScript.UnitTests
             var ast = transformer.Parse();
             Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
             Assert.AreEqual("hello(a, b + 2, 1 + c, 2 * 3 / d)", ast.ToString());
+        }
+
+        [TestMethod]
+        public void assign_arrowfunction()
+        {
+            var transformer = Parser("let a = () => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = () => {}", ast.ToString());
+        }
+
+        [TestMethod]
+        public void assign_arrowfunction_with_param_implicittypes_simple()
+        {
+            var transformer = Parser("let a = x => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = (x : any) => {}", ast.ToString());
+        }
+
+        [TestMethod]
+        public void assign_arrowfunction_with_param_explicittypes_simple_error()
+        {
+            var transformer = Parser("let a = x:i32 => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(true, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            //Assert.AreEqual("var a : any = (x : any) => {}", ast.ToString());
+        }
+
+        [TestMethod]
+        public void assign_arrowfunction_with_param_implicittypes()
+        {
+            var transformer = Parser("let a = (b) => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = (b : any) => {}", ast.ToString());
+        }
+
+
+        [TestMethod]
+        public void assign_arrowfunction_with_param_explicittypes()
+        {
+            var transformer = Parser("let a = (b:i32,c:str) => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = (b : i32, c : str) => {}", ast.ToString());
+        }
+
+        [TestMethod]
+        public void assign_arrowfunction_with_param_mixed_implicitexplicit_types_0()
+        {
+            var transformer = Parser("let a = (b, c, d:i32) => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = (b : any, c : any, d : i32) => {}", ast.ToString());
+        }
+
+
+        [TestMethod]
+        public void assign_arrowfunction_with_param_mixed_implicitexplicit_types_1()
+        {
+            var transformer = Parser("let a = (b, d:i32, c) => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = (b : any, d : i32, c : any) => {}", ast.ToString());
+        }
+
+        [TestMethod]
+        public void assign_arrowfunction_with_param_mixed_implicitexplicit_types_2()
+        {
+            var transformer = Parser("let a = (b, d:i32[], c) => {}");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = (b : any, d : i32[], c : any) => {}", ast.ToString());
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_01()
+        {
+            var transformer = Parser("let a = () => {}; a();");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = () => {} a()", ast.ToString());
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_02()
+        {
+            var transformer = Parser("let a = (x) => {}; a(123);");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("var a : any = (x : any) => {} a(123)", ast.ToString());
+        }
+
+        [TestMethod]
+        public void assign_function_ref()
+        {
+            var transformer = Parser("fn test() { return 0 } let a = test; a(123);");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("fn test() { return 0 } var a : any = test a(123)", ast.ToString());
+        }
+
+        [TestMethod]
+        public void reassign_function_with_lambda()
+        {
+            var transformer = Parser("fn test() { return 0 }; test = () => { };");
+            var ast = transformer.Parse();
+            Assert.AreEqual(false, transformer.HasErrors, string.Join(Environment.NewLine, transformer.Errors));
+            Assert.AreEqual("fn test() { return 0 } test = () => {}", ast.ToString());
         }
 
         private SyntaxParser Parser(string code)

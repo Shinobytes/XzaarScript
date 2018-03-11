@@ -41,7 +41,9 @@ foreach (let item in ["hello",", ", "world!"]) {
 loop {
     console.log("helloooo!")
     break; 
-    // yeah, you can mix with and without semicolons, although I would recommend if you use it as it will make it easier for the compiler to know when the line ends. See it as an performance optimization
+    // yeah, you can mix with and without semicolons, 
+    // although I would recommend if you use it as it will make it easier for the 
+    // compiler to know when the line ends. See it as an performance optimization
 }
 
 // or do while

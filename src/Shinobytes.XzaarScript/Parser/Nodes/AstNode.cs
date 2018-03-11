@@ -77,7 +77,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public object Value { get; protected set; }
 
-        public string ValueText => Value + "";
+        public string StringValue => Value + "";
 
         public AstNode Parent { get; set; }
 
@@ -210,6 +210,16 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return new LiteralNode("NUMBER", number, _nodeIndex++);
         }
 
+        public static LambdaNode Lambda(ParameterNode paremeterExpression, AstNode bodyExpression)
+        {
+            return new LambdaNode(Parameters(new[] { paremeterExpression }), bodyExpression, true, _nodeIndex++);
+        }
+
+        public static LambdaNode Lambda(FunctionParametersNode paremeterExpression, AstNode bodyExpression)
+        {
+            return new LambdaNode(paremeterExpression, bodyExpression, false, _nodeIndex++);
+        }
+
         public static FunctionNode Function(string name, FunctionParametersNode argumentsExpression, AstNode bodyExpression)
         {
             return new FunctionNode(name, argumentsExpression, bodyExpression, _nodeIndex++);
@@ -296,6 +306,12 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             var t = type.Value?.ToString();
 
             return new ParameterNode(n, t, _nodeIndex++);
+        }
+
+        public static ParameterNode Parameter(AstNode name)
+        {
+            var n = name.Value?.ToString();
+            return new ParameterNode(n, "any", _nodeIndex++);
         }
 
         public static DefineVariableNode DefineVariable(string type, string name, AstNode assignValue)

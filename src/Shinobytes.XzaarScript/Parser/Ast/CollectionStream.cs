@@ -55,8 +55,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast
         {
             if (currentIndex + offset >= items.Count) return default(T);
             return items[currentIndex + offset];
-        }
-
+        }        
 
         public bool CurrentIs(Func<T, bool> predicate)
         {

@@ -19,7 +19,6 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shinobytes.XzaarScript.Parser;
-using Shinobytes.XzaarScript.Parser.Ast;
 using Shinobytes.XzaarScript.Parser.Nodes;
 
 namespace Shinobytes.XzaarScript.UnitTests

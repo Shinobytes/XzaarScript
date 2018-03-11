@@ -17,32 +17,29 @@
  *  
  */
 
+using System.Linq;
 using Shinobytes.XzaarScript.Parser.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
 {
-    public class CreateStructNode : AstNode
-    {        
-        private readonly StructNode structNode;
-
-        public CreateStructNode(StructNode structNode, int nodeIndex)
-            : base(SyntaxKind.TypeInstantiation, "CREATE_STRUCT", null, nodeIndex)
+    public class LambdaNode : AstNode
+    {
+        public LambdaNode(FunctionParametersNode parameters, AstNode body, bool isSimple, int nodeIndex)
+            : base(SyntaxKind.LambdaFunctionDefinitionExpression, null, null, nodeIndex)
         {
-            this.structNode = structNode;
-            this.Type = this.structNode.StringValue;
+            Parameters = parameters;
+            Body = body;
+            this.HasCurlyBrackets = body is BlockNode;
+            this.IsSimple = isSimple;
         }
 
-        public CreateStructNode(StructNode structNode, AstNode[] structFieldInitializers, int nodeIndex)
-            : base(SyntaxKind.TypeInstantiation, "CREATE_STRUCT", null, nodeIndex)
-        {
-            FieldInitializers = structFieldInitializers;
-            this.structNode = structNode;
-            this.Type = this.structNode.StringValue;
-        }
+        public bool HasCurlyBrackets { get; }
 
-        public AstNode[] FieldInitializers { get; set; }
+        public FunctionParametersNode Parameters { get; }
 
-        public StructNode StructNode => structNode;
+        public AstNode Body { get; private set; }
+
+        public bool IsSimple { get; }
 
         public override void Accept(INodeVisitor nodeVisitor)
         {
@@ -51,12 +48,15 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public override bool IsEmpty()
         {
-            return false;
+            return this.Body == null || this.Body.IsEmpty();
         }
+
 
         public override string ToString()
         {
-            return "new_struct " + this.structNode.Name;
+            var parameters = this.Parameters.Parameters.Select(x => x.ToString());
+            var str0 = $"({string.Join(", ", parameters.ToArray())}) => ";
+            return HasCurlyBrackets ? str0 + "{" + Body + "}" : str0 + Body;
         }
     }
 }

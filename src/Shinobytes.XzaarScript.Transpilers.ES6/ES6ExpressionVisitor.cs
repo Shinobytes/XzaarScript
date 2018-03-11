@@ -56,6 +56,16 @@ namespace Shinobytes.XzaarScript.Transpilers.ES6
 #endif
         }
 
+        public string Visit(LambdaExpression lambda)
+        {
+            var codeWriter = new XzaarCodeWriter();
+
+            codeWriter.Write("(" + string.Join(", ", lambda.Parameters.Select(Visit).ToArray()) + ") => ");
+
+            codeWriter.Write(Visit(lambda.Body));
+
+            return codeWriter.ToString();
+        }
 
         public string Visit(BinaryExpression binaryOp)
         {
@@ -736,7 +746,7 @@ namespace Shinobytes.XzaarScript.Transpilers.ES6
         {
             var codeWriter = new XzaarCodeWriter();
             codeWriter.Write("function " + function.Name + "(", currentIndent);
-            codeWriter.Write(string.Join(", ", function.GetParameters().Select(v => v.Name).ToArray()));
+            codeWriter.Write(string.Join(", ", function.Parameters.Select(v => v.Name).ToArray()));
             codeWriter.Write(") ");
 
             codeWriter.Write("{");

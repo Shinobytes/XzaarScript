@@ -17,10 +17,7 @@
  *  
  */
 
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Shinobytes.XzaarScript.Assembly;
-using Shinobytes.XzaarScript.Extensions;
 
 namespace Shinobytes.XzaarScript.UnitTests
 {

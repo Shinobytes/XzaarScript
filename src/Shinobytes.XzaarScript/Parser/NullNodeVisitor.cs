@@ -24,6 +24,11 @@ namespace Shinobytes.XzaarScript.Parser
 {
     public class NullNodeVisitor : INodeVisitor
     {
+        public XzaarExpression Visit(LambdaNode lambda)
+        {
+            return null;
+        }
+
         public virtual XzaarExpression Visit(LogicalConditionalNode logicalConditional)
         {
             return null;
