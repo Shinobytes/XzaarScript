@@ -89,7 +89,7 @@ namespace Shinobytes.XzaarScript.Assembly
             return new FieldReference
             {
                 Instance = this.Instance,
-                Name =  this.Name,
+                Name = this.Name,
                 Type = this.Type,
                 InitialValue = this.InitialValue,
                 ArrayIndex = this.ArrayIndex,

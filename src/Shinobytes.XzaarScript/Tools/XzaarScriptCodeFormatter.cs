@@ -58,11 +58,12 @@ namespace Shinobytes.XzaarScript.Tools
 
         public string Visit(XzaarExpression expression)
         {
-#if UNITY
-            if (expression is LambdaExpression lambda) return Visit(lambda);
+#if UNITY            
             if (expression is BinaryExpression binaryExpression) return Visit(binaryExpression);
             if (expression is ConditionalExpression conditionalExpression) return Visit(conditionalExpression);
             if (expression is IfElseExpression elseExpression) return Visit(elseExpression);
+            if (expression is LogicalNotExpression notExpression) return Visit(notExpression);
+
             if (expression is MemberExpression memberExpression) return Visit(memberExpression);
             if (expression is MemberAccessChainExpression chainExpression) return Visit(chainExpression);
             if (expression is GotoExpression gotoExpression) return Visit(gotoExpression);
@@ -70,23 +71,34 @@ namespace Shinobytes.XzaarScript.Tools
             if (expression is SwitchCaseExpression caseExpression) return Visit(caseExpression);
             if (expression is UnaryExpression unaryExpression) return Visit(unaryExpression);
             if (expression is BlockExpression blockExpression) return Visit(blockExpression);
+
             if (expression is ForExpression forExpression) return Visit(forExpression);
             if (expression is ForEachExpression eachExpression) return Visit(eachExpression);
             if (expression is DoWhileExpression whileExpression) return Visit(whileExpression);
             if (expression is WhileExpression expression1) return Visit(expression1);
             if (expression is LoopExpression loopExpression) return Visit(loopExpression);
             if (expression is DefaultExpression defaultExpression) return Visit(defaultExpression);
+
+            if (expression is LambdaExpression lambda) return Visit(lambda);
             if (expression is FunctionCallExpression callExpression) return Visit(callExpression);
+            if (expression is FunctionExpression functionExpression) return Visit(functionExpression);
+
             if (expression is ConstantExpression constantExpression) return Visit(constantExpression);
             if (expression is NegateExpression negateExpression) return Visit(negateExpression);
             if (expression is VariableDefinitionExpression definitionExpression) return Visit(definitionExpression);
+            if (expression is FieldExpression fieldExpression) return Visit(fieldExpression);
             if (expression is LabelExpression labelExpression) return Visit(labelExpression);
             if (expression is ParameterExpression parameterExpression) return Visit(parameterExpression);
-            if (expression is FunctionExpression functionExpression) return Visit(functionExpression);
+
             if (expression is StructExpression structExpression1) return Visit(structExpression1);
-            if (expression is FieldExpression fieldExpression) return Visit(fieldExpression);
-            if (expression is LogicalNotExpression notExpression) return Visit(notExpression);
-            if (expression is CreateStructExpression structExpression) return Visit(structExpression);
+            if (expression is CreateStructExpression structExpression) return Visit(structExpression);                
+
+            if (expression is ErrorExpression error)
+            {
+                
+            }
+
+
             return Visit(expression);
 #else 
             return Visit((dynamic)expression);
@@ -101,7 +113,14 @@ namespace Shinobytes.XzaarScript.Tools
             codeWriter.Write("(" + string.Join(", ", lambda.Parameters.Select(Visit).ToArray()) + ") => ");
             
             // This will fail on single-line lambdas!!
-            codeWriter.Write("{" + Visit(lambda.Body) + "}");
+            if (lambda.Body is BlockExpression)
+            {
+                codeWriter.Write("{" + Visit(lambda.Body) + "}");
+            }
+            else
+            {
+                codeWriter.Write(Visit(lambda.Body));
+            }            
 
             return codeWriter.ToString();
         }

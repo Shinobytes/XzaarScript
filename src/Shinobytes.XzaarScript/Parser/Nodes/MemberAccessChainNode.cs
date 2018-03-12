@@ -17,6 +17,7 @@
  *  
  */
 
+using System;
 using Shinobytes.XzaarScript.Parser.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
@@ -36,7 +37,14 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         }
 
         public AstNode LastAccessor => left;
+
         public AstNode Accessor => right;
+
+        public override string Type
+        {
+            get { return base.Type ?? ResultType; }
+            set { base.Type = value; }
+        }
 
         public string ResultType
         {
@@ -44,7 +52,10 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             set { resultType = value; }
         }
 
-
+        public override string StringValue
+        {
+            get { return Accessor.StringValue; }
+        }
 
         public override void Accept(INodeVisitor nodeVisitor)
         {

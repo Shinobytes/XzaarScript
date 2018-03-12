@@ -19,26 +19,13 @@
 
 namespace Shinobytes.XzaarScript.Assembly
 {
-
-    public enum MemberTypes
+    public class FunctionReference : VariableReference
     {
-        Field,
-        Property,
-        Variable,
-        Method,
-        AnonymousMethod,
-        Parameter,
-        Struct,
-        Class,
-        Label,
+        public FunctionReference(MethodDefinition method)
+        {
+            Method = method;
+        }
 
-        Constant,
-    }
-
-    public abstract class MemberReference
-    {
-        public string Name { get; set; }
-
-        public abstract MemberTypes MemberType { get; }
+        public MethodDefinition Method { get; }
     }
 }

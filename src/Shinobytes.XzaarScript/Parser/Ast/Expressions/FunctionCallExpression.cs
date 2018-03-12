@@ -35,7 +35,6 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
         protected IList<XzaarExpression> arguments;
 
-
         internal FunctionCallExpression(XzaarMethodBase method, IList<XzaarExpression> args = null)
         {
             arguments = args ?? new List<XzaarExpression>();
@@ -59,20 +58,46 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             this.lambda = method;
         }
 
+        internal FunctionCallExpression(string alias, LambdaExpression method, IList<XzaarExpression> args = null)
+        {
+            arguments = args ?? new List<XzaarExpression>();
+            this.lambda = method;
+            this.alias = alias;
+        }
+
         public sealed override ExpressionType NodeType => ExpressionType.Call;
+
+
+        public virtual AnonymousFunctionExpression AnonymousMethod => this.lambda;
 
         public virtual XzaarExpression GetInstance()
         {
             return null;
         }
 
+        public override XzaarType Type
+        {
+            get
+            {
+                if (method != null)
+                {
+                    return method.ReturnType;
+                }
 
+                if (function != null)
+                {
+                    return function.ReturnType;
+                }
 
-        public override XzaarType Type => (method == null ? function.ReturnType : method.ReturnType) ?? XzaarBaseTypes.Any;
+                return XzaarBaseTypes.Any;
+            }
+        }
 
         public XzaarExpression Object => GetInstance();
 
-        public string MethodName => alias ?? (method != null ? method.Name : function != null ? function.Name : lambda?.AssignmentName);
+        public string MethodName => alias ?? RefMethodName;
+
+        public string RefMethodName => method != null ? method.Name : function != null ? function.Name : lambda?.AssignmentName;
 
         public XzaarMethodBase Method => method;
 
@@ -108,6 +133,12 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
         public FunctionCallExpressionN(LambdaExpression method, IList<XzaarExpression> args)
             : base(method, args)
+        {
+            arguments = args;
+        }
+
+        public FunctionCallExpressionN(string alias, LambdaExpression method, IList<XzaarExpression> args)
+            : base(alias, method, args)
         {
             arguments = args;
         }
@@ -633,12 +664,25 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 
         public static FunctionCallExpression Call(LambdaExpression method, params XzaarExpression[] arguments)
         {
-            if (method == null) throw new ArgumentNullException(nameof(method));
+            //if (method == null) throw new ArgumentNullException(nameof(method));
+            // method can be null, if type is "any" since this will be a runtime error instead.
 
             ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
 
             return new FunctionCallExpressionN(method, argList);
         }
+
+        public static FunctionCallExpression Call(string alias, LambdaExpression method, params XzaarExpression[] arguments)
+        {
+            //if (method == null) throw new ArgumentNullException(nameof(method));
+            // method can be null, if type is "any" since this will be a runtime error instead.
+
+            ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
+
+            return new FunctionCallExpressionN(alias, method, argList);
+        }
+
+        // functionAlias
 
         public static FunctionCallExpression Call(FunctionExpression method, params XzaarExpression[] arguments)
         {

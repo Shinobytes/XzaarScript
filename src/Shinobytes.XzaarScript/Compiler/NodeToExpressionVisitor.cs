@@ -63,7 +63,8 @@ namespace Shinobytes.XzaarScript.Compiler
         private XzaarExpression Error(string message)
         {
             this.errors.Add("[Error] " + message);
-            return null;
+            return XzaarExpression.Error(message);
+            // return null;
         }
 
         // public void RegisterExternFunction()
@@ -312,6 +313,12 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             var left = Visit(assign.Left);
             var right = Visit(assign.Right);
+
+            if (right is LambdaExpression lambda)
+            {
+                this.scopeProvider.Current.BindLambda(left as ParameterExpression, lambda);
+            }
+
             return XzaarExpression.Assign(left, right);
         }
 
@@ -532,7 +539,7 @@ namespace Shinobytes.XzaarScript.Compiler
         public virtual XzaarExpression Visit(FunctionCallNode call)
         {
             string functionAlias = null;
-            var arguments = call.Arguments.Select(Visit).Where(a => a != null).ToArray();            
+            var arguments = call.Arguments.Select(Visit).Where(a => a != null).ToArray();
             var f = call.Function;
 
             if (f.Kind == SyntaxKind.FunctionDefinitionExpression)
@@ -580,8 +587,10 @@ namespace Shinobytes.XzaarScript.Compiler
                     if (function == null)
                     {
                         // if its not a function, lets see if we are trying to invoke a function reference
+                        // or if we have a parameter or variable of type "any" with the same name. As we cannot guarantee whether or not the variable
+                        // is a function reference or lambda.
                         var varOrParam = scopeProvider.Current.Find<ParameterExpression>(functionName);
-                        if (varOrParam == null || !varOrParam.IsFunctionReference)
+                        if (varOrParam == null || (!varOrParam.IsFunctionReference && !varOrParam.Type.IsAny))
                         {
                             // to avoid traversing the tree here to find the source. We will just return 
                             // oh well. still can't seem to determine what function it is. still undefined 'extern' function as well?
@@ -597,7 +606,7 @@ namespace Shinobytes.XzaarScript.Compiler
                         return XzaarExpression.Call(functionAlias, invocation, arguments);
                     }
 
-                    return XzaarExpression.Call(function as LambdaExpression, arguments);
+                    return XzaarExpression.Call(functionAlias, function as LambdaExpression, arguments);
                 }
 
                 var instanceVariableName = call.Instance.Value + "";

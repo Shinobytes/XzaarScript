@@ -28,9 +28,9 @@ namespace Shinobytes.XzaarScript.Compiler
     public class ExpressionScope : IDisposable
     {
         private readonly IScopeProvider scopeProvider;
-        
+
         private readonly string name;
-        
+
         private readonly Dictionary<string, ExpressionScope> innerScopes
             = new Dictionary<string, ExpressionScope>();
 
@@ -110,7 +110,7 @@ namespace Shinobytes.XzaarScript.Compiler
                 {
                     if (this.scopeFunctions.TryGetValue(memberName, out var functions))
                     {
-                        var function = functions.FirstOrDefault(x => x.Parameters.Length == 0);
+                        var function = functions.OrderBy(x => x.Parameters.Length).FirstOrDefault();
                         if (function != null)
                         {
                             return function as T;
@@ -139,7 +139,7 @@ namespace Shinobytes.XzaarScript.Compiler
             {
                 if (this.scopeFunctions.TryGetValue(memberName, out var functions))
                 {
-                    var function = functions.FirstOrDefault(x => argCount == -1 || x.Parameters.Length == argCount);
+                    var function = functions.OrderBy(x => x.Parameters.Length).FirstOrDefault(x => argCount == -1 || x.Parameters.Length == argCount);
                     if (function != null)
                     {
                         return function as T;

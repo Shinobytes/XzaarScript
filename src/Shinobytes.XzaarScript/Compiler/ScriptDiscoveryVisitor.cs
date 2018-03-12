@@ -60,6 +60,7 @@ namespace Shinobytes.XzaarScript.Compiler
             // 
 
 #if UNITY
+            if (expression is LambdaExpression lambda) return Visit(lambda);
             if (expression is UnaryExpression unaryExpression) return Visit(unaryExpression);
             if (expression is IfElseExpression elseExpression) return Visit(elseExpression);
             if (expression is ConditionalExpression conditionalExpression) return Visit(conditionalExpression);
@@ -88,6 +89,13 @@ namespace Shinobytes.XzaarScript.Compiler
 #endif
 
         }
+
+
+        public object Visit(LambdaExpression lambda)
+        {
+            return null;
+        }
+
 
         public object Visit(GotoExpression @goto)
         {

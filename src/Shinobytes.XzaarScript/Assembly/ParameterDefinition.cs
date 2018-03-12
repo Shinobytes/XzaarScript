@@ -23,6 +23,19 @@ namespace Shinobytes.XzaarScript.Assembly
     {
         private MethodReference method;
 
+        public ParameterDefinition(VariableReference variableReference)
+        {
+            this.Name = variableReference.Name;
+            this.ArrayIndex = variableReference.ArrayIndex;
+            this.InitialValue = variableReference.InitialValue;
+            this.Reference = variableReference.Reference;
+            this.Type = variableReference.Type;
+        }
+
+        public ParameterDefinition()
+        {
+        }
+
         public override MemberTypes MemberType => MemberTypes.Parameter;
 
         public MethodReference Method

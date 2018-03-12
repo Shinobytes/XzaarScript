@@ -46,6 +46,8 @@ namespace Shinobytes.XzaarScript.Assembly
         Callparent = 21,
         Callextern = 22,
         Callstatic = 23,
+        Callanonymous = 47,
+        Callunknown = 48,
         Return = 24,
         Strcat = 25,
         PropGet = 26,
@@ -68,6 +70,6 @@ namespace Shinobytes.XzaarScript.Assembly
         ArrayRemoveLastElement = 43,
         ArrayRemoveElements = 44,
         ArrayClearElements = 45,
-        ArrayIndexOf = 46
+        ArrayIndexOf = 46,
     }
 }

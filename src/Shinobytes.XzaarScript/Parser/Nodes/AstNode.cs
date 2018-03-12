@@ -63,8 +63,6 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         }
 
 
-        public string Type { get; set; }
-
         public bool Walked { get; set; }
 
         public int Index => nodeIndex;
@@ -75,9 +73,11 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
 
         public string NodeName { get; }
 
-        public object Value { get; protected set; }
+        public virtual string Type { get; set; }
 
-        public string StringValue => Value + "";
+        public virtual object Value { get; protected set; }
+
+        public virtual string StringValue => Value + "";
 
         public AstNode Parent { get; set; }
 

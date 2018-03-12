@@ -19,26 +19,22 @@
 
 namespace Shinobytes.XzaarScript.Assembly
 {
-
-    public enum MemberTypes
+    public class AnonymousFunctionReference : VariableReference
     {
-        Field,
-        Property,
-        Variable,
-        Method,
-        AnonymousMethod,
-        Parameter,
-        Struct,
-        Class,
-        Label,
+        public ParameterCollection Parameters { get; }
 
-        Constant,
-    }
+        public MethodBody Body { get; }
 
-    public abstract class MemberReference
-    {
-        public string Name { get; set; }
+        public AnonymousFunctionReference(ParameterDefinition[] parameters, MethodBody body)
+        {
+            this.Parameters = new ParameterCollection(null);
 
-        public abstract MemberTypes MemberType { get; }
+            Parameters.AddParameters(parameters);
+            Body = body;
+        }
+
+        public override MemberTypes MemberType => MemberTypes.AnonymousMethod;
+
+        public XzaarType ReturnType { get; set; }
     }
 }

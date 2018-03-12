@@ -50,7 +50,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public XzaarExpression ExpressionTree { get; }
 
-        public string CurrentFunctioName;
+        public string CurrentFunctionName;
 
         public XzaarExpression LastVisited;
 
@@ -68,11 +68,15 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public Label CurrentLoopStartLabel => flowControl.CurrentStartLabel;
 
-        public bool IsInGlobalScope => rootFlowControl == flowControl || CurrentFunctioName == null;
+        public bool IsInGlobalScope => rootFlowControl == flowControl || CurrentFunctionName == null;
 
         public int StackRecursionCount { get; set; }
 
         public int InstructionCount => IsInGlobalScope ? this.GlobalInstructions.Count : this.MethodInstructions.Count;
+
+        public int InsideAnonymousFunctionCount { get; set; }
+
+        public AnonymousFunctionScope CurrentAnonymousFunctionScope { get; set; }
 
         public void BeginControlBlock()
         {
@@ -86,7 +90,11 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public void InsertInstruction(int index, Operation instruction)
         {
-            if (this.IsInGlobalScope)
+            if (this.InsideAnonymousFunctionCount > 0)
+            {
+                this.CurrentAnonymousFunctionScope.Instructions.Insert(index, instruction);                
+            }
+            else if (this.IsInGlobalScope)
             {
                 this.GlobalInstructions.Insert(index, instruction);
             }
@@ -95,15 +103,37 @@ namespace Shinobytes.XzaarScript.Compiler
                 this.MethodInstructions.Insert(index, instruction);
             }
         }
+
         public void AddInstruction(Operation instruction)
         {
-            if (this.IsInGlobalScope)
+            if (this.InsideAnonymousFunctionCount > 0)
+            {
+                this.CurrentAnonymousFunctionScope.Instructions.Add(instruction);                
+            }
+            else if (this.IsInGlobalScope)
             {
                 this.GlobalInstructions.Add(instruction);
             }
             else
             {
                 this.MethodInstructions.Add(instruction);
+            }
+        }
+
+
+        private void AddVariable(VariableReference tempVar)
+        {
+            if (InsideAnonymousFunctionCount > 0)
+            {
+                this.CurrentAnonymousFunctionScope.Variables.Add(tempVar);
+            }
+            else if (IsInGlobalScope)
+            {
+                GlobalTempVariables.Add(tempVar);
+            }
+            else
+            {
+                VariableReferences.Add(tempVar);
             }
         }
 
@@ -115,24 +145,24 @@ namespace Shinobytes.XzaarScript.Compiler
             if (variable != null) return variable;
             variable = this.Assembly.GlobalVariables.FirstOrDefault(v => v.Name == name);
             if (variable != null) return variable;
-            var func = this.Assembly.GlobalMethods.FirstOrDefault(gv => gv.Name == this.CurrentFunctioName);
+            var func = this.Assembly.GlobalMethods.FirstOrDefault(gv => gv.Name == this.CurrentFunctionName);
             if (func != null)
             {
-                return func.Body.MethodVariables.FirstOrDefault(v => v.Name == name);
+                var par = func.Parameters.FirstOrDefault(x => x.Name == name);
+                return par ?? func.Body.MethodVariables.FirstOrDefault(v => v.Name == name);
             }
             return null;
         }
 
         public VariableReference TempVariable(int value)
         {
-
             var tempVar = new VariableReference
             {
                 Name = "::temp_number_var" + TempVariableCount++,
                 Type = new TypeReference(XzaarBaseTypes.Number)
             };
-            if (IsInGlobalScope) GlobalTempVariables.Add(tempVar);
-            VariableReferences.Add(tempVar);
+
+            AddVariable(tempVar);
             AddInstruction(Instruction.Create(OpCode.Assign, tempVar, Constant(value)));
             return tempVar;
         }
@@ -144,8 +174,8 @@ namespace Shinobytes.XzaarScript.Compiler
                 Name = "::temp_" + type.Name + "_var" + TempVariableCount++,
                 Type = type
             };
-            if (IsInGlobalScope) GlobalTempVariables.Add(tempVar);
-            VariableReferences.Add(tempVar);
+
+            AddVariable(tempVar);
             return tempVar;
         }
 
@@ -163,8 +193,8 @@ namespace Shinobytes.XzaarScript.Compiler
                 Type = type,
                 Reference = reference
             };
-            if (IsInGlobalScope) GlobalTempVariables.Add(tempVar);
-            VariableReferences.Add(tempVar);
+
+            AddVariable(tempVar);
             return tempVar;
         }
 
@@ -176,8 +206,8 @@ namespace Shinobytes.XzaarScript.Compiler
                 Name = "::temp_" + value.Type + "_var" + TempVariableCount++,
                 Type = new TypeReference(value.Type)
             };
-            if (IsInGlobalScope) GlobalTempVariables.Add(tempVar);
-            VariableReferences.Add(tempVar);
+
+            AddVariable(tempVar);
             return tempVar;
         }
 
@@ -210,5 +240,67 @@ namespace Shinobytes.XzaarScript.Compiler
             };
             return c;
         }
+
+        public void BeginAnonymousFunctionBlock(ParameterDefinition[] parameters)
+        {
+            // this.CurrentFunctionName
+            InsideAnonymousFunctionCount++;
+            var depth = (CurrentAnonymousFunctionScope?.Depth ?? 0) + 1;
+            CurrentAnonymousFunctionScope = new AnonymousFunctionScope(this, CurrentAnonymousFunctionScope, parameters, depth);
+        }
+
+        public void EndAnonymousFunctionBlock()
+        {
+            if (CurrentAnonymousFunctionScope == null)
+            {
+                return;
+            }
+
+            CurrentAnonymousFunctionScope = CurrentAnonymousFunctionScope.Parent;
+            InsideAnonymousFunctionCount--;
+        }
+    }
+
+    public class AnonymousFunctionScope
+    {
+        private readonly ScriptCompilerContext ctx;
+
+        public AnonymousFunctionScope(ScriptCompilerContext ctx, AnonymousFunctionScope parent, ParameterDefinition[] parameters, int depth)
+        {
+            this.ctx = ctx;
+            this.Instructions = new CompilerInstructionCollection(ctx);
+            Parent = parent;
+            Depth = depth;
+            Parameters = new Dictionary<string, ParameterDefinition>();
+            foreach (var param in parameters)
+            {
+                Parameters[param.Name] = param;
+            }
+        }
+
+        internal CompilerInstructionCollection Instructions;
+
+        internal List<VariableReference> Variables = new List<VariableReference>();
+
+        public VariableReference Find(string name)
+        {
+            if (this.Parameters.TryGetValue(name, out var param))
+            {
+                return param;
+            }
+
+            return Parent?.Find(name);
+        }
+
+        public bool TryFind(string name, out VariableReference param)
+        {
+            return (param = Find(name)) != null;
+        }
+
+        public AnonymousFunctionScope Parent { get; }
+
+        public Dictionary<string, ParameterDefinition> Parameters { get; }
+
+        public int Depth { get; }
     }
 }

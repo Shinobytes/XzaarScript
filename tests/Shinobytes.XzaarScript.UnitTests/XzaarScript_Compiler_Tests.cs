@@ -646,15 +646,15 @@ namespace Shinobytes.XzaarScript.UnitTests
     .endParameters
     .variables
       .variable s1 structB
-      .variable j1 any
+      .variable j1 number
       .variable ::temp_structB_var0 structB
-      .variable ::temp_any_var1 any
+      .variable ::temp_number_var1 number
     .endVariables
     .instructions
       StructCreate s1, structB 
       StructGet ::temp_structB_var0, s1, structBField 
-      StructGet ::temp_any_var1, ::temp_structB_var0, structAField 
-      Assign j1, ::temp_any_var1 
+      StructGet ::temp_number_var1, ::temp_structB_var0, structAField 
+      Assign j1, ::temp_number_var1 
     .endInstructions
   .endFunction
 .endGlobalFunctions
@@ -706,15 +706,15 @@ namespace Shinobytes.XzaarScript.UnitTests
     .endParameters
     .variables
       .variable s1 structC
-      .variable j1 any
+      .variable j1 number
       .variable ::temp_structC_var0 structC
-      .variable ::temp_any_var1 any
+      .variable ::temp_structA_var1 structA
     .endVariables
     .instructions
       StructCreate s1, structC 
       StructGet ::temp_structC_var0, s1, structCField 
-      StructGet ::temp_any_var1, ::temp_structC_var0, structBField 
-      StructGet j1, ::temp_any_var1, structAField 
+      StructGet ::temp_structA_var1, ::temp_structC_var0, structBField 
+      StructGet j1, ::temp_structA_var1, structAField 
     .endInstructions
   .endFunction
 .endGlobalFunctions
@@ -767,11 +767,13 @@ namespace Shinobytes.XzaarScript.UnitTests
     .variables
       .variable s1 structC
       .variable ::temp_structC_var0 structC
+      .variable ::temp_structA_var1 structA
     .endVariables
     .instructions
       StructCreate s1, structC 
       StructGet ::temp_structC_var0, s1, structCField 
-      StructSet ::temp_structC_var0, structAField, 9999 
+      StructGet ::temp_structA_var1, ::temp_structC_var0, structBField 
+      StructSet ::temp_structA_var1, structAField, 9999 
     .endInstructions
   .endFunction
 .endGlobalFunctions
@@ -824,11 +826,13 @@ namespace Shinobytes.XzaarScript.UnitTests
     .variables
       .variable s1 structC
       .variable ::temp_structC_var0 structC
+      .variable ::temp_structA_var1 structA
     .endVariables
     .instructions
       StructCreate s1, structC 
       StructGet ::temp_structC_var0, s1, structCField 
-      StructSet ::temp_structC_var0, structAField[0], 0, 9999 
+      StructGet ::temp_structA_var1, ::temp_structC_var0, structBField 
+      StructSet ::temp_structA_var1, structAField[0], 0, 9999 
     .endInstructions
   .endFunction
 .endGlobalFunctions
@@ -901,7 +905,7 @@ namespace Shinobytes.XzaarScript.UnitTests
     .endParameters
     .variables
       .variable x s
-      .variable p any
+      .variable p number
     .endVariables
     .instructions
       StructCreate x, s 
@@ -985,7 +989,7 @@ namespace Shinobytes.XzaarScript.UnitTests
     .endParameters
     .variables
       .variable x s
-      .variable p any
+      .variable p number
     .endVariables
     .instructions
       StructCreate x, s 
@@ -1581,7 +1585,7 @@ namespace Shinobytes.XzaarScript.UnitTests
 .endTypes
 .globalVariables
   .variable array array
-  .variable result any
+  .variable result number
 .endGlobalVariables
 .globalFunctions
 .endGlobalFunctions
@@ -2490,12 +2494,12 @@ fn main(any console) -> void {
       .endParameter
     .endParameters
     .variables
-      .variable ::temp_any_var0 any
+      .variable ::temp_number_var0 number
       .variable ::temp_any_var1 any
     .endVariables
     .instructions
-      StructGet ::temp_any_var0, ""Hello World""[0], length 
-      Callmethod log, console, ::temp_any_var1 ::temp_any_var0
+      StructGet ::temp_number_var0, ""Hello World""[0], Length 
+      Callmethod log, console, ::temp_any_var1 ::temp_number_var0
     .endInstructions
   .endFunction
 .endGlobalFunctions

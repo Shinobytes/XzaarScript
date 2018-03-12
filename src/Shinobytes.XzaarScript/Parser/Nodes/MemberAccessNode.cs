@@ -39,6 +39,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             this.ArrayIndex = arrayIndex;
             MemberType = memberType;
             Member = member;
+            this.Type = this.Type ?? member.Type;
         }
 
         public override void Accept(INodeVisitor nodeVisitor)

@@ -16,9 +16,10 @@
  *  along with XzaarScript.  If not, see <http://www.gnu.org/licenses/>. 
  *  
  */
- 
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Shinobytes.XzaarScript.Assembly;
 using MemberTypes = Shinobytes.XzaarScript.Assembly.MemberTypes;
 
@@ -32,14 +33,13 @@ namespace Shinobytes.XzaarScript.VM
         public VirtualMachineInstructionInterpreter(VirtualMachine vm)
         {
             this.vm = vm;
-            this.reflectionCache = new ReflectionCache(this, vm);            
+            this.reflectionCache = new ReflectionCache(this, vm);
         }
 
         internal bool Execute(Runtime rt, Operation op)
         {
             if (op == null) throw new ArgumentNullException(nameof(op));
-            var instruction = op as Instruction;
-            if (instruction != null)
+            if (op is Instruction instruction)
             {
                 switch (instruction.OpCode)
                 {
@@ -61,6 +61,12 @@ namespace Shinobytes.XzaarScript.VM
                         break;
                     case OpCode.Callextern:
                         CallExtern(rt, instruction);
+                        break;
+                    case OpCode.Callanonymous:
+                        CallAnonymous(rt, instruction);
+                        break;
+                    case OpCode.Callunknown:
+                        CallUnknown(rt, instruction);
                         break;
                     case OpCode.Jmpt:
                         JumpIfTrue(rt, instruction);
@@ -242,8 +248,7 @@ namespace Shinobytes.XzaarScript.VM
                 {
                     if (arg != null)
                     {
-                        var fieldRef = arg as FieldReference;
-                        if (fieldRef != null)
+                        if (arg is FieldReference fieldRef)
                         {
                             var targetVariable = GetVariable(rt, fieldRef);
                             if (targetVariable != null)
@@ -283,8 +288,7 @@ namespace Shinobytes.XzaarScript.VM
                                 // result = GetValueOf(rt, arg);
 
 
-                                var varRef = arg as VariableReference;
-                                if (varRef != null && varRef.ArrayIndex != null)
+                                if (arg is VariableReference varRef && varRef.ArrayIndex != null)
                                 {
                                     result = GetValueOf(v, varRef.ArrayIndex);
                                 }
@@ -313,8 +317,7 @@ namespace Shinobytes.XzaarScript.VM
 
         private void CallMethod(Runtime rt, Instruction instruction)
         {
-            var method = instruction.Arguments[0] as MethodDefinition;
-            if (method == null)
+            if (!(instruction.Arguments[0] is MethodDefinition method))
             {
                 CallManagedMethod(rt, instruction);
             }
@@ -330,7 +333,7 @@ namespace Shinobytes.XzaarScript.VM
 
         private void CallManagedMethod(Runtime rt, Instruction instruction)
         {
-            var methodRef = instruction.Arguments[0] as VariableReference;
+            var methodRef = (VariableReference)instruction.Arguments[0];
             var methodName = methodRef.Name;
             var instanceVariable = GetVariable(rt, instruction, 1);
             var targetVar = GetVariable(rt, instruction, 2);
@@ -357,9 +360,10 @@ namespace Shinobytes.XzaarScript.VM
 
         private void CallGlobal(Runtime rt, Instruction instruction)
         {
-            var method = instruction.Arguments[0] as MethodDefinition;
-            if (method == null || method.IsExtern)
+            if (!(instruction.Arguments[0] is MethodDefinition method) || method.IsExtern)
+            {
                 throw new RuntimeException("FunctionDefinitionExpression needs to be defined in the script its being used by. External functions not implemented yet");
+            }
 
             var returnVariableRef = instruction.Arguments[1];
             var targetVariable = rt.FindVariable(returnVariableRef.Name);
@@ -368,6 +372,50 @@ namespace Shinobytes.XzaarScript.VM
             var methodResult = InvokeMethod(rt, method, funcArgs);
             targetVariable.SetValue(methodResult);
             // instruction.
+        }
+
+        private void CallUnknown(Runtime rt, Instruction instruction)
+        {
+            var targetFunctionVarRef = (VariableReference)instruction.Arguments[0];
+            var param = rt.FindVariable(targetFunctionVarRef.Name);
+            var targetFunctionRef = GetValueOf(rt, param);
+
+            var returnVariableRef = instruction.Arguments[1];
+            var targetVariable = rt.FindVariable(returnVariableRef.Name);
+
+            var args = instruction.OperandArguments;
+            var funcArgs = GetFunctionArgs(rt, args);
+
+            if (targetFunctionRef is AnonymousFunctionReference anonRef)
+            {
+                var methodResult = InvokeAnonymousMethod(rt, anonRef, funcArgs);
+                targetVariable.SetValue(methodResult);
+            }
+            else if (targetFunctionRef is FunctionReference funcRef)
+            {
+                var methodResult = InvokeMethod(rt, funcRef, funcArgs);
+                targetVariable.SetValue(methodResult);
+            }
+            else
+            {
+                throw new RuntimeException(targetFunctionVarRef.Name + " is not a valid function.");
+            }
+        }
+
+        private void CallAnonymous(Runtime rt, Instruction instruction)
+        {
+            if (!(instruction.Arguments[0] is AnonymousFunctionReference function))
+            {
+                throw new RuntimeException("Unable to invoke anonymous function.");
+            }
+
+            var returnVariableRef = instruction.Arguments[1];
+            var targetVariable = rt.FindVariable(returnVariableRef.Name);
+            var args = instruction.OperandArguments;
+            var funcArgs = GetFunctionArgs(rt, args);
+
+            var methodResult = InvokeAnonymousMethod(rt, function, funcArgs);
+            targetVariable.SetValue(methodResult);
         }
 
         private List<object> GetFunctionArgs(Runtime rt, InstructionVariableCollection args)
@@ -381,14 +429,24 @@ namespace Shinobytes.XzaarScript.VM
                 }
                 else
                 {
-                    var fieldRef = p as FieldReference;
-                    if (fieldRef != null)
+                    if (p is AnonymousFunctionReference anonFuncRef) // lambda: hello(() => ..)
+                    {
+                        funcArgs.Add(anonFuncRef);
+
+                        // throw new RuntimeException("Lambda as args: Not yet supported");
+                    }
+                    else if (p is FunctionReference funcRef) // fn test () {} hello(test)
+                    {
+                        funcArgs.Add(funcRef);
+
+                        // throw new RuntimeException("Fn as args: Not yet supported");
+                    }
+                    else if (p is FieldReference fieldRef)
                     {
                         var val = GetVariable(rt, fieldRef);
                         if (val == null)
                         {
-                            object outVal;
-                            if (TryGetClrObject(rt, fieldRef.Instance, fieldRef, out outVal))
+                            if (TryGetClrObject(rt, fieldRef.Instance, fieldRef, out var outVal))
                             {
                                 funcArgs.Add(outVal);
                             }
@@ -417,15 +475,13 @@ namespace Shinobytes.XzaarScript.VM
                         if (varRef != null) arrayIndex = varRef.ArrayIndex;
                         if (v != null)
                         {
-
-                            var varRefRaw = p as VariableReference;
-                            if (varRefRaw != null && varRefRaw.ArrayIndex != null)
+                            if (p is VariableReference varRefRaw && varRefRaw.ArrayIndex != null)
                             {
                                 // what was I thinking here?
                             }
 
-                            funcArgs.Add(arrayIndex != null 
-                                ? GetValueOf(v, arrayIndex) 
+                            funcArgs.Add(arrayIndex != null
+                                ? GetValueOf(v, arrayIndex)
                                 : v);
                         }
                         else
@@ -441,13 +497,17 @@ namespace Shinobytes.XzaarScript.VM
             foreach (var v in funcArgs)
             {
                 var value = v;
-                var c = value as Constant;
-                if (c != null)
+                if (value is Constant c)
                 {
                     finalArgs.Add(c.Value);
                 }
                 else
                 {
+                    if (value is AnonymousFunctionReference || value is FunctionReference)
+                    {
+                        finalArgs.Add(value);
+                        continue;
+                    }
                     if (value is VariableReference varRef)
                     {
                         value = rt.FindVariable(varRef.Name);
@@ -473,6 +533,11 @@ namespace Shinobytes.XzaarScript.VM
             return InvokeMethod(rt, method, args);
         }
 
+        private object InvokeMethod(Runtime rt, FunctionReference method, IList<object> args)
+        {
+            return InvokeMethod(rt, method.Method, args);
+        }
+
         private object InvokeMethod(Runtime rt, MethodDefinition method, IList<object> args)
         {
             rt.BeginScope();
@@ -493,9 +558,33 @@ namespace Shinobytes.XzaarScript.VM
             return rt.LastScope.Result;
         }
 
+        private object InvokeAnonymousMethod(Runtime rt, AnonymousFunctionReference function, IList<object> args)
+        {
+            rt.BeginScope();
+
+            var funcArgs = InitMethodLocals(rt, function.Name, function.Body.MethodVariables, function.Parameters, args);
+            rt.CurrentScope.AddVariables(funcArgs);
+            var ops = function.Body.MethodInstructions;
+            rt.CurrentScope.SetOperations(ops);
+
+            if (ops.Count > 0)
+            {
+                while (Execute(rt, ops[rt.CurrentScope.Position])) { }
+            }
+            if (rt.LastScope == null)
+            {
+                rt.EndScope();
+            }
+            return rt.LastScope.Result;
+        }
+
         private RuntimeVariable[] InitMethodLocals(Runtime rt, string methodName, MethodVariableCollection variables, ParameterCollection parameters, IList<object> arguments)
         {
-            if (parameters.Count != arguments.Count) throw new RuntimeException("The function '" + methodName + "' was invoked with wrong amount of parameters. " + parameters.Count + " parameters are expected but " + arguments.Count + " arguments were supplied.");
+            if (parameters.Count != arguments.Count)
+            {
+                throw new RuntimeException("The function '" + methodName + "' was invoked with wrong amount of parameters. " + parameters.Count + " parameters are expected but " + arguments.Count + " arguments were supplied.");
+            }
+
             var output = new List<RuntimeVariable>();
             for (var i = 0; i < parameters.Count; i++)
             {
@@ -984,27 +1073,110 @@ namespace Shinobytes.XzaarScript.VM
         {
             // assign target value
             var targetVariableRef = instruction.Arguments[0];
-            var targetVariable = rt.FindVariable(targetVariableRef.Name);
 
             var valueRef = instruction.Arguments[1];
-            AssertVariableFound(targetVariable, targetVariableRef.Name);
-            var value = GetValueOf(rt, valueRef);
-            if (value == null)
+
+            // we want to reassign a function
+            if (targetVariableRef is FunctionReference targetFuncRef)
             {
-                var varRef = GetVariable(rt, instruction, 1);
-                value = GetValueOf(varRef);
+                ReAssignFunction(rt, targetFuncRef, valueRef);
+                return;
             }
-            // AssertSameType()
+
+            //if (targetVariableRef is AnonymousFunctionReference anonTargetFuncRef)
+            //{
+            //    ReAssignFunction(rt, anonTargetFuncRef, valueRef);
+            //    return;
+            //}
+
+            var targetVariable = rt.FindVariable(targetVariableRef.Name);
+
+            object value = null;
+            AssertVariableFound(targetVariable, targetVariableRef.Name);
+
+            // we want to assign a function reference to a variable            
+            if (valueRef is FunctionReference funcRef)
+            {
+                value = funcRef;
+            }
+            else
+            {
+                value = GetValueOf(rt, valueRef);
+                if (value == null)
+                {
+                    var varRef = GetVariable(rt, instruction, 1);
+                    value = GetValueOf(varRef);
+                }
+
+            }
+
             if (value != null)
                 targetVariable.SetValue(value);
         }
 
+        private void ReAssignFunction(Runtime rt, FunctionReference funcToReassign, MemberReference newFunction)
+        {
+            // we must match parameters for this to work. Or it should throw an error
+            // we then just "replace" the function body, but this may corrupt the runtime
+            // if we access variables outside its possible scope. But we can just fail
+            // with a runtime error when that happens.
+            // NOTE(zerratar): parameter names does not have to match, as long as they have the same type order, then its fine.
+
+            if (newFunction is AnonymousFunctionReference anonRef)
+            {
+                if (funcToReassign.Method.Parameters.Count != anonRef.Parameters.Count
+                    || !funcToReassign.Method.Parameters.Select(x => x.Type.Name)
+                        .SequenceEqual(anonRef.Parameters.Select(x => x.Type.Name)))
+                {
+                    throw new RuntimeException("Cannot set the target function '"
+                                               + funcToReassign.Name + "' with the new '" + anonRef.Name + "' as the parameters does not match.");
+                }
+
+                // if anonRef.ReturnType is null, then we were unable to determine returntype
+                // so let it be a runtime error later.
+                if (anonRef.ReturnType != null && funcToReassign.Method.ReturnType.Name != anonRef.ReturnType.Name)
+                {
+                    throw new RuntimeException("Cannot set the target function '"
+                                               + funcToReassign.Name + "' with the new '" + anonRef.Name + "' as the return type does not match.");
+                }
+
+                // TODO: there are no way to reverse this in the script afterwards.
+                funcToReassign.Method.SetParameters(anonRef.Parameters.ToArray());
+                funcToReassign.Method.SetBody(anonRef.Body);
+                return;
+            }
+
+            if (newFunction is FunctionReference funcRef)
+            {
+                if (funcToReassign.Method.Parameters.Count != funcRef.Method.Parameters.Count
+                    || !funcToReassign.Method.Parameters.Select(x => x.Type.Name)
+                        .SequenceEqual(funcRef.Method.Parameters.Select(x => x.Type.Name)))
+                {
+                    throw new RuntimeException("Cannot set the target function '"
+                                               + funcToReassign.Name + "' with the new '" + funcRef.Method.Name + "' as the parameters does not match.");
+                }
+
+                if (funcToReassign.Method.ReturnType != funcRef.Method.ReturnType)
+                {
+                    throw new RuntimeException("Cannot set the target function '"
+                                               + funcToReassign.Name + "' with the new '" + funcRef.Method.Name + "' as the return type does not match.");
+                }
+
+                // TODO: there are no way to reverse this in the script afterwards.
+                funcToReassign.Method.SetParameters(funcRef.Method.Parameters.ToArray());
+                funcToReassign.Method.SetBody(funcRef.Method.Body);
+                return;
+            }
+
+            throw new RuntimeException("Cannot set the target function '"
+                                       + funcToReassign.Name +
+                                       "' with a value other than another function or lambda.");
+        }
 
         private object GetValueOf(Runtime rt, object value)
         {
-            if (value is object[])
+            if (value is object[] array)
             {
-                var array = (object[])value;
                 var newArray = new List<object>();
                 foreach (var item in array)
                 {
@@ -1013,35 +1185,48 @@ namespace Shinobytes.XzaarScript.VM
                 return newArray.ToArray();
             }
 
-            var cval = value as Constant;
-            if (cval != null)
+            if (value is Constant cval)
             {
                 return GetValueOf(rt, cval);
             }
-            var vval = value as VariableReference;
-            if (vval != null)
+
+            if (value is FunctionReference || value is AnonymousFunctionReference)
+            {
+                return value;
+            }
+
+            if (value is VariableReference vval)
             {
                 return GetValueOf(rt, vval);
             }
-            var rtv = value as RuntimeVariable;
-            if (rtv != null)
+
+            if (value is RuntimeVariable rtv)
             {
                 return rtv.Value;
             }
+
             return value;
         }
 
         private object GetValueOf(Runtime rt, MemberReference mRef)
         {
-            var c = mRef as Constant;
-            if (c != null)
+            if (mRef is FunctionReference || mRef is AnonymousFunctionReference)
+            {
+                return mRef; // just pass them along
+            }
+
+            if (mRef is Constant c)
             {
                 return GetValueOf(rt, c);
             }
 
-            var v = mRef as VariableReference;
-            if (v != null)
+            if (mRef is VariableReference v)
             {
+                if (v.IsRef && (v.Reference is AnonymousFunctionReference || v.Reference is FunctionReference))
+                {
+                    return v.Reference;
+                }
+
                 var variable = rt.FindVariable(v.Name);
                 if (variable != null)
                 {

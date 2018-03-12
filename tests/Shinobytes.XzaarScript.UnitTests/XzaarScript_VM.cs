@@ -311,7 +311,7 @@ namespace Shinobytes.XzaarScript.UnitTests
             var result = rt.Invoke<int>("do_stuff", new ClassWithArray());
             Assert.AreEqual(1, result);
         }
-        
+
         [TestMethod]
         public void Invoke_Combine_unary_and_conditional_expression_assignment()
         {
@@ -1421,6 +1421,126 @@ print_hello_world()");
             Assert.AreEqual("HEHEHE", result);
         }
 
+
+        [TestMethod]
+        public void invoke_arrowfunction_02()
+        {
+            var result = InvokeWithConsole("let a = (x) => {$console.log(x)}; a(123);");
+            Assert.AreEqual("123\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_03()
+        {
+            var result =
+                InvokeWithConsole(
+                    "let i = 0; \r\nfn print_hello_world(func) -> void {\r\n   $console.log(\"Hello World: \" + (i++))\r\n   func();\r\n}\r\n\r\nprint_hello_world(() => {\r\n   $console.log(\"asd: \" + (i++)) \r\n})\r\n");
+            Assert.AreEqual("Hello World: 0\r\nasd: 1\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_04()
+        {
+            var result =
+                InvokeWithConsole(
+                    "let i = 0; \r\nfn print_hello_world(func) -> void {\r\n   $console.log(\"Hello World: \" + (i++))\r\n   func();\r\n}\r\n\r\nlet test = () => {\r\n   $console.log(\"asd: \" + (i++)) \r\n};\r\n\r\nprint_hello_world(test)");
+            Assert.AreEqual("Hello World: 0\r\nasd: 1\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_05()
+        {
+            var result =
+                InvokeWithConsole(
+                    "let i = 0; \r\nfn print_hello_world(func) -> void {\r\n   $console.log(\"Hello World: \" + (i++))\r\n   func();\r\n}\r\n\r\nfn print_test() {\r\n   $console.log(\"asd: \" + (i++))\r\n}\r\n\r\nprint_hello_world(print_test)");
+            Assert.AreEqual("Hello World: 0\r\nasd: 1\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_return_singleline_value_0()
+        {
+            var result = InvokeWithConsole("let a = () => \"test\"\nlet b = a();\n\n$console.log(b);");
+            Assert.AreEqual("test\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_return_singleline_value_1()
+        {
+            var result = InvokeWithConsole("let a = () => 1234\nlet b = a();\n\n$console.log(b);");
+            Assert.AreEqual("1234\r\n", result);
+        }
+
+
+        [TestMethod]
+        public void invoke_arrowfunction_return_singleline_value_2()
+        {
+            var result = InvokeWithConsole("let c = () => 123; let a = () => c()\nlet b = a();\n\n$console.log(b);");
+            Assert.AreEqual("123\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_return_singleline_value_3()
+        {
+            var result = InvokeWithConsole("let c = () => 123; let a = () => (c() + 5)\nlet b = a();\n\n$console.log(b);");
+            Assert.AreEqual("128\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_return_singleline_value_4()
+        {
+            var result = InvokeWithConsole("let c = () => 123; let a = () => c() + 5\nlet b = a();\n\n$console.log(b);");
+            Assert.AreEqual("128\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_arrowfunction_return_singleline_value_5()
+        {
+            var result = InvokeWithConsole("let c = () => 123; let a = () => c() + 'woo'\nlet b = a();\n\n$console.log(b);");
+            Assert.AreEqual("123woo\r\n", result);
+        }
+
+        [TestMethod]
+        public void assign_function_ref()
+        {
+            var result = InvokeWithConsole("fn test(x) { $console.log(x) } let a = test; a(123);");
+            Assert.AreEqual("123\r\n", result);
+        }
+
+        [TestMethod]
+        public void reassign_function_with_lambda()
+        {
+            //#error this will not run
+            var code = InvokeWithConsole("fn test() {  }; test = () => {  $console.log('yay') }; test();");
+            Assert.AreEqual("yay\r\n", code);
+        }
+
+        [TestMethod]
+        public void invoke_function_with_lambda_as_argument_0()
+        {
+            //#error this will not run
+            var code = InvokeWithConsole("fn test(func) { func(); }; test(()=> { $console.log('hello world!') });");
+            Assert.AreEqual("hello world!\r\n", code);
+        }
+
+
+        [TestMethod]
+        public void invoke_function_with_other_function_as_argument_0()
+        {
+            //#error this will not run
+            var code = InvokeWithConsole("fn a() { $console.log('hello world!') } fn test(func) { func(); }; test(a);");
+            Assert.AreEqual("hello world!\r\n", code);
+        }
+
+
+        //[TestMethod]
+        //public void invoke_function_with_lambda_as_argument_1()
+        //{
+        //    //#error this will not run
+        //    var code = FormatCode("fn test(func) { func(); }; test(()=> $console.log('hello world!'));");
+        //    Assert.AreEqual("fn test(func:any) {\r\n  func()\r\n}\r\ntest(() => $console.log(\"hello world!\"))", code);
+        //}
+
+
         [TestMethod]
         [ExpectedException(typeof(Exception))]
         public void dot_in_array_index_throws()
@@ -1590,6 +1710,24 @@ success
 ", console.Output);
         }
 
+        private string InvokeWithConsole(string code, string functionName, object args)
+        {
+            var rt = Load(code);
+            var console = new ConsoleWrapperTest(rt);
+            rt.RegisterGlobalVariable("console", console);
+            var result = rt.Invoke<string>(functionName, args);
+            return console.Output;
+        }
+
+        private string InvokeWithConsole(string code)
+        {
+            var rt = Load(code);
+            var console = new ConsoleWrapperTest(rt);
+            rt.RegisterGlobalVariable("console", console);
+            rt.Run();
+            return console.Output;
+        }
+
 
         private Runtime Run(string inputCode)
         {
@@ -1604,12 +1742,12 @@ success
 
         private Runtime Load(string inputCode)
         {
-            return inputCode
+            var compileExpression = inputCode
                 .Tokenize()
                 .Parse()
-                .CompileExpression()
-                .Compile()
-                .Load();
+                .CompileExpression();
+            var xzaarAssembly = compileExpression.Compile();
+            return xzaarAssembly.Load();
         }
     }
 

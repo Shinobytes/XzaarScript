@@ -102,14 +102,14 @@ namespace Shinobytes.XzaarScript.Extensions
 
         public static XzaarAssembly Compile(this XzaarExpression expression)
         {
-            var val = ScriptCompiler.Compile(expression, out var errors);
+            var val = XSVMCompiler.Compile(expression, out var errors);
             if (errors.Count > 0) throw new Exception(string.Join(Environment.NewLine, errors.ToArray()));
             return val;
         }
 
         public static XzaarAssembly Compile(this XzaarExpression expression, out IList<string> errors)
         {
-            return ScriptCompiler.Compile(expression, out errors);
+            return XSVMCompiler.Compile(expression, out errors);
         }
 
         public static Runtime Run(this XzaarAssembly asm)

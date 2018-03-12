@@ -369,8 +369,8 @@ namespace Shinobytes.XzaarScript.Parser
                     memberType = field.Type;
                 }
             }
-            if (string.IsNullOrEmpty(memberType) && lastMemberType == "any")
-                return lastMemberType;
+            if (string.IsNullOrEmpty(memberType)) //  && lastMemberType == "any"
+                return "any";
             return memberType;
         }
 
@@ -900,20 +900,15 @@ namespace Shinobytes.XzaarScript.Parser
                     if (SyntaxFacts.IsCloseBody(CurrentToken.Kind))
                         break;
 
-
-
-
                     var assignment = WalkAssignmentOperator();
 
                     // throw new NotImplementedException();
-
 
                     // var assignment = Walk();
                     //if (assignment.Kind != SyntaxKind.Equals)
                     //{
                     //    return new[] { Error("You're suppose to assign the values here", Tokens.Current) };
                     //}
-
 
                     fieldAssignments.Add(assignment);
 

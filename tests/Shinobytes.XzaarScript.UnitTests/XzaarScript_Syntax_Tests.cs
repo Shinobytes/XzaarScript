@@ -2160,6 +2160,23 @@ var result = looper()", code);
             Assert.AreEqual("fn test() -> number {\r\n  return 0\r\n}\r\ntest = () => {}", code);
         }
 
+
+        [TestMethod]
+        public void invoke_function_with_lambda_as_argument_0()
+        {
+            //#error this will not run
+            var code = FormatCode("fn test(func) { func(); }; test(()=> { $console.log('hello world!') });");
+            Assert.AreEqual("fn test(func:any) {\r\n  func()\r\n}\r\ntest(() => {$console.log(\"hello world!\")})", code);
+        }
+
+        [TestMethod]
+        public void invoke_function_with_lambda_as_argument_1()
+        {
+            //#error this will not run
+            var code = FormatCode("fn test(func) { func(); }; test(()=> $console.log('hello world!'));");
+            Assert.AreEqual("fn test(func:any) {\r\n  func()\r\n}\r\ntest(() => $console.log(\"hello world!\"))", code);
+        }
+
         private string FormatCode(string code)
         {
             return XzaarScriptCodeFormatter.FormatCode(code);
