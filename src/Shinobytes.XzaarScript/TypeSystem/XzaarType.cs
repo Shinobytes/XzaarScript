@@ -70,7 +70,9 @@ namespace Shinobytes.XzaarScript
                     case "bool":
                     case "boolean":
                         return XzaarBaseTypes.Boolean;
-
+                    case "str":
+                    case "string":
+                        return XzaarBaseTypes.String;
                     case "any":
                         return XzaarBaseTypes.Any;
                     case "void":
@@ -122,6 +124,7 @@ namespace Shinobytes.XzaarScript
                 case "u64": return TypeCode.UInt64;
                 case "f32": return TypeCode.Single;
                 case "f64": return TypeCode.Double;
+                case "str": return TypeCode.String;
                 case "string": return TypeCode.String;
                 case "object": case "any": return TypeCode.Any;
                 case "datetime": return TypeCode.Date;

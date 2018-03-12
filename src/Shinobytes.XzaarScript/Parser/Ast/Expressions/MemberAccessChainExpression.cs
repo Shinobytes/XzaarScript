@@ -24,7 +24,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         internal MemberAccessChainExpression(XzaarExpression left, XzaarExpression right)
         {
             Left = left;
-            Right = right;            
+            Right = right;
         }
 
         public XzaarExpression Left { get; }
@@ -43,6 +43,10 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
                 var ma = Right as MemberExpression;
                 if (ma != null)
                 {
+                    if (ma.MemberType.Equals(XzaarBaseTypes.Void))
+                    {
+                        return XzaarBaseTypes.Any;
+                    }
                     return ma.MemberType;
                 }
                 return null;

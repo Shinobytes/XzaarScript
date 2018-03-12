@@ -296,6 +296,7 @@ namespace Shinobytes.XzaarScript.Compiler
 
         private TypeReference TypeLookup(XzaarType target, XzaarType fallbackType)
         {
+
             var targetTypeName = "any";
             if ((object)target != null)
             {
@@ -314,6 +315,14 @@ namespace Shinobytes.XzaarScript.Compiler
                 ctx.KnownTypes.Add(possibleType);
                 return possibleType;
             }
+
+            if (target != null && fallbackType == null)
+            {
+                var typedef = new TypeDefinition(target);
+                ctx.KnownTypes.Add(typedef);
+                return typedef;
+            }
+
 
             return TypeLookup(fallbackType, null);
         }

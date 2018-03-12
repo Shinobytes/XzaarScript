@@ -342,6 +342,15 @@ namespace Shinobytes.XzaarScript.UnitTests
         }
 
         [TestMethod]
+        public void invoke_fn_and_return_concated_struct_fields()
+        {
+            var rt = Run("struct myStruct {\n    myFieldA : str,\n    myFieldB : i32\n}\n\n/* instantiate the struct, no need for a \'new\' keyword here */\nlet theStruct = myStruct {\n    myFieldA = \"hello\",\n    myFieldB = 123\n};\n\nfn test() {\n    return theStruct.myFieldA + theStruct.myFieldB;\n}\n");
+            var result = rt.Invoke<string>("test");
+            Assert.AreEqual("hello123", result);
+        }
+
+
+        [TestMethod]
         public void Invoke_Combine_unary_and_conditional_expression_assignment_4()
         {
             var rt = Run("fn test() { let a = 1 let b = a++ > 0 return b }");
