@@ -563,6 +563,23 @@ namespace Shinobytes.XzaarScript.Compiler
                 return Error("The function '" + call.Instance.StringValue + "." + function.Name + "' cannot be called as locally defined instanced functions are not supported");
             }
 
+            if (f.Kind == SyntaxKind.FunctionInvocation)
+            {
+                // if we are invoking the result of the previous invocation.
+                // ex: a()()
+                // return a function call chain
+
+                if (f is FunctionCallNode fcall)
+                {
+                    var target = Visit(fcall) as FunctionCallExpression;
+
+                    return XzaarExpression.Call(target, arguments);
+                }
+
+                return Error(
+                    "A direct invocation of the result from a previous invocation. { Ex: a()(); } is not yet supported.");
+            }
+
             if (SyntaxFacts.IsLiteral(f.Kind) || SyntaxFacts.IsMemberAccess(f.Kind))
             {
                 var functionName = "";
@@ -589,16 +606,35 @@ namespace Shinobytes.XzaarScript.Compiler
                         // if its not a function, lets see if we are trying to invoke a function reference
                         // or if we have a parameter or variable of type "any" with the same name. As we cannot guarantee whether or not the variable
                         // is a function reference or lambda.
+
+                        // same thing goes with member access with an array index. Lets say we have a list of objects where one could b
                         var varOrParam = scopeProvider.Current.Find<ParameterExpression>(functionName);
-                        if (varOrParam == null || (!varOrParam.IsFunctionReference && !varOrParam.Type.IsAny))
+                        if (varOrParam == null
+                            || !varOrParam.IsFunctionReference && !varOrParam.Type.IsAny)
                         {
                             // to avoid traversing the tree here to find the source. We will just return 
                             // oh well. still can't seem to determine what function it is. still undefined 'extern' function as well?
-                            return Error("Target function '" + functionName + "' was not found. Forgot to declare it?");
+
+                            if (varOrParam == null
+                                || !varOrParam.Type.IsArray
+                                || !Equals(f.Type, XzaarBaseTypes.Any.Name)
+                                || !(f is MemberAccessNode memAccess)
+                                || memAccess.ArrayIndex == null
+                                || !Equals(memAccess.Type, XzaarBaseTypes.Any.Name))
+                            {
+                                return Error("Target function '" + functionName +
+                                             "' was not found. Forgot to declare it?");
+                            }
                         }
 
                         function = varOrParam.FunctionReference;
                         functionAlias = varOrParam.Name;
+
+                        if (f is MemberAccessNode access)
+                        {
+                            var func = Visit(access);
+                            return XzaarExpression.Call(functionAlias, func as MemberExpression, arguments);
+                        }
                     }
 
                     if (function is FunctionExpression invocation)
@@ -613,7 +649,7 @@ namespace Shinobytes.XzaarScript.Compiler
                 var variableOrParameter = this.scopeProvider.Current.Find<ParameterExpression>(instanceVariableName);
                 if (variableOrParameter != null)
                 {
-                    if (Equals(variableOrParameter.Type, XzaarBaseTypes.Any) || (ArrayHelper.IsArrayFunction(functionName) && variableOrParameter.Type.IsArray))
+                    if (Equals(call.Function.Type, XzaarBaseTypes.Any.Name) || Equals(variableOrParameter.Type, XzaarBaseTypes.Any) || (ArrayHelper.IsArrayFunction(functionName) && variableOrParameter.Type.IsArray))
                     {
                         return XzaarExpression.Call(variableOrParameter,
                             XzaarExpression.Function(functionName, new ParameterExpression[arguments.Length], XzaarBaseTypes.Any, true),

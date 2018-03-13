@@ -144,11 +144,12 @@ namespace Shinobytes.XzaarScript.VM
                         throw new RuntimeException("Unhandled instruction, OpCode: '" + instruction.OpCode + "'");
                 }
             }
-            else
-            {
-                var label = op as Label;
-                if (label == null) throw new NullReferenceException(nameof(label));
-            }
+            //else
+            //{
+            //    // will there ever be a null label?? don't think so.
+            //    var label = op as Label;
+            //    if (label == null) throw new NullReferenceException(nameof(label));
+            //}
 
             rt.CurrentScope.Next();
 
@@ -230,7 +231,6 @@ namespace Shinobytes.XzaarScript.VM
             var target = GetVariable(rt, instruction, 0);
             var source = GetVariable(rt, instruction, 1);
             var index = GetArgumentValue(rt, instruction, 2);
-
             target.SetValue(source.GetValue(index));
         }
 
@@ -239,75 +239,71 @@ namespace Shinobytes.XzaarScript.VM
         {
             object result = null;
 
-            if (instruction.Arguments.Count > 0)
+            try
             {
-                var arg = instruction.Arguments[0];
-                if (arg is Constant)
-                    result = GetValueOf(rt, arg as Constant);
-                else
+                if (instruction.Arguments.Count <= 0)
                 {
-                    if (arg != null)
+                    return;
+                }
+
+                var returnValueArgument = instruction.Arguments[0];
+                if (returnValueArgument is Constant constant)
+                {
+                    result = GetValueOf(rt, constant);
+                    return;
+                }
+
+                if (returnValueArgument is AnonymousFunctionReference || returnValueArgument is FunctionReference)
+                {
+                    result = returnValueArgument;
+                    return;
+                }
+
+                if (returnValueArgument != null)
+                {
+                    if (returnValueArgument is FieldReference fieldRef)
                     {
-                        if (arg is FieldReference fieldRef)
+                        var targetVariable = GetVariable(rt, fieldRef);
+                        if (targetVariable != null)
                         {
-                            var targetVariable = GetVariable(rt, fieldRef);
-                            if (targetVariable != null)
-                            {
-
-                                // result = GetValueOf(targetVariable); // GetValueOf(rt, fieldRef);
-
-                                if (fieldRef.ArrayIndex != null)
-                                {
-                                    result = GetValueOf(targetVariable, fieldRef.ArrayIndex);
-                                }
-                                else
-                                {
-                                    result = GetValueOf(targetVariable);
-                                }
-
-                                //if (fieldRef.ArrayIndex != null)
-                                //{
-                                //    result = targetVariable.GetValue(0);
-                                //}
-                                //else
-                                //{
-                                //    result = targetVariable.Value;
-                                //}
-                            }
-                            else
-                            {
-                                var instanceVariable = rt.FindVariable(fieldRef.Instance.Name);
-                                TryGetClrObject(instanceVariable, fieldRef, out result);
-                            }
+                            result = fieldRef.ArrayIndex != null
+                                ? GetValueOf(targetVariable, fieldRef.ArrayIndex)
+                                : GetValueOf(targetVariable);
                         }
                         else
                         {
-                            var v = rt.FindVariable(arg.Name);
-                            if (v != null)
-                            {
-                                // result = GetValueOf(rt, arg);
-
-
-                                if (arg is VariableReference varRef && varRef.ArrayIndex != null)
-                                {
-                                    result = GetValueOf(v, varRef.ArrayIndex);
-                                }
-                                else
-                                {
-                                    result = GetValueOf(v);
-                                }
-                            }
+                            var instanceVariable = rt.FindVariable(fieldRef.Instance.Name);
+                            TryGetClrObject(instanceVariable, fieldRef, out result);
                         }
                     }
                     else
                     {
-                        throw new RuntimeException();
+                        var v = rt.FindVariable(returnValueArgument.Name);
+                        if (v == null)
+                        {
+                            return;
+                        }
+
+                        if (returnValueArgument is VariableReference varRef && varRef.ArrayIndex != null)
+                        {
+                            result = GetValueOf(v, varRef.ArrayIndex);
+                        }
+                        else
+                        {
+                            result = GetValueOf(v);
+                        }
                     }
                 }
-                // result = instruction.Arguments[0];
+                else
+                {
+                    throw new RuntimeException();
+                }
             }
-            rt.CurrentScope.Next();
-            rt.EndScope(result);
+            finally
+            {
+                rt.CurrentScope.Next();
+                rt.EndScope(result);
+            }
         }
 
         private void CallExtern(Runtime rt, Instruction instruction)
@@ -317,22 +313,7 @@ namespace Shinobytes.XzaarScript.VM
 
         private void CallMethod(Runtime rt, Instruction instruction)
         {
-            if (!(instruction.Arguments[0] is MethodDefinition method))
-            {
-                CallManagedMethod(rt, instruction);
-            }
-            else
-            {
-                throw new RuntimeException();
-                //var returnVariableRef = instruction.Arguments[1];
-                //var targetVariable = rt.FindVariable(returnVariableRef.Name);
-                //var args = instruction.OperandArguments;
-                //targetVariable.Value = InvokeMethod(rt, method, GetFunctionArgs(rt, args));
-            }
-        }
-
-        private void CallManagedMethod(Runtime rt, Instruction instruction)
-        {
+            // lookup target type
             var methodRef = (VariableReference)instruction.Arguments[0];
             var methodName = methodRef.Name;
             var instanceVariable = GetVariable(rt, instruction, 1);
@@ -344,18 +325,48 @@ namespace Shinobytes.XzaarScript.VM
 
             var instance = GetValueRecursive(instanceVariable);
 
-            // var v = instance.Value;
-            var type = instance.GetType();
-
-            var method = reflectionCache.GetMethod(type, methodName);
-            if (method == null)
-                throw new RuntimeException("Target function: '" + methodName + "' could not be found.");
-
             var args = instruction.OperandArguments;
             var funcArgs = GetFunctionArgs(rt, args);
-
             var parameters = funcArgs.ToArray();
-            targetVar.SetValue(method.Invoke(instance, parameters));
+
+            // check if its a xzaar-typed or clr managed typed object
+            if (instance is RuntimeObject runtimeObject)
+            {
+                var invocationMember = runtimeObject.GetFieldValue(methodName);
+                if (invocationMember == null)
+                    throw new RuntimeException("Target function: '" + methodName + "' is not a valid member of the type '" + runtimeObject.Type.Name);
+
+                if (invocationMember is MethodDefinition funcDef)
+                {
+                    this.InvokeMethod(rt, funcDef, parameters);
+                }
+                else if (invocationMember is FunctionReference funcRef)
+                {
+                    this.InvokeMethod(rt, funcRef, parameters);
+                }
+                else if (invocationMember is AnonymousFunctionReference anonFuncRef)
+                {
+                    this.InvokeAnonymousMethod(rt, anonFuncRef, parameters);
+                }
+                else
+                {
+                    throw new RuntimeException(invocationMember.GetType().FullName + " is not a supported as an invokable type.");
+                }
+            }
+            else
+            {
+                // var v = instance.Value;
+                var type = instance.GetType();
+
+                var method = reflectionCache.GetMethod(type, methodName);
+                if (method == null)
+                    throw new RuntimeException("Target function: '" + methodName + "' could not be found.");
+
+                var returnValue = method.Invoke(instance, parameters);
+
+                targetVar.SetValue(returnValue);
+            }
+
         }
 
         private void CallGlobal(Runtime rt, Instruction instruction)
@@ -378,7 +389,9 @@ namespace Shinobytes.XzaarScript.VM
         {
             var targetFunctionVarRef = (VariableReference)instruction.Arguments[0];
             var param = rt.FindVariable(targetFunctionVarRef.Name);
-            var targetFunctionRef = GetValueOf(rt, param);
+            var targetFunctionRef = targetFunctionVarRef.ArrayIndex != null
+                ? GetValueOf(rt, targetFunctionVarRef)
+                : GetValueOf(rt, param);
 
             var returnVariableRef = instruction.Arguments[1];
             var targetVariable = rt.FindVariable(returnVariableRef.Name);
@@ -604,18 +617,12 @@ namespace Shinobytes.XzaarScript.VM
             return output.ToArray();
         }
 
-        //private IEnumerable<RuntimeVariable> InitMethodLocals(MethodVariableCollection variables)
-        //{
-        //    return variables.Select(v => new RuntimeVariable(v)).ToList();
-        //}
-
-
         private void JumpIfTrue(Runtime rt, Instruction instruction)
         {
             var booleanValue = GetArgumentValue(rt, instruction, 0);
-            if (booleanValue is bool)
+            if (booleanValue is bool value)
             {
-                if ((bool)booleanValue)
+                if (value)
                 {
                     Jump(rt, instruction);
                 }
@@ -656,7 +663,10 @@ namespace Shinobytes.XzaarScript.VM
         private bool TrySetClrObject(Instruction instruction, RuntimeVariable instance, object value)
         {
             var fieldRef = instruction.Arguments[1] as VariableReference;
-            if (fieldRef == null) return false;
+            if (fieldRef == null)
+            {
+                return false;
+            }
 
             if (instance.Value == null)
             {
@@ -682,6 +692,7 @@ namespace Shinobytes.XzaarScript.VM
             }
             catch
             {
+                // Cant remember why theres a catch-all here. 
             }
             return false;
         }
@@ -839,8 +850,16 @@ namespace Shinobytes.XzaarScript.VM
 
         private RuntimeObject FindRuntimeObject(RuntimeVariable instanceVariable)
         {
-            if (instanceVariable == null) return null;
-            if (instanceVariable.Value is RuntimeObject) return (RuntimeObject)instanceVariable.Value;
+            if (instanceVariable == null)
+            {
+                return null;
+            }
+
+            if (instanceVariable.Value is RuntimeObject o)
+            {
+                return o;
+            }
+
             if (instanceVariable.Value is RuntimeVariable)
             {
                 object tmp = instanceVariable.Value;
@@ -848,8 +867,11 @@ namespace Shinobytes.XzaarScript.VM
                 {
                     tmp = (tmp as RuntimeVariable).Value;
                 }
-                var obj = tmp as RuntimeObject;
-                if (obj != null) return obj;
+
+                if (tmp is RuntimeObject obj)
+                {
+                    return obj;
+                }
             }
 
             return null;
@@ -868,14 +890,6 @@ namespace Shinobytes.XzaarScript.VM
             var valueReference = GetVariable(rt, instruction, 1);
             var value = valueReference.GetValue(0);
             targetVariable.SetValue(!bool.Parse(value + ""));
-        }
-
-        private void ModValue(Runtime rt, Instruction instruction)
-        {
-            var targetVariable = GetVariable(rt, instruction, 0);
-            var valueReference = GetVariable(rt, instruction, 1);
-            var value = valueReference.GetValue(0);
-            targetVariable.SetValue(-double.Parse(value + ""));
         }
 
         private void NegateValue(Runtime rt, Instruction instruction)
@@ -919,8 +933,7 @@ namespace Shinobytes.XzaarScript.VM
         {
             var targetVariableRef = instruction.OperandArguments[index];
             // check if the variable is a field from a struct or other type
-            var fieldRef = targetVariableRef as FieldReference;
-            if (fieldRef != null)
+            if (targetVariableRef is FieldReference fieldRef)
             {
                 var instanceVariable = rt.FindVariable(fieldRef.Instance.Name);
                 var instanceObject = FindRuntimeObject(instanceVariable);
@@ -931,12 +944,10 @@ namespace Shinobytes.XzaarScript.VM
             {
                 return null;
             }
-            else
-            {
-                var targetVariable = rt.FindVariable(targetVariableRef.Name);
-                AssertVariableFound(targetVariable, targetVariableRef.Name);
-                return targetVariable;
-            }
+
+            var targetVariable = rt.FindVariable(targetVariableRef.Name);
+            AssertVariableFound(targetVariable, targetVariableRef.Name);
+            return targetVariable;
         }
 
 
@@ -945,8 +956,7 @@ namespace Shinobytes.XzaarScript.VM
         {
             var targetVariableRef = instruction.Arguments[index];
             // check if the variable is a field from a struct or other type
-            var fieldRef = targetVariableRef as FieldReference;
-            if (fieldRef != null)
+            if (targetVariableRef is FieldReference fieldRef)
             {
                 var instanceVariable = rt.FindVariable(fieldRef.Instance.Name);
                 var instanceObject = FindRuntimeObject(instanceVariable);
@@ -969,12 +979,10 @@ namespace Shinobytes.XzaarScript.VM
 
                 return null;
             }
-            else
-            {
-                var targetVariable = rt.FindVariable(targetVariableRef.Name);
-                AssertVariableFound(targetVariable, targetVariableRef.Name);
-                return targetVariable;
-            }
+
+            var targetVariable = rt.FindVariable(targetVariableRef.Name);
+            AssertVariableFound(targetVariable, targetVariableRef.Name);
+            return targetVariable;
         }
 
 
@@ -982,11 +990,7 @@ namespace Shinobytes.XzaarScript.VM
         {
             var instanceVariable = rt.FindVariable(fieldRef.Instance.Name);
             var instanceObject = FindRuntimeObject(instanceVariable);
-            if (instanceObject == null)
-            {
-                return null;
-            }
-            return instanceObject.GetField(fieldRef.Name);
+            return instanceObject?.GetField(fieldRef.Name);
         }
 
         private object EqualityCondition(OpCode op, object left, object right)

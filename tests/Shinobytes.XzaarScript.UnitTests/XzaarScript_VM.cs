@@ -844,8 +844,6 @@ console.log(names.length)
             Assert.AreEqual("3\r\n", cw.Output);
         }
 
-
-
         [TestMethod]
         public void Declare_variable_with_array_initializer_13()
         {
@@ -1540,15 +1538,66 @@ print_hello_world()");
             Assert.AreEqual("hello world!\r\n", code);
         }
 
+        [TestMethod]
+        public void invoke_lambda_function_0()
+        {
+            var result = InvokeWithConsole("let e = (o:i32, k, n:string) => {\r\n    if (o == 0) {\r\n        return \"It was 0. But K is \" + k + \" and n is \" + n;\r\n    }\r\n    return n + \" \" + k + \" (\" + o + \")\";\r\n};\r\n\r\n$console.log(e(0, \"any\", \"str\"));");
+            Assert.AreEqual("It was 0. But K is any and n is str\r\n", result);
+        }
 
-        //[TestMethod]
-        //public void invoke_function_with_lambda_as_argument_1()
-        //{
-        //    //#error this will not run
-        //    var code = FormatCode("fn test(func) { func(); }; test(()=> $console.log('hello world!'));");
-        //    Assert.AreEqual("fn test(func:any) {\r\n  func()\r\n}\r\ntest(() => $console.log(\"hello world!\"))", code);
-        //}
+        [TestMethod]
+        public void invoke_custom_forEach()
+        {
+            var result = InvokeWithConsole(
+                "// variable names starting with $ \n// are variables grabbed from an external source\nlet console = $console\n\nfn _forEach(elements, func) {\n    foreach(let elm in elements) {\n        func(elm);\n    }\n}\n\n_forEach([\"hello\"], x => $console.log(x));");
+            Assert.AreEqual("hello\r\n", result);
+        }
 
+        [TestMethod]
+        public void invoke_functionRef_from_struct()
+        {
+            var result = InvokeWithConsole("struct test {\n    s:any\n}\n\nlet x = test {\n    s: () => { $console.log(\"test\") }\n}\n\nx.s()");
+            Assert.AreEqual("test\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_functionRef_from_struct_1()
+        {
+            var result = InvokeWithConsole("fn hello() { $console.log('hello'); } struct test {\n    s:any\n}\n\nlet x = test {\n    s: hello\n}\n\nx.s()");
+            Assert.AreEqual("hello\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_array_of_lambda_0()
+        {
+            var result = InvokeWithConsole("let anon = [ () => $console.log(\'test\') ];\n\nanon[0]();");
+            Assert.AreEqual("test\r\n", result);
+        }
+
+        [TestMethod]
+        public void invoke_array_of_lambda_1()
+        {
+            var result = InvokeWithConsole("let anon = [ () => $console.log(\'test\') ];\n\nlet b = anon[0]; b();");
+            Assert.AreEqual("test\r\n", result);
+        }
+
+        [TestMethod]
+        public void return_lambda_from_lambda_0()
+        {
+            var result =
+                InvokeWithConsole(
+                    "let a = () => {\n    return () => {\n        $console.log(\"hello world\");\n    };\n}\n\nlet b = a();\n\nb();");
+            Assert.AreEqual("hello world\r\n", result);
+        }
+
+        [TestMethod]
+        public void return_lambda_from_lambda_1()
+        {
+            var result =
+                InvokeWithConsole(
+                    "let a = () => {\n    return () => {\n        $console.log(\"hello world\");\n    };\n}\n\na()();");
+            Assert.AreEqual("hello world\r\n", result);
+        }
 
         [TestMethod]
         [ExpectedException(typeof(Exception))]

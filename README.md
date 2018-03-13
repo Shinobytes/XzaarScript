@@ -264,10 +264,10 @@ let d = x:i32 => 0; // compile error
 But following is okay!
 ```rust
 let a = () => console.log("hello world"); // calls console.log, returns null
-let b = () => 123; // does nothing, returns 123
-let c = () => "asd"; // does nothing, returns "asd"
+let b = () => 123;      // does nothing, returns 123
+let c = () => "asd";    // does nothing, returns "asd"
 let d = x => "asd" + x; // does nothing, returns "asd" + the value from x.
-x("blah"); // "asdblah"
+d("blah");              // "asdblah"
 
 let e = (o:i32, k, n:string) => {
     if (o == 0) {
@@ -336,8 +336,10 @@ do {
 } while(true);
 
 // or just while
-while (true) {
+let j = 0;
+while (j < 100) {
     console.log("I'm totally spamming");
+    j++;
 }
 
 // and why not the typical for loop?
@@ -347,7 +349,7 @@ for (let i = 0; i < 100; i++) {
 ```
 
 #### using structs
-NOTE: You cannot use lambdas or function references in structs yet! But I'm going to add it in the future.
+Structs are a data blob or 'data structure', which only supports fields. But! You may assign a field a reference to a function or lambda. So it is possible to have functions inside the struct. Just make sure those fields are of type `any`
 
 ```rust
 let console = $console;
@@ -362,11 +364,36 @@ struct myStruct {
 
 /* instantiate the struct, no need for a 'new' keyword here */
 let theStruct = myStruct {
-    myFieldA = "hello",
-    myFieldB = 123
+    myFieldA: "hello",
+    myFieldB: 123
 };
 
-console.log(theStruct.myFieldA + theStruct.myFieldB);
+/*
+    This is also okay:
+
+    let theStruct = myStruct {
+        myFieldA = "hello",
+        myFieldB = 123
+    };  
+*/
+
+struct structWithFunc {
+    myLambda: any,
+    myFn: any
+}
+
+fn weee() {
+    console.log("Weee!");
+}
+
+let func = structWithFunc {
+    myLambda: () => { console.log("Oh you!"); }
+    myFn: weee
+}
+
+func.myLambda(); // prints: Oh you!
+func.myFn();     // prints: Weee!
+console.log(theStruct.myFieldA + theStruct.myFieldB); // prints: hello123
 ```
 
 To be updated with more soon!

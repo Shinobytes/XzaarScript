@@ -72,7 +72,20 @@ namespace Shinobytes.XzaarScript.Compiler
 
         public int StackRecursionCount { get; set; }
 
-        public int InstructionCount => IsInGlobalScope ? this.GlobalInstructions.Count : this.MethodInstructions.Count;
+        public int InstructionCount
+        {
+            get
+            {
+                if (InsideAnonymousFunctionCount > 0)
+                {
+                    return this.CurrentAnonymousFunctionScope.Instructions.Count;
+                }
+
+                return IsInGlobalScope
+                        ? this.GlobalInstructions.Count
+                        : this.MethodInstructions.Count;
+            }
+        }
 
         public int InsideAnonymousFunctionCount { get; set; }
 
@@ -92,7 +105,7 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             if (this.InsideAnonymousFunctionCount > 0)
             {
-                this.CurrentAnonymousFunctionScope.Instructions.Insert(index, instruction);                
+                this.CurrentAnonymousFunctionScope.Instructions.Insert(index, instruction);
             }
             else if (this.IsInGlobalScope)
             {
@@ -108,7 +121,7 @@ namespace Shinobytes.XzaarScript.Compiler
         {
             if (this.InsideAnonymousFunctionCount > 0)
             {
-                this.CurrentAnonymousFunctionScope.Instructions.Add(instruction);                
+                this.CurrentAnonymousFunctionScope.Instructions.Add(instruction);
             }
             else if (this.IsInGlobalScope)
             {

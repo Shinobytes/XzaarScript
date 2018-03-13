@@ -809,9 +809,29 @@ namespace Shinobytes.XzaarScript.Compiler
 
             if (method == null)
             {
+                // check if this is an direct invocation of a previous one
+                // ex: myFunction()();
+                if (call.PreviousInvocation != null)
+                {
+                    // traverse invocation tree and assign result from previous to temp variable
+                    // and then call the temp variable
+                    // a()()
+                    //   ^ ^--- 0                    
+                    //   `------1
+
+                    var functionToCall = Visit(call.PreviousInvocation) as VariableReference;
+                    var vargs = new List<VariableReference>();
+                    var tempReturnVar = TempVariable(XzaarBaseTypes.Any);
+                    vargs.Insert(0, tempReturnVar);
+                    vargs.Insert(0, functionToCall);
+                    var anonCall = Instruction.Create(OpCode.Callunknown, vargs.ToArray());
+                    foreach (var a in args) anonCall.OperandArguments.Add(a);
+                    ctx.AddInstruction(anonCall);
+                    return tempReturnVar;
+                }
+
                 // check if this is an anonymous function, if so.
                 // use OpCode.Callanonymous and provide the AnonymousFunctionReference as argument
-
                 if (call.AnonymousMethod != null)
                 {
                     var anonFuncVar = this.ctx.FindVariable(call.MethodName); // check with aliased name
@@ -831,19 +851,6 @@ namespace Shinobytes.XzaarScript.Compiler
 
                 VariableReference returnValue = null;
                 var instance = call.GetInstance();
-                if (instance != null && Equals(call.Type, XzaarBaseTypes.Any) && Equals(instance.Type, XzaarBaseTypes.Any))
-                {
-                    // acceptable
-                    var vargs = new List<VariableReference>();
-                    var anyVar = TempVariable(XzaarBaseTypes.Any);
-                    vargs.Insert(0, anyVar);
-                    vargs.Insert(0, Visit(instance) as VariableReference);
-                    vargs.Insert(0, new VariableReference { Name = methodName });
-                    var xzaarBinaryCode = Instruction.Create(OpCode.Callmethod, vargs.ToArray());
-                    foreach (var a in args) xzaarBinaryCode.OperandArguments.Add(a);
-                    ctx.AddInstruction(xzaarBinaryCode);
-                    return anyVar;
-                }
 
                 if (instance != null && instance.Type.IsArray && ArrayHelper.IsArrayFunction(methodName))
                 {
@@ -870,6 +877,20 @@ namespace Shinobytes.XzaarScript.Compiler
                     return returnValue;
                 }
 
+                if (instance != null && Equals(call.Type, XzaarBaseTypes.Any)) // && Equals(instance.Type, XzaarBaseTypes.Any)
+                {
+                    // acceptable
+                    var vargs = new List<VariableReference>();
+                    var anyVar = TempVariable(XzaarBaseTypes.Any);
+                    vargs.Insert(0, anyVar);
+                    vargs.Insert(0, Visit(instance) as VariableReference);
+                    vargs.Insert(0, new VariableReference { Name = methodName });
+                    var xzaarBinaryCode = Instruction.Create(OpCode.Callmethod, vargs.ToArray());
+                    foreach (var a in args) xzaarBinaryCode.OperandArguments.Add(a);
+                    ctx.AddInstruction(xzaarBinaryCode);
+                    return anyVar;
+                }
+
                 // trying to invoke an "Any" variable.
                 // this is fine. It will throw an error on runtime if its invalid.
                 if (call.RefMethodName == null && call.Type.IsAny)
@@ -880,17 +901,24 @@ namespace Shinobytes.XzaarScript.Compiler
                         var vargs = new List<VariableReference>();
                         var tempReturnVar = TempVariable(XzaarBaseTypes.Any);
                         vargs.Insert(0, tempReturnVar);
-                        vargs.Insert(0, new VariableReference { Name = methodName });
+                        if (anyVar.Type.IsArray && call.Member != null)
+                        {
+                            // check if we are providing a member access with array index                            
+                            var access = Visit(call.Member) as VariableReference;
+                            vargs.Insert(0, access);
+                        }
+                        else
+                        {
+                            vargs.Insert(0, new VariableReference { Name = methodName });
+                        }
+
                         var unknownCall = Instruction.Create(OpCode.Callunknown, vargs.ToArray());
                         foreach (var a in args) unknownCall.OperandArguments.Add(a);
                         ctx.AddInstruction(unknownCall);
                         return tempReturnVar;
                     }
                 }
-                //if (call.MethodName)
-
                 return Error("A function with the name '" + methodName + "' could not be found");
-                // not acceptable, we couldnt find the method.
             }
 
             var tmpVar = TempVariable(method.ReturnType);

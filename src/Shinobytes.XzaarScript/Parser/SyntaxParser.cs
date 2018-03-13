@@ -900,18 +900,18 @@ namespace Shinobytes.XzaarScript.Parser
                     if (SyntaxFacts.IsCloseBody(CurrentToken.Kind))
                         break;
 
-                    var assignment = WalkAssignmentOperator();
-
-                    // throw new NotImplementedException();
-
-                    // var assignment = Walk();
-                    //if (assignment.Kind != SyntaxKind.Equals)
-                    //{
-                    //    return new[] { Error("You're suppose to assign the values here", Tokens.Current) };
-                    //}
-
-                    fieldAssignments.Add(assignment);
-
+                    if (Tokens.NextIs(SyntaxKind.Colon))
+                    {
+                        var identifier = WalkIdentifier();
+                        var colon = Tokens.ConsumeExpected(SyntaxKind.Colon);
+                        var assignmentExpr = WalkExpressionCore();
+                        fieldAssignments.Add(AstNode.Assign(identifier, assignmentExpr));
+                    }
+                    else
+                    {
+                        var assignment = WalkAssignmentOperator();
+                        fieldAssignments.Add(assignment);
+                    }
                     Tokens.Consume(SyntaxKind.Comma);
                 }
 
@@ -1739,9 +1739,9 @@ namespace Shinobytes.XzaarScript.Parser
                 while (true)
                 {
                     var token = Tokens.PeekAt(tokenIndex++);
-                    if (token.Kind != SyntaxKind.Identifier && token.Kind != SyntaxKind.Comma && token.Kind != SyntaxKind.Colon 
+                    if (token.Kind != SyntaxKind.Identifier && token.Kind != SyntaxKind.Comma && token.Kind != SyntaxKind.Colon
                         && token.Kind != SyntaxKind.OpenBracket || token.Kind == SyntaxKind.OpenBracket && Tokens.PeekAt(tokenIndex++).Kind != SyntaxKind.CloseBracket)
-                    {                        
+                    {
                         break;
                     }
                 }

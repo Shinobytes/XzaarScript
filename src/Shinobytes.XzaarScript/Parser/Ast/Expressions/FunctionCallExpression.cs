@@ -31,9 +31,12 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         private readonly FunctionExpression function;
         private readonly LambdaExpression lambda;
         private readonly XzaarMethodBase method;
+        private readonly MemberExpression member;
+        private readonly FunctionCallExpression previousInvocation;
         private readonly string alias;
 
         protected IList<XzaarExpression> arguments;
+        
 
         internal FunctionCallExpression(XzaarMethodBase method, IList<XzaarExpression> args = null)
         {
@@ -58,6 +61,12 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             this.lambda = method;
         }
 
+        internal FunctionCallExpression(FunctionCallExpression callChain, IList<XzaarExpression> args = null)
+        {
+            arguments = args ?? new List<XzaarExpression>();
+            this.previousInvocation = callChain;
+        }
+
         internal FunctionCallExpression(string alias, LambdaExpression method, IList<XzaarExpression> args = null)
         {
             arguments = args ?? new List<XzaarExpression>();
@@ -65,15 +74,29 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             this.alias = alias;
         }
 
+        internal FunctionCallExpression(string alias, MemberExpression method, IList<XzaarExpression> args = null)
+        {
+            arguments = args ?? new List<XzaarExpression>();
+            this.member = method;
+            this.alias = alias;
+        }
+
+
+
         public sealed override ExpressionType NodeType => ExpressionType.Call;
 
-
         public virtual AnonymousFunctionExpression AnonymousMethod => this.lambda;
+
+        public virtual MemberExpression Member => this.member;
+
+        public virtual FunctionCallExpression PreviousInvocation => this.previousInvocation;
 
         public virtual XzaarExpression GetInstance()
         {
             return null;
         }
+
+
 
         public override XzaarType Type
         {
@@ -137,7 +160,19 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             arguments = args;
         }
 
+        public FunctionCallExpressionN(FunctionCallExpression callChain, IList<XzaarExpression> args)
+            : base(callChain, args)
+        {
+            arguments = args;
+        }
+
         public FunctionCallExpressionN(string alias, LambdaExpression method, IList<XzaarExpression> args)
+            : base(alias, method, args)
+        {
+            arguments = args;
+        }
+
+        public FunctionCallExpressionN(string alias, MemberExpression method, IList<XzaarExpression> args)
             : base(alias, method, args)
         {
             arguments = args;
@@ -672,7 +707,27 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             return new FunctionCallExpressionN(method, argList);
         }
 
+        public static FunctionCallExpression Call(FunctionCallExpression callChain, params XzaarExpression[] arguments)
+        {
+            //if (method == null) throw new ArgumentNullException(nameof(method));
+            // method can be null, if type is "any" since this will be a runtime error instead.
+
+            ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
+
+            return new FunctionCallExpressionN(callChain, argList);
+        }
+
         public static FunctionCallExpression Call(string alias, LambdaExpression method, params XzaarExpression[] arguments)
+        {
+            //if (method == null) throw new ArgumentNullException(nameof(method));
+            // method can be null, if type is "any" since this will be a runtime error instead.
+
+            ReadOnlyCollection<XzaarExpression> argList = new ReadOnlyCollection<XzaarExpression>(arguments);
+
+            return new FunctionCallExpressionN(alias, method, argList);
+        }
+
+        public static FunctionCallExpression Call(string alias, MemberExpression method, params XzaarExpression[] arguments)
         {
             //if (method == null) throw new ArgumentNullException(nameof(method));
             // method can be null, if type is "any" since this will be a runtime error instead.

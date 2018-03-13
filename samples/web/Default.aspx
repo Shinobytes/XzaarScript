@@ -3,6 +3,7 @@
 <%@ Import Namespace="System.Diagnostics" %>
 <%@ Import Namespace="Shinobytes.XzaarScript.VM" %>
 <%@ Import Namespace="Shinobytes.XzaarScript.Assembly" %>
+<%@ Import Namespace="Shinobytes.XzaarScript.Extensions" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -17,6 +18,16 @@ fn print_hello_world() -> void {
 }
 
 print_hello_world()";
+
+    private Shinobytes.XzaarScript.VM.Runtime Load(string inputCode)
+    {
+        var compileExpression = Shinobytes.XzaarScript.Extensions.ScriptVmExtensions.CompileExpression(
+            Shinobytes.XzaarScript.Extensions.ScriptVmExtensions.Parse(
+                Shinobytes.XzaarScript.Extensions.ScriptVmExtensions.Tokenize(inputCode)));        
+        var asm = Shinobytes.XzaarScript.Extensions.ScriptVmExtensions.Compile(compileExpression);                
+        return  Shinobytes.XzaarScript.Extensions.ScriptVmExtensions.Load(asm);
+    }
+
     private async void OnClick(object sender, EventArgs e)
     {
         CurrentSourceCode = this.Request.Form["xzaarscript"];
@@ -25,20 +36,26 @@ print_hello_world()";
         try
         {
             Stopwatch sw = new Stopwatch();
-            sw.Start();
-            var rt = new Shinobytes.XzaarScript.Interpreter(CurrentSourceCode);
-            rt.RegisterVariable("$console", console);
-            sw.Stop();
 
-            if (rt.HasErrors)
-                throw new Exception(string.Join("<br/>", rt.Errors.Select(x => "[" + x.ErrorLocation + "] " + x.Error)));
+            sw.Start();
+            var rt = Load(CurrentSourceCode);
+            rt.RegisterGlobalVariable("console", console);
+
+            sw.Stop();
 
             var loadTime = sw.ElapsedMilliseconds;
 
-            sw.Restart();
+            // if (rt.HasErrors)
+            // {
+            //     this.ConsoleOutput = "<span style='color: #999'>[Code executed in " + (loadTime + sw.ElapsedMilliseconds) + "ms (Load: " + loadTime + "ms, Exec: " + sw.ElapsedMilliseconds + ")]</span><br/>";
+            //     this.ConsoleOutput += "<span style='color: red;'>" + string.Join("<br/>", rt.Errors.Select(x => "[" + x.ErrorLocation + "] " + x.Error)) + "</span>";                
+            //     return;
+            // }
 
+            sw.Restart();
             rt.Run();
             sw.Stop();
+
             this.ConsoleOutput = "<span style='color: #999'>[Code executed in " + (loadTime + sw.ElapsedMilliseconds) + "ms (Load: " + loadTime + "ms, Exec: " + sw.ElapsedMilliseconds + ")]</span><br/>";
             this.ConsoleOutput += console.Output;
         }
@@ -86,6 +103,7 @@ print_hello_world()";
     <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
     <style type="text/css" media="screen">
         body {
+			background-color: #222;
             font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
         }
 
@@ -113,8 +131,7 @@ print_hello_world()";
         #console {
             position: absolute;
             top: 70%;
-            right: 0;
-            bottom: 0;
+            right: 0;            
             left: 0;
             border-top: 1px solid #2f3129;
             background-color: #222;

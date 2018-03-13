@@ -268,6 +268,28 @@ var a = test_struct { my_number = 1000 }
 console.log(a.my_number)", code);
         }
 
+
+        [TestMethod]
+        public void Declare_struct_and_create_new_instance_with_initializer_1()
+        {
+            // Assert.Inconclusive("Array initializers has not been implemented yet");
+            var code = ParseWithTypeLookup(@"let console = $console
+struct test_struct {
+  number my_number
+}
+
+let a = test_struct { my_number: 1000 }
+console.log(a.my_number)", out SyntaxParser parser);
+
+            Assert.AreEqual(false, parser.HasErrors);
+            Assert.AreEqual(@"var console = $console
+struct test_struct {
+  number my_number
+}
+var a = test_struct { my_number = 1000 }
+console.log(a.my_number)", code);
+        }
+
         [TestMethod]
         public void Declare_struct_and_create_new_instance_with_initializer_2()
         {

@@ -45,6 +45,8 @@ namespace Shinobytes.XzaarScript.VM
             }
         }
 
+        public TypeReference Type => this.objectType;
+
         public object GetFieldValue(string fieldName)
         {
             return GetField(fieldName).Value;

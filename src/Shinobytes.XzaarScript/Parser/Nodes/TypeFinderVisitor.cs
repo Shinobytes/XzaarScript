@@ -281,7 +281,7 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
                 {
                     var similar = context.FindSimilarNamedFunctionByExpression(expr);
                     if (context.IgnoreMissingMembers) return null;
-                    throw new ExpressionException("Target function '" + expr.Value + "' could not be found! Are you 100% sure that you have defined it? Or could it be a typo?" +
+                    throw new ExpressionException("Target function '" + expr.Value + "' ;could not be found! Are you 100% sure that you have defined it? Or could it be a typo?" +
                         (similar != null ? " Did you possibly mean '" + similar.Name + "'?" : ""));
                 }
 
