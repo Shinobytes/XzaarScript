@@ -1,4 +1,4 @@
-# XzaarScript [![Build Status](https://travis-ci.org/zerratar/XzaarScript.svg?branch=master)](https://travis-ci.org/zerratar/XzaarScript)
+# XzaarScript [![Build Status](https://travis-ci.org/zerratar/XzaarScript.svg?branch=master)](https://travis-ci.org/zerratar/XzaarScript) [![Coverage Status](https://coveralls.io/repos/github/zerratar/XzaarScript/badge.svg?branch=master)](https://coveralls.io/github/zerratar/XzaarScript?branch=master)
 
 ## Introduction
 If Rust and TypeScript had a baby, this might be it. It's ugly, it's incomplete, it's buggy. But I love it! Originally created for a game I was making in Unity. But it took too long to develop that I didn't have time to finish it. Now here it is, free for everyone to use!
