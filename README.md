@@ -8,7 +8,7 @@ XzaarScript is written in C#, .NET Framework v4.6.1 using Visual Studio 2017
 You can test out the demo website [here](http://xzaarscript.shinobytes.com)
 
 ## License
-XzaarScript is licensed under the [GPL, version 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). See [gpl-licence.txt](https://github.com/zerratar/PapyrusDotNet/blob/master/gpl-license.txt) for details.
+XzaarScript is licensed under the MIT License. See [LICENSE](https://github.com/zerratar/PapyrusDotNet/blob/master/LICENSE) for details.
 
 ## Build
 You can either: open up the `XzaarScript.sln` in visual studio, press build. Voilà!
