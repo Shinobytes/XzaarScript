@@ -1,8 +1,2 @@
-dist: trusty
 language: csharp
 solution: XzaarScript.sln
-dotnet: 4.6.1
-install:
-  - dotnet restore
-script:  
-  - dotnet test
