@@ -5,7 +5,11 @@ If Rust and TypeScript had a baby, this might be it. It's ugly, it's incomplete,
 
 XzaarScript is written in C#, .NET Framework v4.6.1 using Visual Studio 2017
 
-You can test out the demo website [here](http://xzaarscript.shinobytes.com)
+
+#### Links
+You can watch a youtube video of the game I was making in unity [here](http://www.youtube.com/watch?v=3BSx14L4HjU&t=1m50s)
+
+You can test out XzaarScript online using the playground [here](http://xzaarscript.shinobytes.com)
 
 ## License
 XzaarScript is licensed under the MIT License. See [LICENSE](https://github.com/zerratar/PapyrusDotNet/blob/master/LICENSE) for details.
@@ -20,6 +24,11 @@ Or you can open the root directory (same one that has the `XzaarScript.sln` file
 You can run all tests with
 
     dotnet test
+
+
+## How to use XzaarScript with Unity
+
+How to use XzaarScript in Unity and how to create a similar syntax highlighted editor as the video above. Coming soon!
 
 ## Documentation
 This documentation totally sucks. I should feel bad. But I don't.
