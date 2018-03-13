@@ -50,7 +50,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast
             }
             else
             {
-#if UNITY
+//#if UNITY
                 if (syntaxTree is DefineVariableNode node) return Process(node);
                 if (syntaxTree is FunctionNode functionNode) return Process(functionNode);
                 if (syntaxTree is StructNode structNode) return Process(structNode);
@@ -60,9 +60,9 @@ namespace Shinobytes.XzaarScript.Parser.Ast
                 if (syntaxTree is AssignNode assignNode) return Process(assignNode);
                 if (syntaxTree is MemberAccessNode accessNode) return Process(accessNode);
                 if (syntaxTree is MemberAccessChainNode chainNode) return Process(chainNode);
-#else 
-                return Process((dynamic)syntaxTree);
-#endif
+//#else 
+//                return Process((dynamic)syntaxTree);
+//#endif
             }
             return syntaxTree;
         }

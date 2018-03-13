@@ -1,2 +1,6 @@
 language: csharp
 solution: XzaarScript.sln
+script:
+ - dotnet restore
+ - dotnet build
+ - dotnet test

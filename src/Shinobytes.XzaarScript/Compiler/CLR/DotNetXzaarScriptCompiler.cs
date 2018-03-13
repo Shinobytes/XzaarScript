@@ -67,7 +67,7 @@ namespace Shinobytes.XzaarScript.Compiler
                 return finalItem;
             }
 
-#if UNITY
+//#if UNITY
             if (expression is BinaryExpression binaryExpression) return Visit(binaryExpression);
             if (expression is IfElseExpression elseExpression) return Visit(elseExpression);
             if (expression is ConditionalExpression conditionalExpression) return Visit(conditionalExpression);
@@ -95,9 +95,9 @@ namespace Shinobytes.XzaarScript.Compiler
             if (expression is FieldExpression fieldExpression) return Visit(fieldExpression);
             if (expression is LogicalNotExpression notExpression) return Visit(notExpression);
             return Visit(expression);
-#else
-            return Visit((dynamic)expression);
-#endif
+//#else
+//            return Visit((dynamic)expression);
+//#endif
         }
 
         public object Visit(ConditionalExpression expr)

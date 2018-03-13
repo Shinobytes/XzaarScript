@@ -26,6 +26,6 @@ namespace Shinobytes.XzaarScript.Assembly
         {
             item.Offset = currentInstructionIndex++;
             base.Add(item);
-        }
+        }        
     }
 }

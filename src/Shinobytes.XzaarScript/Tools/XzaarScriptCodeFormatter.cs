@@ -58,7 +58,7 @@ namespace Shinobytes.XzaarScript.Tools
 
         public string Visit(XzaarExpression expression)
         {
-#if UNITY            
+//#if UNITY            
             if (expression is BinaryExpression binaryExpression) return Visit(binaryExpression);
             if (expression is ConditionalExpression conditionalExpression) return Visit(conditionalExpression);
             if (expression is IfElseExpression elseExpression) return Visit(elseExpression);
@@ -100,9 +100,9 @@ namespace Shinobytes.XzaarScript.Tools
 
 
             return Visit(expression);
-#else 
-            return Visit((dynamic)expression);
-#endif
+//#else 
+//            return Visit((dynamic)expression);
+//#endif
         }
 
 

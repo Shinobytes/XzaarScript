@@ -1,4 +1,4 @@
-# XzaarScript [![Build Status](https://travis-ci.org/zerratar/XzaarScript.svg?branch=master)](https://travis-ci.org/zerratar/XzaarScript) [![Coverage Status](https://coveralls.io/repos/github/zerratar/XzaarScript/badge.svg?branch=master)](https://coveralls.io/github/zerratar/XzaarScript?branch=master)
+# XzaarScript [![Build Status](https://travis-ci.org/zerratar/XzaarScript.svg?branch=master)](https://travis-ci.org/zerratar/XzaarScript) [![codecov](https://codecov.io/gh/zerratar/XzaarScript/branch/master/graph/badge.svg)](https://codecov.io/gh/zerratar/XzaarScript)
 
 ## Introduction
 If Rust and TypeScript had a baby, this might be it. It's ugly, it's incomplete, it's buggy. But I love it! Originally created for a game I was making in Unity. But it took too long to develop that I didn't have time to finish it. Now here it is, free for everyone to use!
@@ -11,8 +11,15 @@ You can test out the demo website [here](http://xzaarscript.shinobytes.com)
 XzaarScript is licensed under the [GPL, version 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). See [gpl-licence.txt](https://github.com/zerratar/PapyrusDotNet/blob/master/gpl-license.txt) for details.
 
 ## Build
-Open up the `XzaarScript.sln` in visual studio, press build. Voilà!
-.NET Core is not currently supported. I may create a build or convert this to it later.
+You can either: open up the `XzaarScript.sln` in visual studio, press build. Voilà!
+
+Or you can open the root directory (same one that has the `XzaarScript.sln` file) and use the following commandline
+
+    dotnet build
+
+You can run all tests with
+
+    dotnet test
 
 ## Documentation
 This documentation totally sucks. I should feel bad. But I don't.

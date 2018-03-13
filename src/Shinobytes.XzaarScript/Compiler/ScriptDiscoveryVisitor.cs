@@ -59,7 +59,7 @@ namespace Shinobytes.XzaarScript.Compiler
             // NOTE: Blueh! If only we could have used dynamics here, that would have saved us so many darn lines :P But since we are compiling for 3.5, thats not possible
             // 
 
-#if UNITY
+//#if UNITY
             if (expression is LambdaExpression lambda) return Visit(lambda);
             if (expression is UnaryExpression unaryExpression) return Visit(unaryExpression);
             if (expression is IfElseExpression elseExpression) return Visit(elseExpression);
@@ -84,9 +84,9 @@ namespace Shinobytes.XzaarScript.Compiler
             if (expression is FunctionExpression functionExpression) return Visit(functionExpression);
             if (expression is StructExpression expression1) return Visit(expression1);
             return Visit(expression);
-#else
-            return Visit((dynamic)expression);
-#endif
+//#else
+//            return Visit((dynamic)expression);
+//#endif
 
         }
 

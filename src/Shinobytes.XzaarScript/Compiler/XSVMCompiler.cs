@@ -79,7 +79,7 @@ namespace Shinobytes.XzaarScript.Compiler
                 return null;
             }
 
-#if UNITY
+//#if UNITY
             if (expression is LambdaExpression lambda) return Visit(lambda);
 
             if (expression is BinaryExpression binaryExpression) return Visit(binaryExpression);
@@ -109,9 +109,9 @@ namespace Shinobytes.XzaarScript.Compiler
             if (expression is FieldExpression fieldExpression) return Visit(fieldExpression);
             if (expression is LogicalNotExpression notExpression) return Visit(notExpression);
             return Visit(expression);
-#else
-            return Visit((dynamic)expression);
-#endif
+//#else
+//            return Visit((dynamic)expression);
+//#endif
         }
 
         private VariableReference BinaryOp(BinaryExpression binaryOp, OpCode oper, XzaarType tempVariableType)

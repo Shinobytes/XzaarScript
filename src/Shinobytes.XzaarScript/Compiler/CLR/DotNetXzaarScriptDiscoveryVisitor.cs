@@ -53,9 +53,8 @@ namespace Shinobytes.XzaarScript.Compiler
             {
                 throw new Exception(errorExpression.ErrorMessage);
             }
-#if UNITY
 
-
+//#if UNITY
             if (expression is UnaryExpression) return Visit(expression as UnaryExpression);
             if (expression is IfElseExpression) return Visit(expression as IfElseExpression);
             if (expression is ConditionalExpression) return Visit(expression as ConditionalExpression);
@@ -79,9 +78,9 @@ namespace Shinobytes.XzaarScript.Compiler
             if (expression is FunctionExpression) return Visit(expression as FunctionExpression);
             if (expression is StructExpression) return Visit(expression as StructExpression);
             return Visit(expression);
-#else
-            return Visit((dynamic)expression);
-#endif
+//#else
+//            return Visit((dynamic)expression);
+//#endif
 
         }
 
