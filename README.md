@@ -1,4 +1,5 @@
-# XzaarScript [![Build Status](https://travis-ci.org/zerratar/XzaarScript.svg?branch=master)](https://travis-ci.org/zerratar/XzaarScript) [![codecov](https://codecov.io/gh/zerratar/XzaarScript/branch/master/graph/badge.svg)](https://codecov.io/gh/zerratar/XzaarScript)
+# XzaarScript 
+[![Build Status](https://travis-ci.org/zerratar/XzaarScript.svg?branch=master)](https://travis-ci.org/zerratar/XzaarScript) [![codecov](https://codecov.io/gh/zerratar/XzaarScript/branch/master/graph/badge.svg)](https://codecov.io/gh/zerratar/XzaarScript)
 
 ## Introduction
 If Rust and TypeScript had a baby, this might be it. It's ugly, it's incomplete, it's buggy. But I love it! Originally created for a game I was making in Unity. But it took too long to develop that I didn't have time to finish it. Now here it is, free for everyone to use!
@@ -6,8 +7,13 @@ If Rust and TypeScript had a baby, this might be it. It's ugly, it's incomplete,
 XzaarScript is written in C#, .NET Framework v4.6.1 using Visual Studio 2017
 
 
+#### Demo game / concepts created in unity using XzaarScript
+[![XzaarScript in action](https://img.youtube.com/vi/3BSx14L4HjU/0.jpg)](http://www.youtube.com/watch?v=3BSx14L4HjU&t=1m50s "XzaarScript in action")
+
+
+![](http://xzaarscript.shinobytes.com/imgs/hack_ui.png) ![](http://xzaarscript.shinobytes.com/imgs/hack_ui_2.png)
+
 #### Links
-You can watch a youtube video of the game I was making in unity [here](http://www.youtube.com/watch?v=3BSx14L4HjU&t=1m50s)
 
 You can test out XzaarScript online using the playground [here](http://xzaarscript.shinobytes.com)
 
