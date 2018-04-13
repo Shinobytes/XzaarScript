@@ -88,7 +88,7 @@ namespace Shinobytes.XzaarScript.Parser
                     }
                 case '\'': return WalkSingleQuouteString();
                 case '"': return WalkDoubleQuouteString();
-                case '!': return Token(Match('=') ? SyntaxKind.NotEquals : SyntaxKind.Not);
+                case '!': return Token(Match('=') ? SyntaxKind.NotEquals : SyntaxKind.Not);                
                 case '=': return Token(Match('=') ? SyntaxKind.EqualsEquals : Match('>') ? SyntaxKind.EqualsGreater : SyntaxKind.Equals);
                 case '*': return Token(Match('=') ? SyntaxKind.MultiplyEquals : SyntaxKind.Multiply);
                 case '%': return Token(Match('=') ? SyntaxKind.ModuloEquals : SyntaxKind.Modulo);
@@ -101,6 +101,7 @@ namespace Shinobytes.XzaarScript.Parser
                 case '&': return Token(Match('&') ? SyntaxKind.AndAnd : Match('=') ? SyntaxKind.AndEquals : SyntaxKind.And);
                 case '?': return Token(Match('?') ? SyntaxKind.QuestionQuestion : SyntaxKind.Question);
                 case ':': return Token(Match(':') ? SyntaxKind.ColonColon : SyntaxKind.Colon);
+                case '~': return Token(SyntaxKind.BitNot);
                 case ',': return Token(SyntaxKind.Comma);
                 case '.': return Token(SyntaxKind.Dot);
                 case ';': return Token(SyntaxKind.Semicolon);

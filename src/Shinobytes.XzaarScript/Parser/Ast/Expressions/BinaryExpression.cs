@@ -96,6 +96,8 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
                     return ExpressionType.LeftShift;
                 case ExpressionType.ExclusiveOrAssign:
                     return ExpressionType.ExclusiveOr;
+                case ExpressionType.BitNot:
+                    return ExpressionType.BitNot;
                 default:
                     throw new InvalidOperationException("op");
             }
@@ -216,6 +218,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
                 case ExpressionType.Equal: return Equal(left, right, liftToNull, method);
                 case ExpressionType.NotEqual: return NotEqual(left, right, liftToNull, method);
                 case ExpressionType.ExclusiveOr: return ExclusiveOr(left, right, method);
+                case ExpressionType.BitNot: return BitNot(left, right, method);
                 case ExpressionType.Coalesce: return Coalesce(left, right);
                 case ExpressionType.ArrayIndex: return ArrayIndex(left, right);
                 case ExpressionType.RightShift: return RightShift(left, right, method);
@@ -400,7 +403,23 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         public static BinaryExpression ExclusiveOr(XzaarExpression left, XzaarExpression right)
         {
             return ExclusiveOr(left, right, null);
+        }        
+
+        public static BinaryExpression BitNot(XzaarExpression left, XzaarExpression right, XzaarMethodBase method)
+        {
+            RequiresCanRead(left, "left");
+            RequiresCanRead(right, "right");
+            if (method == null)
+            {
+                if (left.Type == right.Type && XzaarTypeUtils.IsIntegerOrBool(left.Type))
+                {
+                    return new SimpleBinaryExpression(ExpressionType.BitNot, left, right, left.Type);
+                }
+                return GetUserDefinedBinaryOperatorOrThrow(ExpressionType.BitNot, "op_BitNot", left, right, true);
+            }
+            return GetMethodBasedBinaryOperator(ExpressionType.BitNot, left, right, method, true);
         }
+
         public static BinaryExpression ExclusiveOr(XzaarExpression left, XzaarExpression right, XzaarMethodBase method)
         {
             RequiresCanRead(left, "left");
@@ -636,7 +655,7 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             RequiresCanRead(right, "right");
             if (method == null)
             {
-                if (left.Type == right.Type && XzaarTypeUtils.IsIntegerOrBool(left.Type))
+                if (left.Type.Equals(right.Type) && XzaarTypeUtils.IsNumberOrBool(left.Type)) // for now, allow all numbers. although isnt really supported.
                 {
                     return new SimpleBinaryExpression(ExpressionType.Or, left, right, left.Type);
                 }

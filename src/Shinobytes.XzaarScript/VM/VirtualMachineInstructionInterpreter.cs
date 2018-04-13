@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.  
  **/
- 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +56,20 @@ namespace Shinobytes.XzaarScript.VM
                     case OpCode.Mod:
                     case OpCode.Sub:
                         ArithmeticValue(rt, instruction, instruction.OpCode);
+                        break;
+
+                    case OpCode.BitwiseAnd:
+                    case OpCode.BitwiseOr:
+                    case OpCode.BitwiseXor:
+                    case OpCode.BitwiseNot:
+                    case OpCode.BitwiseRightShift:
+                    case OpCode.BitwiseLeftShift:
+                        Bitwise(rt, instruction, instruction.OpCode);
+                        break;
+
+                    case OpCode.And:
+                    case OpCode.Or:
+                        Conditional(rt, instruction, instruction.OpCode);
                         break;
                     case OpCode.Callglobal:
                         CallGlobal(rt, instruction);
@@ -922,11 +936,56 @@ namespace Shinobytes.XzaarScript.VM
             targetVariable.SetValue(Arithmetic((ArithmeticOperation)opcode, valueLeft, valueRight));
         }
 
+
+        private void Bitwise(Runtime rt, Instruction instruction, OpCode opcode)
+        {
+            // add target value1 value2
+            var targetVariable = GetVariable(rt, instruction, 0);
+            var valueLeft = GetArgumentValue(rt, instruction, 1);
+            var valueRight = GetArgumentValue(rt, instruction, 2);
+
+            targetVariable.SetValue(Bitwise((ArithmeticOperation)opcode, valueLeft, valueRight));
+        }
+
+        /*
+         *                     case OpCode.BitwiseAnd:
+                    case OpCode.BitwiseOr:
+                    case OpCode.BitwiseXor:
+                    case OpCode.BitwiseNot:
+                    case OpCode.BitwiseRightShift:
+                    case OpCode.BitwiseLeftShift:
+         */
+
+        private void Conditional(Runtime rt, Instruction instruction, OpCode opcode)
+        {
+            // add target value1 value2
+            var targetVariable = GetVariable(rt, instruction, 0);
+            var valueLeft = GetArgumentValue<bool>(rt, instruction, 1);
+            var valueRight = GetArgumentValue<bool>(rt, instruction, 2);
+
+            targetVariable.SetValue(
+                opcode == OpCode.And
+                    ? valueLeft && valueRight
+                    : valueLeft || valueRight
+                );
+        }
+
         private object GetArgumentValue(Runtime rt, Instruction instruction, int index)
         {
             return GetValueOf(rt, instruction.Arguments[index]);
         }
 
+        private T GetArgumentValue<T>(Runtime rt, Instruction instruction, int index)
+        {
+            try
+            {
+                return (T)GetValueOf(rt, instruction.Arguments[index]);
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
 
         private object GetOperandValue(Runtime rt, Instruction instruction, int index)
         {
@@ -1040,6 +1099,11 @@ namespace Shinobytes.XzaarScript.VM
         {
             return node is decimal || node is double || node is int || node is float || node is long || node is byte ||
                    node is short || node is uint || node is ulong || node is sbyte || node is ushort;
+        }
+
+        private object Bitwise(BitwiseOperation op, object valueLeft, object valueRight)
+        {
+            
         }
 
         private object Arithmetic(ArithmeticOperation op, object valueLeft, object valueRight)
@@ -1305,6 +1369,16 @@ namespace Shinobytes.XzaarScript.VM
             Mul = 3,
             Div = 4,
             Mod = 5
+        }
+
+        internal enum BitwiseOperation
+        {
+            Or,
+            Xor,
+            Not,
+            And,
+            LeftShift,
+            RightShift
         }
     }
 }

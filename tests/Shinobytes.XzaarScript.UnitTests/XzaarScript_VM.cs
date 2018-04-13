@@ -469,7 +469,6 @@ namespace Shinobytes.XzaarScript.UnitTests
             Assert.AreEqual(null, result);
         }
 
-
         [TestMethod]
         public void Push_array_return_item_value_1()
         {
@@ -1430,6 +1429,70 @@ print_hello_world()");
             var rt = Run("fn test(any s) -> string { s.Val.Test = \"HEHEHE\" return s.Val.Test } ");
             var result = rt.Invoke<string>("test", new DeepClass());
             Assert.AreEqual("HEHEHE", result);
+        }
+
+        [TestMethod]
+        public void brainfuck_interpreter()
+        {
+            var result = InvokeWithConsole("fn interpret(code: str) {\n    let LENGTH = 65535;\n    let mem = [];\n    let dataPointer = 0;\n    \n    \n        let l = 0;\n        for(let i = 0; i < code.length; i++) {\n            if(code[i] == \'>\') {\n                dataPointer = (dataPointer == LENGTH-1) ? 0 : dataPointer + 1;\n            } else if(code[i] == \'<\') {\n                dataPointer = (dataPointer == 0) ? LENGTH-1 : dataPointer - 1;\n            } else if(code[i] == \'+\') {\n                mem[dataPointer]++;\n            } else if(code[i] == \'-\') {\n                mem[dataPointer]--;\n            } else if(code[i] == \'.\') {\n                $console.log(mem[dataPointer]);\n            } else if(code[i] == \',\') {\n                mem[dataPointer] = mem[dataPointer];\n            } else if(code[i] == \'[\') {\n                if(mem[dataPointer] == 0) {\n                    i++;\n                    while(l > 0 || code[i] != \']\') {\n                        if(code[i] == \'[\') l++;\n                        if(code[i] == \']\') l--;\n                        i++;\n                    }\n                }\n            } else if(code[i] == \']\') {\n                if(mem[dataPointer] != 0) {\n                    i--;\n                    while(l > 0 || code[i] != \'[\') {\n                        if(code[i] == \']\') l++;\n                        if(code[i] == \'[\') l--;\n                        i--;\n                    }\n                    i--;\n                }\n            }\n        }\n}");
+            Assert.AreEqual("123\r\n", result);
+        }
+
+        [TestMethod]
+        public void test_orelse()
+        {
+            var result = InvokeWithConsole("if (true || false) { $console.log('yes') } else { $console.log('no') }");
+            Assert.AreEqual("yes\r\n", result);
+        }
+
+        [TestMethod]
+        public void test_andalso()
+        {
+            var result = InvokeWithConsole("if (true && false) { $console.log('yes') } else { $console.log('no') }");
+            Assert.AreEqual("no\r\n", result);
+        }
+
+
+        [TestMethod]
+        public void test_bitwise_or()
+        {
+            var result = InvokeWithConsole("$console.log(10 | 1)");
+            Assert.AreEqual("yes\r\n", result);
+        }
+
+        [TestMethod]
+        public void test_bitwise_and()
+        {
+            var result = InvokeWithConsole("$console.log(10 & 1)");
+            Assert.AreEqual("yes\r\n", result);
+        }
+
+        [TestMethod]
+        public void test_bitwise_not()
+        {
+            var result = InvokeWithConsole("$console.log(10 ~ 1)");
+            Assert.AreEqual("yes\r\n", result);
+        }
+
+        [TestMethod]
+        public void test_bitwise_xor()
+        {
+            var result = InvokeWithConsole("$console.log(10 ^ 1)");
+            Assert.AreEqual("yes\r\n", result);
+        }
+
+        [TestMethod]
+        public void test_bitwise_leftshift()
+        {
+            var result = InvokeWithConsole("$console.log(10 << 1)");
+            Assert.AreEqual("yes\r\n", result);
+        }
+
+        [TestMethod]
+        public void test_bitwise_rightshift()
+        {
+            var result = InvokeWithConsole("$console.log(10 >> 1)");
+            Assert.AreEqual("yes\r\n", result);
         }
 
 

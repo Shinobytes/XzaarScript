@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.  
  **/
- 
+
 using System;
 using System.Linq;
 using Shinobytes.XzaarScript.Parser.Ast.Expressions;
@@ -169,7 +169,7 @@ namespace Shinobytes.XzaarScript
                 // for now we wont expect multiple types with the same name since we don't support namespaces just yet. otherwise we could do o.FullName == ..
             }
 
-            return (o.IsAny && IsAny) || ((object.ReferenceEquals(this.UnderlyingSystemType, o.UnderlyingSystemType)) && !o.UnderlyingSystemType.IsAny);
+            return o.IsAny && IsAny || ReferenceEquals(UnderlyingSystemType, o.UnderlyingSystemType) && o.UnderlyingSystemType != null && !o.UnderlyingSystemType.IsAny;
         }
 
         public bool IsArray => IsArrayImpl();

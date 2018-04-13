@@ -39,13 +39,12 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         {
             get
             {
-                var fc = Right as FunctionCallExpression;
-                if (fc != null)
+                if (Right is FunctionCallExpression fc)
                 {
                     return fc.Type;
                 }
-                var ma = Right as MemberExpression;
-                if (ma != null)
+
+                if (Right is MemberExpression ma)
                 {
                     if (ma.MemberType.Equals(XzaarBaseTypes.Void))
                     {

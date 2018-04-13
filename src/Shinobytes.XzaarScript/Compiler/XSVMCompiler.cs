@@ -260,6 +260,18 @@ namespace Shinobytes.XzaarScript.Compiler
                     return BinaryOp(binaryOp, OpCode.CmpEq, XzaarBaseTypes.Boolean);
                 case ExpressionType.NotEqual:
                     return BinaryOp(binaryOp, OpCode.CmpNotEq, XzaarBaseTypes.Boolean);
+
+                case ExpressionType.AndAlso: return ConditionalAnd(binaryOp);
+                case ExpressionType.OrElse: return ConditionalOr(binaryOp);
+
+                case ExpressionType.Or: return BitwiseOr(binaryOp);
+                case ExpressionType.ExclusiveOr: return BitwiseXor(binaryOp);
+                case ExpressionType.And: return BitwiseAnd(binaryOp);
+
+                case ExpressionType.BitNot: return BitwiseNot(binaryOp);
+                case ExpressionType.LeftShift: return BitwiseLeftShift(binaryOp);
+                case ExpressionType.RightShift: return BitwiseRightShift(binaryOp);
+
                 case ExpressionType.Subtract:
                     return BinaryOp(binaryOp, OpCode.Sub, XzaarBaseTypes.Number);
                 case ExpressionType.Add:
@@ -273,7 +285,6 @@ namespace Shinobytes.XzaarScript.Compiler
             }
             return Error(binaryOp.NodeType + " has not been implemented.");
         }
-
 
         public object Visit(ConditionalExpression expr)
         {
@@ -1130,6 +1141,48 @@ namespace Shinobytes.XzaarScript.Compiler
         public object Visit(FieldExpression node)
         {
             throw new NotImplementedException();
+        }
+
+        private VariableReference BitwiseAnd(BinaryExpression op)
+        {
+            return BinaryOp(op, OpCode.BitwiseAnd, XzaarBaseTypes.Number);
+        }
+
+        private VariableReference BitwiseOr(BinaryExpression op)
+        {
+            return BinaryOp(op, OpCode.BitwiseOr, XzaarBaseTypes.Number);
+        }
+
+
+        private VariableReference BitwiseNot(BinaryExpression op)
+        {
+            return BinaryOp(op, OpCode.BitwiseNot, XzaarBaseTypes.Number);
+        }
+
+
+        private VariableReference BitwiseLeftShift(BinaryExpression op)
+        {
+            return BinaryOp(op, OpCode.BitwiseLeftShift, XzaarBaseTypes.Number);
+        }
+
+        private VariableReference BitwiseRightShift(BinaryExpression op)
+        {
+            return BinaryOp(op, OpCode.BitwiseRightShift, XzaarBaseTypes.Number);
+        }
+
+        private VariableReference BitwiseXor(BinaryExpression op)
+        {            
+            return BinaryOp(op, OpCode.BitwiseXor, XzaarBaseTypes.Number);
+        }
+
+        private VariableReference ConditionalOr(BinaryExpression op)
+        {
+            return BinaryOp(op, OpCode.Or, XzaarBaseTypes.Boolean);
+        }
+
+        private VariableReference ConditionalAnd(BinaryExpression op)
+        {
+            return BinaryOp(op, OpCode.And, XzaarBaseTypes.Boolean);
         }
 
         public MethodBody VisitLambdaBody(XzaarExpression body)

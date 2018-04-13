@@ -75,5 +75,16 @@ namespace Shinobytes.XzaarScript.Assembly
         ArrayRemoveElements = 44,
         ArrayClearElements = 45,
         ArrayIndexOf = 46,
+
+        BitwiseAnd = 49,
+        BitwiseOr = 50,
+        BitwiseXor = 51,
+        BitwiseNot = 52,
+        BitwiseLeftShift = 53,
+        BitwiseRightShift = 54,
+
+        // you'd think that I had added these earlier. So did I. I must have forgotten :o
+        Or = 55,
+        And = 56,
     }
 }

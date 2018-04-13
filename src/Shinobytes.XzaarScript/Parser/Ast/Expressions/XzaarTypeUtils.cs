@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.  
  **/
- 
+
 namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
 {
     public static class XzaarTypeUtils
@@ -106,6 +106,8 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
+                case TypeCode.Byte:
+                case TypeCode.SByte:
                     return true;
             }
             //}
@@ -151,9 +153,19 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
             return false;
         }
 
+        internal static bool IsNumberOrBool(XzaarType type)
+        {
+            if (IsArithmetic(type))
+            {
+                return true;
+            }
+            type = GetNonNullableType(type);
+            return XzaarType.GetTypeCode(type) == TypeCode.Boolean;
+        }
+
         public static bool AreReferenceAssignable(XzaarType dest, XzaarType src)
         {
-            if (dest.IsAny || dest.IsNumeric && src.IsNumeric) return true;            
+            if (dest.IsAny || dest.IsNumeric && src.IsNumeric) return true;
             if (AreEquivalent(dest, src))
             {
                 return true;

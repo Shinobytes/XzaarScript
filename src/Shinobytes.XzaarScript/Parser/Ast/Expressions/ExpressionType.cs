@@ -93,6 +93,10 @@ namespace Shinobytes.XzaarScript.Parser.Ast.Expressions
         /// </summary>
         ExclusiveOr,
         /// <summary>
+        /// A node that represents a bitwise NOT operation.
+        /// </summary>
+        BitNot,
+        /// <summary>
         /// A node that represents a "greater than" numeric comparison.
         /// </summary>
         GreaterThan,
