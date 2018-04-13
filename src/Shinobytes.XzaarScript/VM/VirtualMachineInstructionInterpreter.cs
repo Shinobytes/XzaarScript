@@ -64,7 +64,7 @@ namespace Shinobytes.XzaarScript.VM
                     case OpCode.BitwiseNot:
                     case OpCode.BitwiseRightShift:
                     case OpCode.BitwiseLeftShift:
-                        Bitwise(rt, instruction, instruction.OpCode);
+                        BitwiseValue(rt, instruction, instruction.OpCode);
                         break;
 
                     case OpCode.And:
@@ -937,14 +937,21 @@ namespace Shinobytes.XzaarScript.VM
         }
 
 
-        private void Bitwise(Runtime rt, Instruction instruction, OpCode opcode)
+        private void BitwiseValue(Runtime rt, Instruction instruction, OpCode opcode)
         {
             // add target value1 value2
+            var op = (BitwiseOperation)opcode;
             var targetVariable = GetVariable(rt, instruction, 0);
             var valueLeft = GetArgumentValue(rt, instruction, 1);
-            var valueRight = GetArgumentValue(rt, instruction, 2);
-
-            targetVariable.SetValue(Bitwise((ArithmeticOperation)opcode, valueLeft, valueRight));
+            if (op == BitwiseOperation.Not)
+            {
+                targetVariable.SetValue(BitwiseNot(valueLeft));
+            }
+            else
+            {
+                var valueRight = GetArgumentValue(rt, instruction, 2);
+                targetVariable.SetValue(Bitwise(op, valueLeft, valueRight));
+            }
         }
 
         /*
@@ -1101,9 +1108,36 @@ namespace Shinobytes.XzaarScript.VM
                    node is short || node is uint || node is ulong || node is sbyte || node is ushort;
         }
 
+        private object BitwiseNot(object valueLeft)
+        {
+            var left = 0;
+            if (valueLeft is bool leftBool) left = leftBool ? 1 : 0;
+            if (IsNumber(valueLeft)) left = (int)Number(valueLeft);
+            return ~left;
+        }
+
         private object Bitwise(BitwiseOperation op, object valueLeft, object valueRight)
         {
-            
+            var left = 0;
+            var right = 0;
+            if (valueLeft is bool leftBool) left = leftBool ? 1 : 0;
+            if (valueRight is bool rightBool) left = rightBool ? 1 : 0;
+            if (IsNumber(valueLeft)) left = (int)Number(valueLeft);
+            if (IsNumber(valueRight)) right = (int)Number(valueRight);
+            switch (op)
+            {
+                case BitwiseOperation.And:
+                    return left & right;
+                case BitwiseOperation.Or:
+                    return left | right;
+                case BitwiseOperation.LeftShift:
+                    return left << right;
+                case BitwiseOperation.RightShift:
+                    return left >> right;
+                case BitwiseOperation.Xor:
+                    return left ^ right;
+            }
+            return null;
         }
 
         private object Arithmetic(ArithmeticOperation op, object valueLeft, object valueRight)
