@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.  
  **/
- 
+
 using Shinobytes.XzaarScript.Parser.Ast;
 
 namespace Shinobytes.XzaarScript.Parser.Nodes
@@ -44,6 +44,25 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             Op = op;
             OperatingOrder = operatingOrderWeight;
         }
+
+        public override string Type
+        {
+            get
+            {
+                if (left.Type == XzaarBaseTypes.Number.Name && right.Type == XzaarBaseTypes.Number.Name)
+                {
+                    return XzaarBaseTypes.Number.Name;
+                }
+
+                if (left.Type == XzaarBaseTypes.String.Name || right.Type == XzaarBaseTypes.String.Name && this.Op == "+")
+                {
+                    return XzaarBaseTypes.String.Name;
+                }
+
+                return XzaarBaseTypes.Any.Name;
+            }
+        }
+
 
         public AstNode Left => left;
 

@@ -350,19 +350,9 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return new ArgumentNode(item, argIndex, _nodeIndex++);
         }
 
-        public static MemberAccessNode MemberAccess(AstNode member)
-        {
-            return new MemberAccessNode(member, null, null, null, _nodeIndex++);
-        }
-
         public static MemberAccessNode MemberAccess(AstNode member, string declaringType, string memberType)
         {
             return new MemberAccessNode(member, null, declaringType, memberType, _nodeIndex++);
-        }
-
-        public static MemberAccessNode MemberAccess(AstNode member, AstNode arrayIndexer, string declaringType, string memberType)
-        {
-            return new MemberAccessNode(member, arrayIndexer, declaringType, memberType, _nodeIndex++);
         }
 
         public static MemberAccessNode MemberAccess(AstNode member, AstNode arrayIndexer)
@@ -370,59 +360,11 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return new MemberAccessNode(member, arrayIndexer, "any", "any", _nodeIndex++);
         }
 
-        public static MemberAccessNode ParameterAccess(AstNode parameter)
-        {
-            return new MemberAccessNode(parameter, null, null, null, _nodeIndex++);
-        }
-        public static MemberAccessNode ParameterAccess(AstNode parameter, string parameterType)
-        {
-            return new MemberAccessNode(parameter, null, null, parameterType, _nodeIndex++);
-        }
-
-        public static MemberAccessNode VariableAccess(AstNode variable)
-        {
-            return new MemberAccessNode(variable, null, null, null, _nodeIndex++);
-        }
-
-
-        public static MemberAccessNode VariableAccess(AstNode variable, string variableType)
-        {
-            var access = variable as MemberAccessNode;
-            if (access != null)
-            {
-                return new MemberAccessNode(access.Member, null, access.DeclaringType, variableType, _nodeIndex++);
-            }
-
-            return new MemberAccessNode(variable, null, null, variableType, _nodeIndex++);
-        }
-
-        public static MemberAccessNode VariableAccess(AstNode variable, AstNode arrayIndex)
-        {
-            var access = variable as MemberAccessNode;
-            if (access != null)
-            {
-                if (access.ArrayIndex != null)
-                {
-                    return new MemberAccessNode(access, arrayIndex, access.DeclaringType, access.MemberType, _nodeIndex++);
-                }
-                else
-                {
-                    return new MemberAccessNode(access.Member, arrayIndex, access.DeclaringType, access.MemberType, _nodeIndex++);
-                }
-            }
-
-            return new MemberAccessNode(variable, arrayIndex, null, null, _nodeIndex++);
-        }
-
         public static MemberAccessChainNode MemberAccessChain(AstNode lastAccessorNode, MemberAccessNode memberAccessNode)
         {
             return new MemberAccessChainNode(lastAccessorNode, memberAccessNode, memberAccessNode.MemberType, _nodeIndex++);
         }
 
-        public static MemberAccessChainNode MemberAccessChain(AstNode lastAccessorNode, AstNode memberAccessNode, string functionReturnType)
-        {
-            return new MemberAccessChainNode(lastAccessorNode, memberAccessNode, functionReturnType, _nodeIndex++);
-        }
 
         public static ConditionalExpressionNode Conditional(AstNode condition, SyntaxToken questionToken, AstNode whenTrue, SyntaxToken colonToken, AstNode whenFalse)
         {
@@ -525,11 +467,6 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return new ForLoopNode(initiator, test, incrementor, body, _nodeIndex++);
         }
 
-        public static LogicalNotNode Negate(AstNode expression)
-        {
-            return new LogicalNotNode(expression, _nodeIndex++);
-        }
-
         public static BinaryOperatorNode BinaryOperator(int order, AstNode left, char op0, AstNode right)
         {
             return new BinaryOperatorNode(order, left, op0, right, _nodeIndex++);
@@ -537,16 +474,6 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
         public static BinaryOperatorNode BinaryOperator(int order, AstNode left, string op0, AstNode right)
         {
             return new BinaryOperatorNode(order, left, op0, right, _nodeIndex++);
-        }
-
-        public static AstNode EqualityOperator(AstNode left, string toString, AstNode right)
-        {
-            return new EqualityOperatorNode(left, toString, right, _nodeIndex++);
-        }
-
-        public static AstNode ConditionalOperator(int order, AstNode node, string toString, AstNode rl)
-        {
-            return new LogicalConditionalNode(order, node, toString, rl, _nodeIndex++);
         }
 
         public static AstNode Number(int i)
@@ -564,49 +491,11 @@ namespace Shinobytes.XzaarScript.Parser.Nodes
             return new MatchNode(valueExpression, cases, _nodeIndex++);
         }
 
-        public static UnaryNode Incrementor(AstNode item)
-        {
-            return new UnaryNode(false, true, item, _nodeIndex++);
-        }
-
-        public static UnaryNode Decrementor(AstNode item)
-        {
-            return new UnaryNode(false, false, item, _nodeIndex++);
-        }
-
-        public static UnaryNode PostIncrementor(AstNode item)
-        {
-            return new UnaryNode(true, true, item, _nodeIndex++);
-        }
-
-        public static UnaryNode PostDecrementor(AstNode item)
-        {
-            return new UnaryNode(true, false, item, _nodeIndex++);
-        }
-
-        public static AstNode PrefixUnary(SyntaxNode opToken, AstNode operand)
-        {
-            return new UnaryNode(false, opToken.StringValue, operand, _nodeIndex++);
-        }
-
         public static AstNode PrefixUnary(SyntaxToken opToken, AstNode operand)
         {
             return new UnaryNode(false, opToken.Value, operand, _nodeIndex++);
         }
 
-        public static AstNode PostfixUnary(SyntaxToken opToken, AstNode operand)
-        {
-            return new UnaryNode(true, opToken.Value, operand, _nodeIndex++);
-        }
-
-        public static AstNode PostfixUnary(SyntaxNode opToken, AstNode operand)
-        {
-            return new UnaryNode(true, opToken.StringValue, operand, _nodeIndex++);
-        }
-        public static AstNode PostfixUnary(SyntaxNode opToken, AstNode operand, SyntaxKind type)
-        {
-            return new UnaryNode(true, opToken.StringValue, operand, _nodeIndex++);
-        }
         public static AstNode PostfixUnary(SyntaxToken opToken, AstNode operand, SyntaxKind type)
         {
             return new UnaryNode(true, opToken.Value, operand, _nodeIndex++);
